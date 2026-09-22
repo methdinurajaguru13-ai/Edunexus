@@ -208,3 +208,79 @@ create policy "avatars own update" on storage.objects for update
   using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
 create policy "avatars own delete" on storage.objects for delete
   using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+
+
+-- ===================================================================
+-- EduNexus: profile picture borders + an admin "unlock everything" flag.
+-- Run once in the Supabase SQL Editor. Safe to run twice.
+-- ===================================================================
+
+alter table public.profiles add column if not exists border     text    not null default 'classic';
+alter table public.profiles add column if not exists unlock_all boolean not null default false;
+
+-- Users can edit their own profile, so without this anyone could grant
+-- themselves everything. Signed-in users can never set or change unlock_all;
+-- only the SQL Editor or the service role can.
+create or replace function public.protect_unlock_all()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if coalesce(auth.role(), '') in ('authenticated', 'anon') then
+    if tg_op = 'INSERT' then
+      new.unlock_all := false;
+    elsif new.unlock_all is distinct from old.unlock_all then
+      new.unlock_all := old.unlock_all;
+    end if;
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists protect_unlock_all on public.profiles;
+create trigger protect_unlock_all
+  before insert or update on public.profiles
+  for each row execute function public.protect_unlock_all();
+
+
+-- ===================================================================
+-- EduNexus: name styles (the font and colour your name shows in).
+-- Run once in the Supabase SQL Editor. Safe to run twice.
+-- ===================================================================
+alter table public.profiles add column if not exists name_style text not null default 'plain';
+
+
+-- ===================================================================
+-- EduNexus: the teaching assistant's conversation and memory.
+-- Run once in the Supabase SQL Editor. Safe to run twice.
+-- Each teacher can only ever see and change their own rows.
+-- ===================================================================
+
+create table if not exists public.assistant_messages (
+  id         uuid primary key default gen_random_uuid(),
+  teacher_id uuid not null references public.profiles(id) on delete cascade,
+  role       text not null check (role in ('user','assistant')),
+  content    text not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists assistant_messages_teacher_idx on public.assistant_messages(teacher_id, created_at);
+
+-- Durable facts the assistant keeps between conversations:
+-- preferences, plans, decisions, context about the class.
+create table if not exists public.assistant_memory (
+  id         uuid primary key default gen_random_uuid(),
+  teacher_id uuid not null references public.profiles(id) on delete cascade,
+  note       text not null check (char_length(note) between 1 and 400),
+  source     text not null default 'assistant' check (source in ('assistant','teacher')),
+  created_at timestamptz not null default now()
+);
+create index if not exists assistant_memory_teacher_idx on public.assistant_memory(teacher_id, created_at);
+
+alter table public.assistant_messages enable row level security;
+alter table public.assistant_memory   enable row level security;
+
+drop policy if exists p_amsg_own on public.assistant_messages;
+drop policy if exists p_amem_own on public.assistant_memory;
+create policy p_amsg_own on public.assistant_messages for all
+  using (teacher_id = auth.uid() and public.is_staff())
+  with check (teacher_id = auth.uid() and public.is_staff());
+create policy p_amem_own on public.assistant_memory for all
+  using (teacher_id = auth.uid() and public.is_staff())
+  with check (teacher_id = auth.uid() and public.is_staff());
