@@ -940,6 +940,12 @@ async function send(text){
       .map(m=>({role:m.role, content:m.content}));
     const out = await ai("chat",{ message:text, history: history.slice(0,-1) });
     S.chat.pop(); S.chat.push({role:"assistant", content:out.reply, topics:out.topics});
+    /* Saved so it survives logging out and back in — failures here are silent,
+       the conversation still works this session even if a save drops. */
+    sb.from("chat_messages").insert([
+      { student_id:S.me.id, role:"user", content:text },
+      { student_id:S.me.id, role:"assistant", content:out.reply },
+    ]).then(({error})=>{ if(error) console.warn("Could not save chat message:", error.message); });
   }catch(e){
     S.chat.pop(); S.chat.push({role:"assistant", content:"I couldn't reach the AI service. "+e.message});
   }
@@ -1882,14 +1888,16 @@ window.addEventListener("hashchange", route);
 
 /* ================= boot ================= */
 async function loadStudent(){
-  const [{data:courses},{data:enrol},{data:attempts},{data:port}] = await Promise.all([
+  const [{data:courses},{data:enrol},{data:attempts},{data:port},{data:chat}] = await Promise.all([
     sb.from("courses").select("*").eq("published",true).order("created_at",{ascending:false}),
     sb.from("enrollments").select("course_id").eq("student_id",S.me.id),
     sb.from("attempts").select("*").eq("student_id",S.me.id).order("created_at",{ascending:false}).limit(300),
-    sb.from("portfolio_items").select("*").eq("student_id",S.me.id).order("created_at",{ascending:false})
+    sb.from("portfolio_items").select("*").eq("student_id",S.me.id).order("created_at",{ascending:false}),
+    sb.from("chat_messages").select("role, content").eq("student_id",S.me.id).order("created_at",{ascending:true}).limit(200)
   ]);
   S.courses = courses||[]; S.enrolled = (enrol||[]).map(e=>e.course_id);
   S.attempts = attempts||[]; S.portfolio = port||[];
+  S.chat = (chat||[]).map(m=>({role:m.role, content:m.content}));
   const ids = S.courses.map(c=>c.id);
   if(ids.length){
     const { data:lessons } = await sb.from("lessons").select("*").in("course_id",ids).eq("published",true);

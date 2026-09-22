@@ -84,6 +84,16 @@ create table if not exists public.portfolio_items (
   created_at  timestamptz not null default now()
 );
 
+-- Edu AI chat history: so it survives logging out and back in --------
+create table if not exists public.chat_messages (
+  id         uuid primary key default gen_random_uuid(),
+  student_id uuid not null references public.profiles(id) on delete cascade,
+  role       text not null,   -- user | assistant
+  content    text not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists chat_messages_student_idx on public.chat_messages(student_id, created_at);
+
 -- who is staff --------------------------------------------------------
 create or replace function public.is_staff()
 returns boolean language sql stable security definer set search_path = public as $$
@@ -98,6 +108,7 @@ alter table public.lessons         enable row level security;
 alter table public.enrollments     enable row level security;
 alter table public.attempts        enable row level security;
 alter table public.portfolio_items enable row level security;
+alter table public.chat_messages   enable row level security;
 
 -- drop older policies from v1 if they exist
 drop policy if exists "read own profile"        on public.profiles;
@@ -118,6 +129,7 @@ drop policy if exists p_attempts_own   on public.attempts;
 drop policy if exists p_attempts_staff on public.attempts;
 drop policy if exists p_portfolio_own   on public.portfolio_items;
 drop policy if exists p_portfolio_staff on public.portfolio_items;
+drop policy if exists p_chat_own on public.chat_messages;
 
 create policy p_profiles_self    on public.profiles for select using (auth.uid() = id);
 create policy p_profiles_staff   on public.profiles for select using (public.is_staff());
@@ -141,6 +153,9 @@ create policy p_attempts_staff   on public.attempts for select using (public.is_
 
 create policy p_portfolio_own    on public.portfolio_items for all using (student_id = auth.uid()) with check (student_id = auth.uid());
 create policy p_portfolio_staff  on public.portfolio_items for select using (public.is_staff());
+
+-- Edu AI chat is private even from teachers, per the app's own privacy claim
+create policy p_chat_own on public.chat_messages for all using (student_id = auth.uid()) with check (student_id = auth.uid());
 
 -- profile created automatically on register ------------------------------
 create or replace function public.handle_new_user()
