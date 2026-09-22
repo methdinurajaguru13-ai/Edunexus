@@ -17,7 +17,7 @@ const cors = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
 
-async function groq(messages: unknown[], jsonMode = false, model = MODEL) {
+async function groq(messages: unknown[], jsonMode = false, model = MODEL, maxTokens = 1200) {
   const key = Deno.env.get("GROQ_API_KEY");
   if (!key) throw new Error("GROQ_API_KEY is not set on the function");
   const res = await fetch(GROQ_URL, {
@@ -27,7 +27,7 @@ async function groq(messages: unknown[], jsonMode = false, model = MODEL) {
       model,
       messages,
       temperature: 0.3,
-      max_tokens: 1200,
+      max_tokens: maxTokens,
       ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
     }),
   });
@@ -81,11 +81,14 @@ Deno.serve(async (req) => {
       topics = genomeSummary(recent);
     }
 
+    // The app has no math-rendering library, so raw LaTeX (\( \), \frac, $$) shows as
+    // broken escaped text — every task that might touch numbers or formulas needs this.
+    const noMath = " Write any math in plain text only, e.g. v0 sin(theta), x^2, (1/2) g t^2 — never LaTeX, never \\( \\), \\frac{}{}, or $ delimiters.";
     const rules =
       "You are Edu AI inside EduNexus, a school platform. Speak to the student directly, warmly and plainly. " +
       "Use ONLY the evidence given to you. Never invent a score, a paper or a topic. " +
       "If the evidence is thin, say so and tell them what to complete so you can help properly. " +
-      "Two or three short paragraphs at most. No bullet lists unless asked.";
+      "Two or three short paragraphs at most. No bullet lists unless asked." + noMath;
 
     let out: any;
     switch (task) {
@@ -112,7 +115,7 @@ Deno.serve(async (req) => {
       }
       case "generate_checkpoint": {
         const messages = [
-          { role: "system", content: "You write one multiple-choice checkpoint for a school lesson. Return JSON only: {\"question\":string,\"options\":[string,string,string],\"answer\":0,\"explanation\":string}. The wrong options must be plausible misconceptions, not obviously silly. answer is the index of the correct option." },
+          { role: "system", content: "You write one multiple-choice checkpoint for a school lesson. Return JSON only: {\"question\":string,\"options\":[string,string,string],\"answer\":0,\"explanation\":string}. The wrong options must be plausible misconceptions, not obviously silly. answer is the index of the correct option." + noMath },
           { role: "user", content: `Subject: ${payload.subject}\nLesson: ${payload.title}\nTopic: ${payload.topic}\nLesson text: ${(payload.body ?? "").slice(0, 3000)}` },
         ];
         out = asJson(await groq(messages, true));
@@ -120,15 +123,24 @@ Deno.serve(async (req) => {
       }
       case "generate_lesson": {
         const messages = [
-          { role: "system", content: "You write clear lesson notes for A-level students. Plain prose and short paragraphs, 200 to 300 words, no headings, no markdown symbols. Include the key relationship or definition stated precisely." },
+          { role: "system", content: "You write clear lesson notes for A-level students. Plain prose and short paragraphs, 200 to 300 words, no headings, no markdown symbols. Include the key relationship or definition stated precisely." + noMath },
           { role: "user", content: `Subject: ${payload.subject}\nLesson title: ${payload.title}\nTopic: ${payload.topic}` },
         ];
         out = { body: await groq(messages) };
         break;
       }
+      case "summarise_video": {
+        const transcript = String(payload.transcript ?? "").slice(0, 12000);
+        const messages = [
+          { role: "system", content: "You turn a lesson video's transcript into teaching material. Return JSON only: {\"summary\":string,\"notes\":string,\"key_points\":[string,string,string],\"checkpoint\":{\"question\":string,\"options\":[string,string,string],\"answer\":0,\"explanation\":string}}. summary is one or two sentences shown to students before they watch. notes is 150 to 250 words of plain-prose lesson notes, no headings. key_points is 3 to 5 short phrases. checkpoint follows the same rules as any other lesson checkpoint: plausible wrong options, not obviously silly, answer is the index of the correct option." + noMath },
+          { role: "user", content: `Subject: ${payload.subject}\nLesson title: ${payload.title}\nTopic: ${payload.topic}\nTranscript:\n${transcript}` },
+        ];
+        out = asJson(await groq(messages, true, MODEL, 2500));
+        break;
+      }
       case "examlens": {
         const messages = [
-          { role: "system", content: "You are ExamLens. You mark one exam answer and classify WHY marks were lost. Return JSON only: {\"score\":0-100,\"cause\":\"conceptual gap|method slip|arithmetic or units|misread the question|blank\",\"verdict\":string,\"explanation\":string,\"correct_working\":string,\"topic\":string}. verdict is one short sentence. explanation is two or three sentences naming the misconception. If the answer is fully correct, cause is \"none\"." },
+          { role: "system", content: "You are ExamLens. You mark one exam answer and classify WHY marks were lost. Return JSON only: {\"score\":0-100,\"cause\":\"conceptual gap|method slip|arithmetic or units|misread the question|blank\",\"verdict\":string,\"explanation\":string,\"correct_working\":string,\"topic\":string}. verdict is one short sentence. explanation is two or three sentences naming the misconception. If the answer is fully correct, cause is \"none\"." + noMath },
           { role: "user", content: `Subject: ${payload.subject}\nTopic given by student: ${payload.topic}\nQuestion: ${payload.question}\nStudent answer: ${payload.answer}\nMark scheme or expected answer: ${payload.expected || "not provided — judge it yourself"}` },
         ];
         out = asJson(await groq(messages, true));
@@ -151,7 +163,7 @@ Deno.serve(async (req) => {
       }
       case "mirage_generate": {
         const messages = [
-          { role: "system", content: "You are Mirage. You test whether mastery is genuine by asking the same idea at five increasing distances from how it is usually taught. Return JSON only: {\"questions\":[{\"level\":1,\"label\":\"Identical form\",\"question\":string,\"expected\":string}]}. Exactly five questions, levels 1 to 5, labels: Identical form, Reworded, New values, New context, Inverse. Each question must be answerable in one or two sentences without a calculator where possible." },
+          { role: "system", content: "You are Mirage. You test whether mastery is genuine by asking the same idea at five increasing distances from how it is usually taught. Return JSON only: {\"questions\":[{\"level\":1,\"label\":\"Identical form\",\"question\":string,\"expected\":string}]}. Exactly five questions, levels 1 to 5, labels: Identical form, Reworded, New values, New context, Inverse. Each question must be answerable in one or two sentences without a calculator where possible." + noMath },
           { role: "user", content: `Subject: ${payload.subject}\nTopic: ${payload.topic}` },
         ];
         out = asJson(await groq(messages, true));
@@ -159,7 +171,7 @@ Deno.serve(async (req) => {
       }
       case "mirage_mark": {
         const messages = [
-          { role: "system", content: "You mark short answers strictly but fairly. Return JSON only: {\"results\":[{\"level\":1,\"correct\":true,\"score\":0-100,\"note\":string}],\"verdict\":string,\"root_cause\":string}. score reflects partial credit. verdict explains, in two or three sentences, whether the mastery is genuine or pattern-matched, using the pattern across levels." },
+          { role: "system", content: "You mark short answers strictly but fairly. Return JSON only: {\"results\":[{\"level\":1,\"correct\":true,\"score\":0-100,\"note\":string}],\"verdict\":string,\"root_cause\":string}. score reflects partial credit. verdict explains, in two or three sentences, whether the mastery is genuine or pattern-matched, using the pattern across levels." + noMath },
           { role: "user", content: `Topic: ${payload.topic}\n` + (payload.answers ?? []).map((a: any) => `Level ${a.level} (${a.label})\nQ: ${a.question}\nExpected: ${a.expected}\nStudent: ${a.answer || "(blank)"}`).join("\n\n") },
         ];
         out = asJson(await groq(messages, true));
@@ -167,9 +179,19 @@ Deno.serve(async (req) => {
       }
       case "doctor": {
         const session = payload.session ?? [];
+        const sequence = payload.sequence ?? []; // [{subject, course, topics:[in taught order]}], from real lesson positions
+        const curriculumBlock = sequence.length
+          ? sequence.map((c: any) => `${c.subject} — ${c.course}: ` + c.topics.join(" -> ")).join("\n")
+          : "No enrolled course has a lesson sequence yet.";
         const messages = [
-          { role: "system", content: `${rules} You are Study Doctor. Separate genuine knowledge gaps from careless slips and pacing problems, then give one prescription the student can start today. Return JSON only: {"findings":[{"kind":"gap|slip|pacing","title":string,"text":string}],"prescription":string}.` },
-          { role: "user", content: `Recent work:\n` + session.map((a: any) => `${a.kind} · ${a.topic} · ${a.score}%${a.seconds ? ` · ${a.seconds}s` : ""}`).join("\n") + `\n\nTopic scores:\n` + topics.map(t => `${t.topic}: ${t.score}%`).join("\n") },
+          { role: "system", content: `${rules} You are Study Doctor. Separate genuine knowledge gaps from careless slips and pacing problems. ` +
+            `You are given the actual taught order of topics in each course the student is enrolled in (earlier topics were taught first, so a weak later topic may really be a gap in an earlier one it depends on) — use that real sequence to spot prerequisite gaps, never guess a prerequisite relationship that isn't shown in it. ` +
+            `Then give a short ordered plan of 2 to 3 concrete steps the student can start today, and make exactly one of them a retest of a specific weak topic. ` +
+            `Return JSON only: {"findings":[{"kind":"gap|slip|pacing|prereq","title":string,"text":string}],"plan":[{"step":string,"topic":string}]}. ` +
+            `Use kind "prereq" only when the taught sequence actually supports it — name both the weak topic and the earlier topic it likely depends on in the finding's text.` },
+          { role: "user", content: `Recent work:\n` + session.map((a: any) => `${a.kind} · ${a.topic} · ${a.score}%${a.seconds ? ` · ${a.seconds}s` : ""}`).join("\n") +
+            `\n\nTopic scores:\n` + topics.map(t => `${t.topic}: ${t.score}%`).join("\n") +
+            `\n\nTaught order per course (this is real, not a guess):\n` + curriculumBlock },
         ];
         out = asJson(await groq(messages, true));
         break;

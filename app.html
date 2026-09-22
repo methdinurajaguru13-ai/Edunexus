@@ -91,6 +91,7 @@ a{color:inherit;text-decoration:none;}
 .tag.gap{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line);}
 .tag.slip{background:var(--panel2);color:var(--ink-2);border:1px solid var(--line);}
 .tag.pace{background:var(--panel2);color:var(--ink-2);border:1px solid var(--line);}
+.tag.prereq{background:var(--teal-ghost);color:var(--teal);border:1px solid rgba(47,227,192,.4);}
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:9px 15px;border-radius:var(--r-sm);
   background:var(--teal);color:#032019;font-weight:700;font-size:var(--fs-2);}
@@ -790,14 +791,16 @@ V.doctor = () => {
   ${d ? `
     <div class="sec">What the doctor found</div>
     <div class="grid" style="gap:10px">
-      ${(d.findings||[]).map(f=>`<div class="card ${f.kind==="gap"?"":"flat"}" ${f.kind==="gap"?'style="border-color:var(--warn-line);background:var(--warn-soft)"':""}>
+      ${(d.findings||[]).map(f=>`<div class="card ${f.kind==="gap"||f.kind==="prereq"?"":"flat"}" ${f.kind==="gap"||f.kind==="prereq"?'style="border-color:var(--warn-line);background:var(--warn-soft)"':""}>
         <div class="row" style="align-items:flex-start;gap:10px">
-          <span class="tag ${f.kind==="gap"?"gap":"slip"}">${esc(String(f.kind).toUpperCase())}</span>
+          <span class="tag ${esc(f.kind)}">${esc(String(f.kind).toUpperCase())}</span>
           <div><div style="font-weight:600;font-size:var(--fs-2)">${esc(f.title)}</div>
             <div class="note" style="margin-top:3px">${esc(f.text)}</div></div></div></div>`).join("")}
     </div>
-    <div class="ai" style="margin-top:14px"><div class="who">${I.ai} Prescription</div>
-      <p class="prose" style="font-size:var(--fs-2)">${esc(d.prescription)}</p></div>`
+    <div class="ai" style="margin-top:14px"><div class="who">${I.ai} Plan for today</div>
+      ${(d.plan||[]).map((p,i)=>`<p class="prose" style="font-size:var(--fs-2);margin:${i?"10px":"0"} 0 0">
+        ${i+1}. ${esc(p.step)}${p.topic?` <span class="chip teal" style="margin-left:4px">${esc(p.topic)}</span>`:""}</p>`).join("")}
+    </div>`
    : ""}`;
 };
 
@@ -886,15 +889,20 @@ V.profile = () => {
       </div>
       ${S.cache.advisor?(()=>{const a=S.cache.advisor;return `
         <div class="card" style="margin-top:12px;border-color:rgba(47,227,192,.4);background:var(--teal-ghost)">
-          ${(a.matches||[]).map((m,i)=>`<div style="padding:9px 0;${i?"border-top:1px solid var(--line-soft)":""}">
+          ${(a.matches||[]).length ? (a.matches||[]).map((m,i)=>`<div style="padding:9px 0;${i?"border-top:1px solid var(--line-soft)":""}">
             <div class="between"><b style="font-size:var(--fs-2)">${esc(m.name)}</b><b class="pct">${m.fit}%</b></div>
             <div class="bar" style="margin:7px 0"><i style="width:${m.fit}%"></i></div>
-            <div class="note">${esc(m.why)}</div></div>`).join("")}
+            <div class="note">${esc(m.why)}</div></div>`).join("")
+            : `<div class="note">Not enough graded work yet to suggest specific pathways with confidence. Complete more checkpoints, ExamLens or Mirage runs, then check again.</div>`}
         </div>
         <div class="card list" style="margin-top:12px">${(a.requirements||[]).map(r=>`<div class="item">
           <span class="row" style="gap:9px"><span class="${r.met?"done":"warn-text"}">${r.met?"✓":"○"}</span>
           <span style="font-size:var(--fs-2)">${esc(r.title)}</span></span>
           <span class="note ${r.met?"":"warn-text"}">${esc(r.status)}</span></div>`).join("")}</div>
+        ${(a.todo||[]).length ? `<div class="sec">What to do next</div>
+        <div class="grid" style="gap:10px">${(a.todo||[]).map(t=>`<div class="card flat">
+          <div style="font-weight:600;font-size:var(--fs-2)">${esc(t.title)}</div>
+          <div class="note" style="margin-top:3px">${esc(t.detail)}</div></div>`).join("")}</div>` : ""}
         ${a.blocking?`<div class="card" style="margin-top:12px;border-color:var(--warn-line);background:var(--warn-soft)">
           <div class="note warn-text">${esc(a.blocking)}</div></div>`:""}
         <div class="card flat" style="margin-top:12px"><div class="note">Advisory only. Suggestions from your record, not decisions.</div></div>`})():""}
@@ -987,14 +995,13 @@ V.edit = () => {
     <label class="f" for="lVideo">Video link (YouTube, optional)</label>
     <input id="lVideo" value="${esc(d.video_url||"")}" placeholder="https://www.youtube.com/watch?v=...">
     <div class="row" style="gap:8px;margin-top:9px;flex-wrap:wrap">
-      <button class="btn ghost sm" data-act="fetch-captions">${busy("captions","Read the video")}</button>
-      ${d.transcript?`<button class="btn ghost sm" data-act="summarise-video">${busy("summarise","Summarise it for students")}</button>`:""}
+      <button class="btn ghost sm" data-act="summarise-video">${busy("summarise","Summarise it for students")}</button>
       ${d.transcript?`<span class="chip teal">Transcript: ${d.transcript.split(/\s+/).length} words</span>`:""}
     </div>
-    <div class="note" style="margin-top:7px">Edu AI reads text, not pictures, so it works from the video's captions. If the video has none, paste the transcript below yourself.</div>
+    <div class="note" style="margin-top:7px">Edu AI reads text, not pictures. Paste the video's transcript below — copy it from YouTube's own transcript panel, or anywhere else — then it writes the summary, notes and checkpoint for you.</div>
 
     <label class="f" for="lTrans">Transcript</label>
-    <textarea id="lTrans" style="min-height:90px" placeholder="Fetched captions appear here, or paste your own.">${esc(d.transcript||"")}</textarea>
+    <textarea id="lTrans" style="min-height:90px" placeholder="Paste the video's transcript here.">${esc(d.transcript||"")}</textarea>
 
     <label class="f" for="lSummary">Summary students see before watching</label>
     <textarea id="lSummary" style="min-height:70px" placeholder="Written by you, or generated from the transcript.">${esc(d.summary||"")}</textarea>
@@ -1283,7 +1290,14 @@ const ACT = {
     const since = Date.now()-1000*60*60*24*14;
     const session = S.attempts.filter(a=>new Date(a.created_at).getTime()>since)
       .map(a=>({kind:a.kind, topic:a.topic, score:a.score, seconds:a.seconds}));
-    S.cache.doctor = await ai("doctor",{ session });
+    /* Real taught order per enrolled course, from each lesson's own position —
+       this is what lets the doctor reason about prerequisites from actual
+       curriculum structure instead of the model's own guesswork. */
+    const sequence = S.courses.filter(c=>S.enrolled.includes(c.id)).map(c=>({
+      subject: c.subject, course: c.title,
+      topics: S.lessons.filter(l=>l.course_id===c.id).sort((a,b)=>a.position-b.position).map(l=>l.topic)
+    })).filter(c=>c.topics.length>1);
+    S.cache.doctor = await ai("doctor",{ session, sequence });
   });},
   "run-advisor"(){ withBusy("advisor", async ()=>{ S.cache.advisor = await ai("advisor",{}); });},
   send(){ const i=$("#ask"); send(i.value); i.value=""; },
@@ -1346,16 +1360,9 @@ const ACT = {
       body: d.transcript ? (d.body||"") + "\n\nVideo transcript:\n" + d.transcript : (d.body||"") });
     S.cache.draft = { ...d, checkpoint: cp };
   });},
-  "fetch-captions"(){ captureDraft(); withBusy("captions", async ()=>{
-    const d = S.cache.draft || {};
-    if(!d.video_url) throw new Error("Paste a video link first");
-    const out = await ai("video_transcript",{ url:d.video_url });
-    S.cache.draft = { ...d, transcript: out.transcript };
-    toast("Captions read — " + out.transcript.split(/\s+/).length + " words");
-  });},
   "summarise-video"(){ captureDraft(); withBusy("summarise", async ()=>{
     const c = S.courses.find(x=>x.id===S.course), d = S.cache.draft || {};
-    if(!d.transcript) throw new Error("Read the video or paste a transcript first");
+    if(!d.transcript) throw new Error("Paste the video's transcript first");
     const out = await ai("summarise_video",{ subject:c.subject, title:d.title, topic:d.topic, transcript:d.transcript });
     const points = (out.key_points||[]).map(k=>"• "+k).join("\n");
     S.cache.draft = { ...d,
