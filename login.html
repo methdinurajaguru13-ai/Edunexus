@@ -40,6 +40,17 @@ input:focus,select:focus{outline:2px solid var(--teal);outline-offset:1px}
 .btn{width:100%;margin-top:18px;padding:12px;border-radius:10px;border:none;background:var(--teal);
  color:#032019;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
 .btn[disabled]{opacity:.6;cursor:default}
+
+/* ---- gesture feedback: press + ripple ---- */
+.btn,.tabs button,.roles button{position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;
+ transition:transform .16s cubic-bezier(.34,1.56,.64,1),background .15s,border-color .15s,color .15s,filter .15s}
+.btn:active,.tabs button:active,.roles button:active{transform:scale(.96)}
+.eye{transition:transform .15s cubic-bezier(.34,1.56,.64,1),color .15s}
+.eye:active{transform:translateY(-50%) scale(.85)}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.5);
+ transform:scale(0);opacity:.55;pointer-events:none;animation:rippleOut .55s ease-out forwards}
+.tabs button .ripple,.roles button .ripple{background:rgba(47,227,192,.35)}
+@keyframes rippleOut{to{transform:scale(2.6);opacity:0}}
 .msg{margin-top:14px;padding:11px 13px;border-radius:10px;font-size:12.5px;display:none}
 .msg.err{display:block;background:var(--warn-soft);border:1px solid var(--warn-line);color:var(--warn)}
 .msg.ok{display:block;background:var(--teal-ghost);border:1px solid rgba(47,227,192,.4);color:var(--teal)}
@@ -96,6 +107,10 @@ input:focus,select:focus{outline:2px solid var(--teal);outline-offset:1px}
   .brand img{animation:none}
   .signin-fx .ring{animation:none!important;display:none}
   .signin-fx img{animation:none!important;opacity:1}
+  .btn,.tabs button,.roles button,.eye{transition:none!important}
+  .btn:active,.tabs button:active,.roles button:active{transform:none}
+  .eye:active{transform:translateY(-50%)}
+  .ripple{display:none}
 }
 </style>
 </head>
@@ -175,6 +190,22 @@ input:focus,select:focus{outline:2px solid var(--teal);outline-offset:1px}
 <script>
 const $ = s => document.querySelector(s);
 let mode = "in", role = "student", db = null, configProblem = null;
+
+/* Tap/click ripple on the sign-in buttons, mirrors app.html. */
+document.addEventListener("pointerdown", e=>{
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const el = e.target.closest(".btn,.tabs button,.roles button");
+  if(!el || el.disabled) return;
+  const r = el.getBoundingClientRect();
+  const size = Math.max(r.width, r.height) * 1.15;
+  const span = document.createElement("span");
+  span.className = "ripple";
+  span.style.width = span.style.height = size + "px";
+  span.style.left = (e.clientX - r.left - size/2) + "px";
+  span.style.top = (e.clientY - r.top - size/2) + "px";
+  el.appendChild(span);
+  span.addEventListener("animationend", () => span.remove());
+});
 
 /* "Keep me signed in" controls WHERE the session token lives: localStorage
    survives closing the browser, sessionStorage clears the moment the tab

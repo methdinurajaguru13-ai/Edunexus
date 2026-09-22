@@ -491,8 +491,23 @@ a{color:inherit;text-decoration:none;}
 @media (min-width:861px){.mobiletop{display:none;}}
 .scroll-x{overflow-x:auto;}
 svg{max-width:100%;height:auto;}
-.fade{animation:fade .18s ease-out;}
-@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.fade{animation:fade .2s cubic-bezier(.22,.8,.3,1);}
+@keyframes fade{from{opacity:0;transform:translateY(6px) scale(.995)}to{opacity:1;transform:none}}
+
+/* ---- gesture feedback: press + ripple, shared by every view ---- */
+.btn,.tabs button,.seg button{position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.btn:active,.tabs button:active,.seg button:active{transform:scale(.95)}
+.tabs button,.seg button{transition:transform .16s cubic-bezier(.34,1.56,.64,1),background .15s,border-color .15s,color .15s}
+.mobilebar a,.nav a{-webkit-tap-highlight-color:transparent;transition:transform .15s cubic-bezier(.34,1.56,.64,1),background .15s,color .15s}
+.mobilebar a:active,.nav a:active{transform:scale(.92)}
+.card,button.card,a.card{-webkit-tap-highlight-color:transparent}
+.card:active,button.card:active,a.card:active{transform:scale(.985)}
+.list .item[data-act]{transition:background .15s,transform .12s cubic-bezier(.34,1.56,.64,1)}
+.list .item[data-act]:active{transform:scale(.98)}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.55);
+  transform:scale(0);opacity:.55;pointer-events:none;animation:rippleOut .55s ease-out forwards}
+.btn.ghost .ripple,.tabs button .ripple,.seg button .ripple{background:rgba(var(--accent-rgb),.4)}
+@keyframes rippleOut{to{transform:scale(2.6);opacity:0}}
 </style><style>
 textarea,input[type=text],input[type=number],select{width:100%;background:var(--panel2);border:1px solid var(--line);
   border-radius:10px;padding:10px 12px;color:var(--ink);font:inherit;font-size:var(--fs-2)}
@@ -529,10 +544,9 @@ label.f{display:block;font-size:12px;color:var(--ink-2);font-weight:600;margin:1
 label.f .note{font-weight:500;margin-left:6px}
 
 /* ---- buttons ---- */
-.btn{transition:transform .08s,filter .15s,background .15s,border-color .15s,box-shadow .15s;
+.btn{transition:transform .16s cubic-bezier(.34,1.56,.64,1),filter .15s,background .15s,border-color .15s,box-shadow .15s;
   box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 6px 16px -8px rgba(var(--accent-rgb),.6)}
 .btn:hover{filter:brightness(1.08)}
-.btn:active{transform:translateY(1px)}
 .btn.ghost{box-shadow:none;background:transparent}
 .btn.ghost:hover{border-color:rgba(var(--accent-rgb),.5);background:var(--teal-ghost);filter:none}
 .btn.big{padding:13px 22px;font-size:var(--fs-3);border-radius:12px}
@@ -2973,6 +2987,23 @@ document.addEventListener("click", e=>{
   if(!el) return;
   const fn = ACT[el.dataset.act];
   if(fn){ if(el.dataset.act!=="close-sheet") e.preventDefault(); fn(el); }
+});
+/* Tap/click ripple on buttons and tabs, everywhere in the app. Skipped
+   entirely when "Reduced motion" is on, since animationend never fires
+   for a killed animation and the ripple span would just sit there. */
+document.addEventListener("pointerdown", e=>{
+  if(document.documentElement.dataset.motion==="reduced") return;
+  const el = e.target.closest(".btn,.tabs button,.seg button");
+  if(!el || el.disabled) return;
+  const r = el.getBoundingClientRect();
+  const size = Math.max(r.width, r.height) * 1.15;
+  const span = document.createElement("span");
+  span.className = "ripple";
+  span.style.width = span.style.height = size + "px";
+  span.style.left = (e.clientX - r.left - size/2) + "px";
+  span.style.top = (e.clientY - r.top - size/2) + "px";
+  el.appendChild(span);
+  span.addEventListener("animationend", () => span.remove());
 });
 function openSheet(){
   const here = (location.hash.split("/")[1]||"");
