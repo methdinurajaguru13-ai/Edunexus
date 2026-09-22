@@ -122,6 +122,18 @@ begin
   end loop;
 end $$;
 
+-- Durable facts Edu AI keeps about a student across every thread — mirrors
+-- the teacher assistant's memory, so a goal mentioned in one chat still
+-- informs the next one, the way it would carry across ChatGPT conversations.
+create table if not exists public.student_memory (
+  id         uuid primary key default gen_random_uuid(),
+  student_id uuid not null references public.profiles(id) on delete cascade,
+  note       text not null check (char_length(note) between 1 and 400),
+  source     text not null default 'assistant' check (source in ('assistant','student')),
+  created_at timestamptz not null default now()
+);
+create index if not exists student_memory_student_idx on public.student_memory(student_id, created_at);
+
 -- who is staff --------------------------------------------------------
 create or replace function public.is_staff()
 returns boolean language sql stable security definer set search_path = public as $$
@@ -138,6 +150,7 @@ alter table public.attempts        enable row level security;
 alter table public.portfolio_items enable row level security;
 alter table public.chat_messages   enable row level security;
 alter table public.chat_threads    enable row level security;
+alter table public.student_memory  enable row level security;
 
 -- drop older policies from v1 if they exist
 drop policy if exists "read own profile"        on public.profiles;
@@ -160,6 +173,7 @@ drop policy if exists p_portfolio_own   on public.portfolio_items;
 drop policy if exists p_portfolio_staff on public.portfolio_items;
 drop policy if exists p_chat_own on public.chat_messages;
 drop policy if exists p_chat_threads_own on public.chat_threads;
+drop policy if exists p_student_memory_own on public.student_memory;
 
 create policy p_profiles_self    on public.profiles for select using (auth.uid() = id);
 create policy p_profiles_staff   on public.profiles for select using (public.is_staff());
@@ -187,6 +201,7 @@ create policy p_portfolio_staff  on public.portfolio_items for select using (pub
 -- Edu AI chat is private even from teachers, per the app's own privacy claim
 create policy p_chat_own on public.chat_messages for all using (student_id = auth.uid()) with check (student_id = auth.uid());
 create policy p_chat_threads_own on public.chat_threads for all using (student_id = auth.uid()) with check (student_id = auth.uid());
+create policy p_student_memory_own on public.student_memory for all using (student_id = auth.uid()) with check (student_id = auth.uid());
 
 -- profile created automatically on register ------------------------------
 create or replace function public.handle_new_user()

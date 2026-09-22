@@ -774,7 +774,7 @@ const ago = d => { const m=(Date.now()-new Date(d))/60000;
 const S = {
   me:null, courses:[], lessons:[], enrolled:[], attempts:[], portfolio:[],
   students:[], viewing:null, course:null, lesson:null, gSubject:null, gTopic:null, busy:{}, cache:{}, chat:[],
-  chatThreads:[], activeThreadId:null
+  chatThreads:[], activeThreadId:null, studentMemory:[]
 };
 
 /* ---------- the genome, computed from real evidence ---------- */
@@ -1453,8 +1453,25 @@ V.counsellor = () => `
     <button data-act="ask" data-q="Where am I losing the most marks?">Where am I losing marks?</button>
     <button data-act="ask" data-q="Build me a revision plan for the next two weeks.">Plan my next two weeks</button>
     <button data-act="ask" data-q="Is my strongest topic actually strong, or just familiar?">Is my best topic really strong?</button>
-  </div>`;
+  </div>
+  <div class="only-narrow" style="margin-top:16px">${studentMemoryCard()}</div>`;
 
+function studentMemoryCard(){
+  const m = S.studentMemory;
+  return `<div class="ta-mem card">
+      <div class="between"><b style="font-size:var(--fs-3)">Memory</b><span class="chip">${m.length}</span></div>
+      <p class="note" style="margin:6px 0 12px">What Edu AI remembers about you, across every chat. Only you can see it.</p>
+      ${m.length ? `<div class="mem-list">${m.map(x=>`<div class="mem-item">
+          <span class="mem-dot ${x.source==="student"?"you":""}" title="${x.source==="student"?"Added by you":"Saved by Edu AI"}"></span>
+          <span class="mem-note">${esc(x.note)}</span>
+          <button class="mem-x" data-act="sm-forget" data-id="${x.id}" aria-label="Forget this">✕</button></div>`).join("")}</div>`
+        : `<div class="note" style="padding:10px 0">Nothing yet. Mention a goal or preference and it will save the useful ones.</div>`}
+      <div class="mem-add">
+        <input id="smNote" placeholder="Add a note, e.g. Aiming for mechanical engineering" maxlength="400">
+        <button class="btn ghost sm" data-act="sm-remember">Add</button>
+      </div>
+</div>`;
+}
 function renderChat(){
   const c = $("#chat"); if(!c) return;
   if(!S.chat.length){
@@ -1502,6 +1519,8 @@ async function send(text){
       .map(m=>({role:m.role, content:m.content}));
     const out = await ai("chat",{ message:text, history: history.slice(0,-1) });
     S.chat.pop(); S.chat.push({role:"assistant", content:out.reply, topics:out.topics});
+    if(out.memory) S.studentMemory = out.memory;
+    if(out.remembered && out.remembered.length) toast(`Remembered: ${out.remembered[0]}${out.remembered.length>1?` (+${out.remembered.length-1})`:""}`);
     /* Saved so it survives logging out and back in — failures here are silent,
        the conversation still works this session even if a save drops. */
     if(threadId){
@@ -2659,6 +2678,7 @@ function aside(view){
     <p class="note" style="margin-top:10px">Students' Edu AI conversations stay private to them and are never shown here.</p></div>`;
   if(S.me.role!=="student") return `<div class="card"><b style="font-size:var(--fs-2)">Teaching</b>
     <p class="note" style="margin:7px 0 0">Lessons you publish become the evidence your students' genomes are built from. A lesson without a checkpoint records nothing.</p></div>`;
+  if(view==="counsellor") return studentMemoryCard();
   if(!g.topics.length) return `<div class="card"><b style="font-size:var(--fs-2)">Nothing recorded yet</b>
     <p class="note" style="margin:7px 0 0">Your genome, your advisor and Edu AI all read the same rows. Complete a checkpoint and every screen here changes.</p></div>`;
   return `<div class="ai" style="margin-bottom:14px"><div class="who">${I.ai} Edu AI</div>
@@ -3036,6 +3056,17 @@ const ACT = {
       }
       openChatList(); // refresh the sheet in place, keep it open
     })();
+  },
+  async "sm-forget"(el){
+    const { error } = await sb.from("student_memory").delete().eq("id", el.dataset.id);
+    if(error) return toast(error.message);
+    S.studentMemory = S.studentMemory.filter(m=>m.id!==el.dataset.id); toast("Forgotten"); rerender();
+  },
+  async "sm-remember"(el){
+    const inp = el && el.parentElement && el.parentElement.querySelector("input"); const note = ((inp||{}).value||"").trim(); if(!note) return;
+    const { data, error } = await sb.from("student_memory").insert({ student_id:S.me.id, note, source:"student" }).select().single();
+    if(error) return toast(error.message);
+    S.studentMemory.push(data); toast("Saved to memory"); rerender();
   }
 };
 document.addEventListener("click", e=>{
@@ -3105,16 +3136,18 @@ window.addEventListener("hashchange", route);
 
 /* ================= boot ================= */
 async function loadStudent(){
-  const [{data:courses},{data:enrol},{data:attempts},{data:port},{data:threads}] = await Promise.all([
+  const [{data:courses},{data:enrol},{data:attempts},{data:port},{data:threads},{data:memory}] = await Promise.all([
     sb.from("courses").select("*").eq("published",true).order("created_at",{ascending:false}),
     sb.from("enrollments").select("course_id").eq("student_id",S.me.id),
     sb.from("attempts").select("*").eq("student_id",S.me.id).order("created_at",{ascending:false}).limit(300),
     sb.from("portfolio_items").select("*").eq("student_id",S.me.id).order("created_at",{ascending:false}),
-    sb.from("chat_threads").select("*").eq("student_id",S.me.id).order("updated_at",{ascending:false})
+    sb.from("chat_threads").select("*").eq("student_id",S.me.id).order("updated_at",{ascending:false}),
+    sb.from("student_memory").select("id, note, source, created_at").eq("student_id",S.me.id).order("created_at",{ascending:true})
   ]);
   S.courses = courses||[]; S.enrolled = (enrol||[]).map(e=>e.course_id);
   S.attempts = attempts||[]; S.portfolio = port||[];
   S.chatThreads = threads||[];
+  S.studentMemory = memory||[];
   S.activeThreadId = S.chatThreads[0]?.id || null;
   S.chat = S.activeThreadId ? await loadThreadMessages(S.activeThreadId) : [];
   const ids = S.courses.map(c=>c.id);

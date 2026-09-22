@@ -98,15 +98,42 @@ Deno.serve(async (req) => {
           : "No graded work recorded yet.";
         const last = recent.slice(0, 8).map(a => `${a.kind} on ${a.topic}: ${a.score}%`).join("; ") || "none";
         const isFirstTurn = !(payload.history ?? []).length;
+
+        /* Durable notes that survive across every thread, not just this one —
+           the same mechanism the teacher assistant already uses. */
+        const { data: memory }: any = await sb.from("student_memory").select("id, note, source, created_at")
+          .eq("student_id", user.id).order("created_at", { ascending: true }).limit(60);
+
         const messages = [
           { role: "system", content: `${rules}\n\nStudent: ${profile?.full_name}. Class: ${profile?.grade ?? "unknown"}. Stated goal: ${profile?.goal ?? "none given"}.\nTopic scores (weakest first):\n${ctx}\nMost recent work: ${last}\n\n` +
+            `WHAT YOU REMEMBER ABOUT THIS STUDENT ACROSS EVERY CONVERSATION:\n` +
+            ((memory ?? []).map((m: any) => `[${m.id}] ${m.note}`).join("\n") || "nothing yet") +
+            `\n\nMEMORY. Save a note only for things that will still matter in a later, different conversation: their goals, ` +
+            `preferences, plans, or context they've told you that isn't already in the data above. Never save grades or ` +
+            `scores, those are live data. At most 2 new notes per reply, each one short sentence. If they ask you to ` +
+            `remember something, save it. If they ask you to forget something, or a note is now wrong, list its id in ` +
+            `forget. Do not repeat notes you already have.\n\nReturn JSON only: {"reply":string,"remember":[string],"forget":[string]}.\n\n` +
             (isFirstTurn
               ? `This is the first message of the conversation — a natural "Hi ${profile?.full_name?.split(" ")[0] || "there"}" is fine here.`
               : `This conversation is already underway — you can see the earlier turns below. Do not open with their name or a greeting again; reply like someone mid-conversation, not someone meeting them for the first time. Only use their name again if it's genuinely natural, not as a habit.`) },
           ...(payload.history ?? []).slice(-6),
           { role: "user", content: String(payload.message ?? "") },
         ];
-        out = { reply: await groq(messages), topics: topics.slice(0, 4), evidenceCount: recent.length };
+
+        const res = asJson(await groq(messages, true, MODEL, 1800));
+        const reply = String(res.reply ?? "").trim() || "Sorry, I couldn't put an answer together. Try asking again.";
+        const known = new Set((memory ?? []).map((m: any) => m.note.toLowerCase()));
+        const remember = (Array.isArray(res.remember) ? res.remember : []).map((n: any) => String(n).trim().slice(0, 400))
+          .filter((n: string) => n && !known.has(n.toLowerCase())).slice(0, 2);
+        const ids = new Set((memory ?? []).map((m: any) => m.id));
+        const forget = (Array.isArray(res.forget) ? res.forget : []).map(String).filter((id: string) => ids.has(id));
+
+        if (remember.length) await sb.from("student_memory").insert(remember.map((note: string) => ({ student_id: user.id, note, source: "assistant" })));
+        if (forget.length) await sb.from("student_memory").delete().in("id", forget).eq("student_id", user.id);
+        const { data: memNow }: any = await sb.from("student_memory").select("id, note, source, created_at")
+          .eq("student_id", user.id).order("created_at", { ascending: true });
+
+        out = { reply, topics: topics.slice(0, 4), evidenceCount: recent.length, remembered: remember, memory: memNow ?? [] };
         break;
       }
       case "title_chat": {
