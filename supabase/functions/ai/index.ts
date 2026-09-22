@@ -109,6 +109,14 @@ Deno.serve(async (req) => {
         out = { reply: await groq(messages), topics: topics.slice(0, 4), evidenceCount: recent.length };
         break;
       }
+      case "title_chat": {
+        const messages = [
+          { role: "system", content: "Write a short title for a chat conversation, 3 to 6 words, based on the student's first message. No quotes, no trailing punctuation, no emoji. Return JSON only: {\"title\":string}." },
+          { role: "user", content: String(payload.message ?? "").slice(0, 1000) },
+        ];
+        out = asJson(await groq(messages, true, MODEL, 500));
+        break;
+      }
       case "checkpoint": {
         const messages = [
           { role: "system", content: `${rules} The student just answered a lesson checkpoint. In two or three sentences, say why their answer works or where the thinking went wrong, and name the underlying idea.` },

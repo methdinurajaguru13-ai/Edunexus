@@ -85,14 +85,42 @@ create table if not exists public.portfolio_items (
 );
 
 -- Edu AI chat history: so it survives logging out and back in --------
+-- One student can hold several separate conversations (chat_threads), each
+-- with its own title, like a normal chat app rather than one long transcript.
+create table if not exists public.chat_threads (
+  id         uuid primary key default gen_random_uuid(),
+  student_id uuid not null references public.profiles(id) on delete cascade,
+  title      text not null default 'New chat',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists chat_threads_student_idx on public.chat_threads(student_id, updated_at desc);
+
 create table if not exists public.chat_messages (
   id         uuid primary key default gen_random_uuid(),
   student_id uuid not null references public.profiles(id) on delete cascade,
+  thread_id  uuid references public.chat_threads(id) on delete cascade,
   role       text not null,   -- user | assistant
   content    text not null,
   created_at timestamptz not null default now()
 );
+-- Belt and braces: the CREATE TABLE above is skipped if chat_messages already
+-- existed from before threads were added, so make sure the column is really
+-- there before anything indexes it.
+alter table public.chat_messages add column if not exists thread_id uuid references public.chat_threads(id) on delete cascade;
 create index if not exists chat_messages_student_idx on public.chat_messages(student_id, created_at);
+create index if not exists chat_messages_thread_idx on public.chat_messages(thread_id, created_at);
+
+-- Backfill: any message from before threads existed gets folded into one
+-- thread per student, so nothing already saved is orphaned or lost.
+do $$
+declare r record; new_thread uuid;
+begin
+  for r in select distinct student_id from public.chat_messages where thread_id is null loop
+    insert into public.chat_threads (student_id, title) values (r.student_id, 'Earlier conversation') returning id into new_thread;
+    update public.chat_messages set thread_id = new_thread where student_id = r.student_id and thread_id is null;
+  end loop;
+end $$;
 
 -- who is staff --------------------------------------------------------
 create or replace function public.is_staff()
@@ -109,6 +137,7 @@ alter table public.enrollments     enable row level security;
 alter table public.attempts        enable row level security;
 alter table public.portfolio_items enable row level security;
 alter table public.chat_messages   enable row level security;
+alter table public.chat_threads    enable row level security;
 
 -- drop older policies from v1 if they exist
 drop policy if exists "read own profile"        on public.profiles;
@@ -130,6 +159,7 @@ drop policy if exists p_attempts_staff on public.attempts;
 drop policy if exists p_portfolio_own   on public.portfolio_items;
 drop policy if exists p_portfolio_staff on public.portfolio_items;
 drop policy if exists p_chat_own on public.chat_messages;
+drop policy if exists p_chat_threads_own on public.chat_threads;
 
 create policy p_profiles_self    on public.profiles for select using (auth.uid() = id);
 create policy p_profiles_staff   on public.profiles for select using (public.is_staff());
@@ -156,6 +186,7 @@ create policy p_portfolio_staff  on public.portfolio_items for select using (pub
 
 -- Edu AI chat is private even from teachers, per the app's own privacy claim
 create policy p_chat_own on public.chat_messages for all using (student_id = auth.uid()) with check (student_id = auth.uid());
+create policy p_chat_threads_own on public.chat_threads for all using (student_id = auth.uid()) with check (student_id = auth.uid());
 
 -- profile created automatically on register ------------------------------
 create or replace function public.handle_new_user()

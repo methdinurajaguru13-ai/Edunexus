@@ -773,7 +773,8 @@ const ago = d => { const m=(Date.now()-new Date(d))/60000;
 /* ---------- app state ---------- */
 const S = {
   me:null, courses:[], lessons:[], enrolled:[], attempts:[], portfolio:[],
-  students:[], viewing:null, course:null, lesson:null, gSubject:null, gTopic:null, busy:{}, cache:{}, chat:[]
+  students:[], viewing:null, course:null, lesson:null, gSubject:null, gTopic:null, busy:{}, cache:{}, chat:[],
+  chatThreads:[], activeThreadId:null
 };
 
 /* ---------- the genome, computed from real evidence ---------- */
@@ -933,7 +934,9 @@ const I = {
   user:icon('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/>'),
   more:icon('<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'),
   settings:icon('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
-  mirage:icon('<path d="M4 18c3-8 13-8 16 0"/><circle cx="12" cy="8" r="2"/>')
+  mirage:icon('<path d="M4 18c3-8 13-8 16 0"/><circle cx="12" cy="8" r="2"/>'),
+  history:icon('<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l4 2"/>'),
+  plus:icon('<path d="M12 5v14M5 12h14"/>')
 };
 function toast(msg){
   const t=document.createElement("div");
@@ -1435,7 +1438,11 @@ V.doctor = () => {
 /* ---------- Edu AI ---------- */
 V.counsellor = () => `
   <div class="topbar"><div><h1 class="h1">Edu AI</h1>
-    <div class="sub">Answers from your own records only. Your conversations stay private to you.</div></div></div>
+    <div class="sub">Answers from your own records only. Your conversations stay private to you.</div></div>
+    <div class="row" style="gap:8px">
+      <button class="btn ghost sm" data-act="open-chat-list" aria-label="Chat history">${I.history}${S.chatThreads.length?`<span class="chip" style="margin-left:2px">${S.chatThreads.length}</span>`:""}</button>
+      <button class="btn ghost sm" data-act="new-chat" aria-label="New chat">${I.plus}</button>
+    </div></div>
   <div class="chat" id="chat"></div>
   <div class="composer">
     <input id="ask" placeholder="Ask anything about your studies" autocomplete="off">
@@ -1464,20 +1471,46 @@ function renderChat(){
   }).join("");
   c.lastElementChild && c.lastElementChild.scrollIntoView({block:"end"});
 }
+/* Chats are created lazily — clicking "New chat" just clears the pane; the
+   chat_threads row only gets written once there's actually a first message,
+   so browsing away from an unused draft never leaves an empty thread behind. */
+async function ensureThread(firstMessage){
+  if(S.activeThreadId) return S.activeThreadId;
+  const fallback = firstMessage.trim().slice(0,40) + (firstMessage.trim().length>40 ? "…" : "");
+  const { data, error } = await sb.from("chat_threads").insert({ student_id:S.me.id, title:fallback }).select().single();
+  if(error){ console.warn("Could not create chat thread:", error.message); return null; }
+  S.activeThreadId = data.id;
+  S.chatThreads.unshift(data);
+  /* Upgrade the fallback title to an AI-written one in the background —
+     never blocks sending, and a failure here just keeps the fallback. */
+  ai("title_chat", { message:firstMessage }).then(out=>{
+    const clean = String(out.title||"").trim().slice(0,60);
+    if(!clean) return;
+    sb.from("chat_threads").update({ title:clean }).eq("id", data.id).then(({error})=>{
+      if(error) console.warn("Could not save chat title:", error.message);
+    });
+    const t = S.chatThreads.find(x=>x.id===data.id); if(t) t.title = clean;
+  }).catch(()=>{});
+  return data.id;
+}
 async function send(text){
   if(!text || !text.trim()) return;
   S.chat.push({role:"user", content:text}); S.chat.push({role:"typing"}); renderChat();
   try{
+    const threadId = await ensureThread(text);
     const history = S.chat.filter(m=>m.role==="user"||m.role==="assistant").slice(-6)
       .map(m=>({role:m.role, content:m.content}));
     const out = await ai("chat",{ message:text, history: history.slice(0,-1) });
     S.chat.pop(); S.chat.push({role:"assistant", content:out.reply, topics:out.topics});
     /* Saved so it survives logging out and back in — failures here are silent,
        the conversation still works this session even if a save drops. */
-    sb.from("chat_messages").insert([
-      { student_id:S.me.id, role:"user", content:text },
-      { student_id:S.me.id, role:"assistant", content:out.reply },
-    ]).then(({error})=>{ if(error) console.warn("Could not save chat message:", error.message); });
+    if(threadId){
+      sb.from("chat_messages").insert([
+        { student_id:S.me.id, thread_id:threadId, role:"user", content:text },
+        { student_id:S.me.id, thread_id:threadId, role:"assistant", content:out.reply },
+      ]).then(({error})=>{ if(error) console.warn("Could not save chat message:", error.message); });
+      sb.from("chat_threads").update({ updated_at:new Date().toISOString() }).eq("id",threadId).then(()=>{});
+    }
   }catch(e){
     S.chat.pop(); S.chat.push({role:"assistant", content:"I couldn't reach the AI service. "+e.message});
   }
@@ -2980,7 +3013,30 @@ const ACT = {
     S.me.role==="student" ? await loadStudent() : await loadTeacher();
     toast("Up to date");
   });},
-  "view-student"(el){ S.viewing = el.dataset.id; location.hash = "#/student"; }
+  "view-student"(el){ S.viewing = el.dataset.id; location.hash = "#/student"; },
+  "new-chat"(){ closeSheet(); S.activeThreadId = null; S.chat = []; rerender(); },
+  "open-chat-list"(){ openChatList(); },
+  "open-thread"(el){
+    closeSheet();
+    (async ()=>{
+      S.activeThreadId = el.dataset.id;
+      S.chat = await loadThreadMessages(S.activeThreadId);
+      rerender();
+    })();
+  },
+  "delete-thread"(el){
+    const id = el.dataset.id;
+    (async ()=>{
+      const { error } = await sb.from("chat_threads").delete().eq("id", id);
+      if(error){ toast("Could not delete: "+error.message); return; }
+      S.chatThreads = S.chatThreads.filter(t=>t.id!==id);
+      if(S.activeThreadId===id){
+        S.activeThreadId = S.chatThreads[0]?.id || null;
+        S.chat = S.activeThreadId ? await loadThreadMessages(S.activeThreadId) : [];
+      }
+      openChatList(); // refresh the sheet in place, keep it open
+    })();
+  }
 };
 document.addEventListener("click", e=>{
   const el = e.target.closest("[data-act]");
@@ -3021,6 +3077,27 @@ function closeSheet(){
   sh.classList.remove("open"); $("#sheetBack").classList.remove("open");
   setTimeout(()=>{ sh.hidden = true; $("#sheetBack").hidden = true; }, 180);
 }
+/* Reuses the same sheet as "More" — only one can be open at a time anyway. */
+function openChatList(){
+  const rows = S.chatThreads.map(t=>`
+    <div class="mem-item">
+      <span class="mem-dot ${t.id===S.activeThreadId?"":"you"}"></span>
+      <button class="mem-note" style="text-align:left;background:none;border:none;color:inherit;font:inherit;cursor:pointer"
+        data-act="open-thread" data-id="${t.id}">
+        <b style="display:block;font-weight:${t.id===S.activeThreadId?"700":"500"}">${esc(t.title||"New chat")}</b>
+        <span class="note">${ago(t.updated_at)}</span>
+      </button>
+      <button class="mem-x" data-act="delete-thread" data-id="${t.id}" aria-label="Delete chat">✕</button>
+    </div>`).join("");
+  $("#sheet").innerHTML = `<div class="sheet-grab"></div>
+    <div class="between" style="padding:6px 8px 14px;border-bottom:1px solid var(--line-soft);margin-bottom:10px">
+      <b style="font-size:var(--fs-3)">Your chats</b>
+      <button class="btn ghost sm" data-act="new-chat">${I.plus} New chat</button>
+    </div>
+    ${rows || `<p class="note" style="padding:0 8px 8px">No chats yet — send a message to start one.</p>`}`;
+  $("#sheet").hidden = false; $("#sheetBack").hidden = false;
+  requestAnimationFrame(()=>{ $("#sheet").classList.add("open"); $("#sheetBack").classList.add("open"); });
+}
 document.addEventListener("click", e=>{ if(e.target.id==="sheetBack") closeSheet(); });
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSheet(); });
 window.addEventListener("hashchange", closeSheet);
@@ -3028,21 +3105,28 @@ window.addEventListener("hashchange", route);
 
 /* ================= boot ================= */
 async function loadStudent(){
-  const [{data:courses},{data:enrol},{data:attempts},{data:port},{data:chat}] = await Promise.all([
+  const [{data:courses},{data:enrol},{data:attempts},{data:port},{data:threads}] = await Promise.all([
     sb.from("courses").select("*").eq("published",true).order("created_at",{ascending:false}),
     sb.from("enrollments").select("course_id").eq("student_id",S.me.id),
     sb.from("attempts").select("*").eq("student_id",S.me.id).order("created_at",{ascending:false}).limit(300),
     sb.from("portfolio_items").select("*").eq("student_id",S.me.id).order("created_at",{ascending:false}),
-    sb.from("chat_messages").select("role, content").eq("student_id",S.me.id).order("created_at",{ascending:true}).limit(200)
+    sb.from("chat_threads").select("*").eq("student_id",S.me.id).order("updated_at",{ascending:false})
   ]);
   S.courses = courses||[]; S.enrolled = (enrol||[]).map(e=>e.course_id);
   S.attempts = attempts||[]; S.portfolio = port||[];
-  S.chat = (chat||[]).map(m=>({role:m.role, content:m.content}));
+  S.chatThreads = threads||[];
+  S.activeThreadId = S.chatThreads[0]?.id || null;
+  S.chat = S.activeThreadId ? await loadThreadMessages(S.activeThreadId) : [];
   const ids = S.courses.map(c=>c.id);
   if(ids.length){
     const { data:lessons } = await sb.from("lessons").select("*").in("course_id",ids).eq("published",true);
     S.lessons = lessons||[];
   }
+}
+async function loadThreadMessages(threadId){
+  const { data } = await sb.from("chat_messages").select("role, content")
+    .eq("thread_id", threadId).order("created_at",{ascending:true}).limit(200);
+  return (data||[]).map(m=>({role:m.role, content:m.content}));
 }
 async function loadTeacher(){
   const [{data:courses},{data:students}] = await Promise.all([
