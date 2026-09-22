@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EduNexus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#040a09; --bg2:#070f0e; --panel:#0a1614; --panel2:#0d1d1a;
+  --line:#153630; --line-soft:#102520;
+  --teal:#2fe3c0; --teal-dim:#1c8c78; --teal-ghost:rgba(47,227,192,.10);
+  --ink:#e6f6f2; --ink-2:#a9c8c1; --mute:#6f918a;
+  --warn:#f08a5d; --warn-soft:rgba(240,138,93,.12); --warn-line:rgba(240,138,93,.45);
+  --r:14px; --r-sm:10px;
+  --fs-1:11px; --fs-2:12.5px; --fs-3:14px; --fs-4:16px; --fs-5:20px; --fs-6:26px; --fs-7:34px;
+}
+:root:not([data-theme="light"]){color-scheme:dark;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:var(--fs-3);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(900px 500px at 12% -10%,rgba(47,227,192,.07),transparent 60%),
+    radial-gradient(700px 400px at 100% 100%,rgba(47,227,192,.05),transparent 60%);
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;}
+a{color:inherit;text-decoration:none;}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:6px;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+
+/* ---------- shell ---------- */
+.app{position:relative;z-index:1;display:grid;grid-template-columns:232px minmax(0,1fr) 312px;min-height:100vh;}
+.side{border-right:1px solid var(--line-soft);padding:20px 14px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh;}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 10px 18px;}
+.brand b{font-size:var(--fs-4);font-weight:800;letter-spacing:-.02em;}
+.nav{display:flex;flex-direction:column;gap:2px;}
+.nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--r-sm);color:var(--ink-2);font-weight:600;font-size:var(--fs-3);}
+.nav a:hover{background:var(--panel);color:var(--ink);}
+.nav a.on{background:var(--teal-ghost);color:var(--teal);}
+.nav-label{margin:18px 12px 6px;font-size:var(--fs-1);color:var(--mute);font-weight:600;}
+.side-foot{margin-top:auto;border-top:1px solid var(--line-soft);padding-top:12px;}
+
+.main{min-width:0;padding:26px 30px 90px;}
+.aside{border-left:1px solid var(--line-soft);padding:22px 18px;position:sticky;top:0;height:100vh;overflow:auto;}
+
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:22px;}
+.h1{font-size:var(--fs-7);font-weight:800;letter-spacing:-.03em;margin:0;line-height:1.1;}
+.h2{font-size:var(--fs-5);font-weight:700;letter-spacing:-.02em;margin:0 0 12px;}
+.sub{color:var(--mute);font-size:var(--fs-2);margin-top:5px;}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);
+  display:grid;place-items:center;font-weight:700;color:var(--teal);font-size:var(--fs-2);flex:none;}
+
+/* ---------- pieces ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;}
+.card.flat{background:var(--bg2);}
+.grid{display:grid;gap:14px;}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr));}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr));}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr));}
+.row{display:flex;align-items:center;gap:10px;}
+.between{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;}
+.stat .k{font-size:var(--fs-2);color:var(--mute);}
+.stat .v{font-size:var(--fs-6);font-weight:700;letter-spacing:-.02em;margin-top:2px;}
+.stat.warn{border-color:var(--warn-line);background:var(--warn-soft);}
+.stat.warn .v{color:var(--warn);}
+
+.bar{height:6px;border-radius:99px;background:var(--line-soft);overflow:hidden;}
+.bar i{display:block;height:100%;background:var(--teal);border-radius:99px;}
+.bar.warn i{background:var(--warn);}
+.pct{font-variant-numeric:tabular-nums;font-weight:700;}
+.pct.warn{color:var(--warn);}
+
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:99px;
+  border:1px solid var(--line);background:var(--bg2);font-size:var(--fs-1);color:var(--ink-2);}
+.chip.teal{border-color:rgba(47,227,192,.4);color:var(--teal);background:var(--teal-ghost);}
+.chip.warn{border-color:var(--warn-line);color:var(--warn);background:var(--warn-soft);}
+
+.tag{display:inline-flex;padding:2px 7px;border-radius:5px;font-size:var(--fs-1);font-weight:700;letter-spacing:.02em;}
+.tag.gap{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line);}
+.tag.slip{background:var(--panel2);color:var(--ink-2);border:1px solid var(--line);}
+.tag.pace{background:var(--panel2);color:var(--ink-2);border:1px solid var(--line);}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:9px 15px;border-radius:var(--r-sm);
+  background:var(--teal);color:#032019;font-weight:700;font-size:var(--fs-2);}
+.btn:hover{filter:brightness(1.07);}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);}
+.btn.ghost:hover{background:var(--panel2);}
+.btn.sm{padding:7px 12px;font-size:var(--fs-1);}
+.btn[disabled]{opacity:.55;cursor:default;filter:none;}
+
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;}
+.tabs button{padding:7px 13px;border-radius:99px;border:1px solid var(--line);color:var(--ink-2);font-size:var(--fs-2);font-weight:600;}
+.tabs button.on{background:var(--teal);border-color:var(--teal);color:#032019;}
+
+.list{display:flex;flex-direction:column;}
+.list .item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-radius:var(--r-sm);}
+.list .item + .item{border-top:1px solid var(--line-soft);}
+.item.on{background:var(--teal-ghost);}
+.item.locked{color:var(--mute);}
+.done{color:var(--teal);}
+
+.ai{border:1px solid rgba(47,227,192,.32);background:linear-gradient(180deg,rgba(47,227,192,.08),rgba(47,227,192,.02));
+  border-radius:var(--r);padding:14px;}
+.ai .who{display:flex;align-items:center;gap:7px;color:var(--teal);font-weight:700;font-size:var(--fs-2);margin-bottom:7px;}
+.ai p{margin:0 0 10px;font-size:var(--fs-2);color:var(--ink);line-height:1.55;}
+
+.note{font-size:var(--fs-1);color:var(--mute);}
+.sec{margin:26px 0 12px;font-size:var(--fs-2);color:var(--mute);font-weight:600;}
+.sec:first-child{margin-top:0;}
+.divider{height:1px;background:var(--line-soft);margin:14px 0;}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:8px 0;font-size:var(--fs-2);}
+.kv + .kv{border-top:1px solid var(--line-soft);}
+.kv span:first-child{color:var(--mute);}
+.crumb{font-size:var(--fs-2);color:var(--mute);margin-bottom:10px;}
+.crumb a:hover{color:var(--teal);}
+.warn-text{color:var(--warn);}
+.teal-text{color:var(--teal);}
+.mono{font-variant-numeric:tabular-nums;}
+
+/* counsellor */
+.chat{display:flex;flex-direction:column;gap:14px;}
+.msg{max-width:76%;padding:12px 14px;border-radius:var(--r);font-size:var(--fs-2);line-height:1.6;}
+.msg.me{align-self:flex-end;background:var(--teal);color:#032019;font-weight:600;border-bottom-right-radius:4px;}
+.msg.ai{align-self:flex-start;background:var(--panel);border:1px solid var(--line);border-bottom-left-radius:4px;}
+.msg.ai .evidence{margin:10px 0;border:1px solid var(--line);border-radius:var(--r-sm);padding:10px;background:var(--bg2);}
+.sources{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.composer{display:flex;gap:9px;margin-top:16px;}
+.composer input{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:12px 16px;color:var(--ink);font:inherit;font-size:var(--fs-2);}
+.composer input::placeholder{color:var(--mute);}
+.suggests{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;}
+.suggests button{padding:7px 12px;border:1px solid var(--line);border-radius:99px;font-size:var(--fs-1);color:var(--ink-2);}
+.suggests button:hover{border-color:var(--teal);color:var(--teal);}
+.typing i{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--teal);margin-right:3px;animation:blink 1.2s infinite;}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+
+/* examlens question map */
+.qmap{display:flex;gap:7px;flex-wrap:wrap;}
+.q{width:52px;padding:6px 4px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--bg2);text-align:center;}
+.q b{display:block;font-size:var(--fs-3);}
+.q small{font-size:10px;color:var(--mute);}
+.q.partial{border-color:rgba(240,138,93,.3);}
+.q.loss{border-color:var(--warn-line);background:var(--warn-soft);color:var(--warn);}
+.q.loss small{color:var(--warn);}
+.q.on{outline:2px solid var(--teal);}
+.legend{display:flex;gap:14px;font-size:var(--fs-1);color:var(--mute);margin-top:10px;flex-wrap:wrap;}
+.dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;}
+
+/* answer compare */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.cmp .box{border-radius:var(--r-sm);padding:10px;font-size:var(--fs-2);}
+.cmp .yours{background:var(--warn-soft);border:1px solid var(--warn-line);}
+.cmp .right{background:var(--teal-ghost);border:1px solid rgba(47,227,192,.3);}
+.cmp .lbl{font-size:var(--fs-1);color:var(--mute);margin-bottom:4px;}
+
+/* mobile */
+.mobilebar{display:none;}
+@media (max-width:1180px){
+  .app{grid-template-columns:200px minmax(0,1fr);}
+  .aside{display:none;}
+}
+@media (max-width:860px){
+  .app{grid-template-columns:1fr;}
+  .side{display:none;}
+  .main{padding:18px 16px 96px;}
+  .h1{font-size:var(--fs-6);}
+  .g2,.g3,.g4{grid-template-columns:1fr;}
+  .cmp{grid-template-columns:1fr;}
+  .msg{max-width:92%;}
+  .mobilebar{
+    display:flex;position:fixed;bottom:0;left:0;right:0;z-index:20;
+    background:rgba(7,15,14,.96);border-top:1px solid var(--line);
+    padding:9px 6px calc(9px + env(safe-area-inset-bottom));
+  }
+  .mobilebar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--mute);font-weight:600;}
+  .mobilebar a.on{color:var(--teal);}
+  .mobiletop{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+}
+@media (min-width:861px){.mobiletop{display:none;}}
+.scroll-x{overflow-x:auto;}
+svg{max-width:100%;height:auto;}
+.fade{animation:fade .18s ease-out;}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+</style><style>
+textarea,input[type=text],input[type=number],select{width:100%;background:var(--panel2);border:1px solid var(--line);
+  border-radius:10px;padding:10px 12px;color:var(--ink);font:inherit;font-size:var(--fs-2)}
+textarea{min-height:110px;resize:vertical;line-height:1.6}
+label.f{display:block;font-size:var(--fs-1);color:var(--mute);margin:12px 0 5px;font-weight:600}
+.empty{text-align:center;padding:26px 18px}
+.empty b{display:block;font-size:var(--fs-4);margin-bottom:6px}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid var(--line);border-top-color:var(--teal);
+  border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.prose{font-size:var(--fs-3);line-height:1.65;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div id="gate" style="position:fixed;inset:0;z-index:99;display:grid;place-items:center;background:var(--bg);color:var(--mute);font-size:13px">
+  <span><span class="spin"></span>Loading your record…</span>
+</div>
+<div class="app" id="shell" style="visibility:hidden">
+  <nav class="side">
+    <div class="brand">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="1.6"><path d="M12 4.2c-1-1.1-3.2-1.1-4 .3-1.7-.3-3 1-2.8 2.6-1.4.7-1.6 2.7-.4 3.7-.6 1.6.6 3.3 2.3 3.3.4 1.6 2.3 2.3 3.6 1.4.4.9 1.3 1.5 2.3 1.5"/><path d="M12 4.2c1-1.1 3.2-1.1 4 .3 1.7-.3 3 1 2.8 2.6 1.4.7 1.6 2.7.4 3.7.6 1.6-.6 3.3-2.3 3.3-.4 1.6-2.3 2.3-3.6 1.4-.4.9-1.3 1.5-2.3 1.5"/><path d="M12 4.2V19"/></svg>
+      <b>EduNexus</b>
+    </div>
+    <div class="nav" id="nav"></div>
+    <div class="side-foot">
+      <div class="note" id="whoami">—</div>
+      <button class="btn ghost sm" id="signout" style="width:100%;margin-top:9px">Sign out</button>
+    </div>
+  </nav>
+  <main class="main" id="main"></main>
+  <aside class="aside" id="aside"></aside>
+</div>
+<nav class="mobilebar" id="mobilebar"></nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+/* ==================================================================
+   EduNexus — real data app.
+   Every screen reads rows this account owns. Nothing is invented.
+================================================================== */
+const CFG = window.EDUNEXUS_CONFIG || {};
+let sb = null, configProblem = null;
+(function connect(){
+  const url = (CFG.SUPABASE_URL||"").trim().replace(/\/+$/,""), key = (CFG.SUPABASE_ANON_KEY||"").trim();
+  if(!url || !key || url.includes("PASTE_YOUR") || key.includes("PASTE_YOUR")){ configProblem="Add your Supabase URL and key to config.js."; return; }
+  try{ sb = supabase.createClient(url, key); }catch(e){ configProblem = "Could not connect: "+e.message; }
+})();
+
+const $ = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const initials = n => String(n||"?").split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join("");
+const ago = d => { const m=(Date.now()-new Date(d))/60000;
+  if(m<1) return "just now"; if(m<60) return Math.round(m)+" min ago";
+  if(m<1440) return Math.round(m/60)+"h ago"; return Math.round(m/1440)+"d ago"; };
+
+/* ---------- app state ---------- */
+const S = {
+  me:null, courses:[], lessons:[], enrolled:[], attempts:[], portfolio:[],
+  students:[], viewing:null, course:null, lesson:null, gSubject:null, gTopic:null, busy:{}, cache:{}, chat:[]
+};
+
+/* ---------- the genome, computed from real evidence ---------- */
+const WEIGHTS = { test:30, paper:22, examlens:18, mirage:18, quiz:14, doctor:10, lesson:6 };
+const HALF_LIFE_DAYS = 60;
+function genomeFrom(attempts){
+  const now=Date.now(), map={};
+  attempts.forEach(a=>{
+    const w = WEIGHTS[a.kind] ?? 10;
+    const decay = Math.pow(0.5, ((now-new Date(a.created_at))/86400000)/HALF_LIFE_DAYS);
+    const t = map[a.topic] ||= {topic:a.topic, subject:a.subject||"", num:0, den:0, n:0, last:a.created_at};
+    t.num += Number(a.score)*w*decay; t.den += w*decay; t.n++;
+    if(new Date(a.created_at) > new Date(t.last)) t.last = a.created_at;
+  });
+  const topics = Object.values(map).map(t=>({
+    topic:t.topic, subject:t.subject, evidence:t.n, last:t.last,
+    score: Math.round(t.num/t.den),
+    confidence: Math.min(100, Math.round(t.den/60*100))
+  })).sort((a,b)=>a.score-b.score);
+  const overall = topics.length ? Math.round(topics.reduce((s,t)=>s+t.score,0)/topics.length) : null;
+  return { topics, overall, weakest: topics[0]||null, strongest: topics[topics.length-1]||null };
+}
+const G = () => genomeFrom(S.attempts);
+
+/* One weighted score for any bundle of attempts. */
+function scoreOf(atts){
+  const now = Date.now(); let num=0, den=0, last=0;
+  atts.forEach(a=>{
+    const w = WEIGHTS[a.kind] ?? 10;
+    const decay = Math.pow(0.5, ((now-new Date(a.created_at))/86400000)/HALF_LIFE_DAYS);
+    num += Number(a.score)*w*decay; den += w*decay;
+    last = Math.max(last, new Date(a.created_at).getTime());
+  });
+  return { score: den ? Math.round(num/den) : null, evidence: atts.length,
+           confidence: Math.min(100, Math.round(den/60*100)), last };
+}
+/* Group attempts into the nodes one ring of the genome shows. */
+function nodesBy(atts, keyFn){
+  const map = {};
+  atts.forEach(a=>{ const k = keyFn(a) || "Unsorted"; (map[k] ||= []).push(a); });
+  return Object.entries(map).map(([name, rows])=>({ name, ...scoreOf(rows) }))
+    .sort((a,b)=>a.score-b.score);
+}
+const lessonName = id => { const l = S.lessons.find(x=>x.id===id); return l ? l.title : null; };
+
+/* ---------- talking to the AI service ---------- */
+async function ai(task, payload){
+  const { data:{ session } } = await sb.auth.getSession();
+  let res;
+  try{
+    res = await fetch(`${CFG.SUPABASE_URL.replace(/\/+$/,"")}/functions/v1/ai`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", apikey:CFG.SUPABASE_ANON_KEY,
+                Authorization:`Bearer ${session.access_token}` },
+      body: JSON.stringify({ task, payload })
+    });
+  }catch(e){
+    throw new Error("The AI service isn't reachable. Deploy the 'ai' function (part 2 of SETUP.md), then try again.");
+  }
+  if(res.status===404) throw new Error("No AI function found on this project. Run: supabase functions deploy ai");
+  let out;
+  try{ out = await res.json(); }
+  catch(e){ throw new Error(`AI service returned ${res.status} with no JSON. Check Edge Functions → Logs.`); }
+  if(out.error){
+    if(String(out.error).includes("GROQ_API_KEY"))
+      throw new Error("The function is deployed but has no Groq key. Run: supabase secrets set GROQ_API_KEY=your_key");
+    throw new Error(out.error);
+  }
+  return out;
+}
+
+/* Shrink a photo before it goes over the wire — phone camera photos are often
+   4-8MB, and Groq's vision model only reads up to 20MB and pays per-image in
+   fixed tokens regardless of resolution, so there's nothing gained by full size. */
+function fileToCompressedDataURL(file, maxDim = 1600, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let { width: w, height: h } = img;
+        if (w > maxDim || h > maxDim) {
+          const scale = maxDim / Math.max(w, h);
+          w = Math.round(w * scale); h = Math.round(h * scale);
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.onerror = () => reject(new Error("Could not read that photo"));
+      img.src = reader.result;
+    };
+    reader.onerror = () => reject(new Error("Could not read that photo"));
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ---------- writing evidence ---------- */
+async function record({kind, subject, topic, score, seconds, lesson_id, meta}){
+  const row = { student_id:S.me.id, kind, subject:subject||null, topic, score,
+                seconds:seconds||null, lesson_id:lesson_id||null, meta:meta||{} };
+  const { data, error } = await sb.from("attempts").insert(row).select().single();
+  if(error) { toast("Could not save: "+error.message); return null; }
+  S.attempts.unshift(data);
+  return data;
+}
+
+/* ---------- small ui helpers ---------- */
+const icon = p=>`<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const I = {
+  home:icon('<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/>'),
+  learn:icon('<path d="M4 4h7v16H4z"/><path d="M13 4h7v16h-7z"/>'),
+  growth:icon('<circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/>'),
+  school:icon('<path d="M3 9l9-5 9 5-9 5z"/><path d="M7 11v5c0 1 2.5 2 5 2s5-1 5-2v-5"/>'),
+  lens:icon('<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>'),
+  doctor:icon('<path d="M12 4v16M4 12h16"/>'),
+  folder:icon('<path d="M3 7h6l2 2h10v10H3z"/>'),
+  ai:icon('<path d="M12 3v18M5 8l14 8M19 8L5 16"/>'),
+  user:icon('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/>'),
+  mirage:icon('<path d="M4 18c3-8 13-8 16 0"/><circle cx="12" cy="8" r="2"/>')
+};
+function toast(msg){
+  const t=document.createElement("div");
+  t.style.cssText="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:80;background:var(--teal);color:#032019;font-weight:700;font-size:12.5px;padding:10px 16px;border-radius:99px;max-width:86vw;text-align:center";
+  t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2600);
+}
+const barRow = (label,v,weak,sub)=>`
+  <div style="padding:9px 0">
+    <div class="between" style="margin-bottom:6px">
+      <div><div style="font-size:var(--fs-2);font-weight:600">${esc(label)}</div>${sub?`<div class="note">${esc(sub)}</div>`:""}</div>
+      <div class="pct ${weak?"warn":""}">${v===null||v===undefined?"—":v+"%"}</div></div>
+    <div class="bar ${weak?"warn":""}"><i style="width:${v||0}%"></i></div></div>`;
+/* Radar web. Nodes are clickable when there's a level below them. */
+function web(items, drillTo){
+  const n = items.length;
+  if(n < 3) return `<div class="card flat"><div class="note">A web needs at least three points to be worth drawing.
+    ${n===0?"Nothing here yet.":"There "+(n===1?"is one":"are two")+" here, shown below instead."}</div></div>`;
+  const cx=170, cy=160, R=105;
+  const pt=(i,r)=>[cx+r*Math.cos(-Math.PI/2+i*2*Math.PI/n), cy+r*Math.sin(-Math.PI/2+i*2*Math.PI/n)];
+  const rings=[25,50,75,100].map(p=>`<polygon points="${items.map((_,i)=>pt(i,R*p/100).join(",")).join(" ")}"
+      fill="none" stroke="var(--line)"/>`).join("");
+  const spokes=items.map((_,i)=>{const [x,y]=pt(i,R);
+    return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--line)"/>`}).join("");
+  const shape=items.map((t,i)=>pt(i,R*(t.score||0)/100).join(",")).join(" ");
+  const parts=items.map((t,i)=>{
+    const [dx,dy]=pt(i,R*(t.score||0)/100);
+    const [lx,ly]=pt(i,R+28);
+    const weak = t.score!==null && t.score<60;
+    const label = t.name.length>22 ? t.name.slice(0,20)+"…" : t.name;
+    const click = drillTo ? `data-act="drill" data-to="${drillTo(t)}" style="cursor:pointer"` : "";
+    return `<g ${click}>
+      <circle cx="${dx}" cy="${dy}" r="4" fill="${weak?"var(--warn)":"var(--teal)"}"/>
+      <circle cx="${lx}" cy="${ly-4}" r="26" fill="transparent"/>
+      <text x="${lx}" y="${ly}" font-size="10" text-anchor="middle" fill="${weak?"var(--warn)":"var(--ink-2)"}">${esc(label)}</text>
+      <text x="${lx}" y="${ly+12}" font-size="10" font-weight="700" text-anchor="middle"
+        fill="${weak?"var(--warn)":"var(--teal)"}">${t.score===null?"—":t.score+"%"}</text></g>`;
+  }).join("");
+  return `<svg viewBox="0 0 340 330" role="img" aria-label="Genome web">
+    ${rings}${spokes}
+    <polygon points="${shape}" fill="rgba(47,227,192,.15)" stroke="var(--teal)" stroke-width="1.6"/>
+    ${parts}
+    <text x="${cx}" y="322" font-size="9" text-anchor="middle" fill="var(--mute)">Rings mark 25, 50, 75 and 100 percent</text>
+  </svg>`;
+}
+
+function videoEmbed(url){
+  const m = String(url).match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/)([A-Za-z0-9_-]{11})/);
+  if(m) return `<div style="aspect-ratio:16/9"><iframe src="https://www.youtube-nocookie.com/embed/${m[1]}"
+    style="width:100%;height:100%;border:0" allowfullscreen title="Lesson video"></iframe></div>`;
+  return `<video controls src="${esc(url)}" style="width:100%;display:block"></video>`;
+}
+const empty = (title, text, action) => `<div class="card empty"><b>${esc(title)}</b>
+  <p class="note" style="margin:0 auto;max-width:420px">${esc(text)}</p>
+  ${action?`<div style="margin-top:14px">${action}</div>`:""}</div>`;
+const busy = (id, label) => S.busy[id] ? `<span class="spin"></span>${esc(label)}` : esc(label);
+
+/* ================= student views ================= */
+const V = {};
+
+V.home = () => {
+  const g = G(), me = S.me;
+  const myCourses = S.courses.filter(c=>S.enrolled.includes(c.id));
+  const nextLesson = S.lessons.filter(l=>l.published && myCourses.some(c=>c.id===l.course_id))
+    .filter(l=>!S.attempts.some(a=>a.lesson_id===l.id))
+    .sort((a,b)=>a.position-b.position)[0];
+  return `
+  <div class="topbar">
+    <div><h1 class="h1">Hello, ${esc(me.full_name.split(" ")[0])}</h1>
+      <div class="sub">${new Date().toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"})}</div></div>
+    <div class="avatar">${esc(initials(me.full_name))}</div>
+  </div>
+  <div class="grid g3">
+    <div class="stat"><div class="k">Genome score</div><div class="v">${g.overall===null?"—":g.overall+"%"}</div>
+      <div class="note">${g.topics.length} topic${g.topics.length===1?"":"s"} with evidence</div></div>
+    <div class="stat"><div class="k">Work recorded</div><div class="v">${S.attempts.length}</div>
+      <div class="note">quizzes, papers and checkpoints</div></div>
+    <div class="stat ${g.weakest && g.weakest.score<60 ? "warn":""}"><div class="k">Needs attention</div>
+      <div class="v" style="font-size:var(--fs-4)">${g.weakest?esc(g.weakest.topic):"—"}</div>
+      <div class="note">${g.weakest?g.weakest.score+"% from "+g.weakest.evidence+" attempts":"nothing yet"}</div></div>
+  </div>
+  ${nextLesson ? `<a class="card" href="#/lesson/${nextLesson.id}" style="display:block;margin-top:14px;border-color:rgba(47,227,192,.35);background:var(--teal-ghost)">
+      <div class="between"><div><div class="note teal-text">Next lesson</div>
+        <div style="font-weight:700;margin-top:2px">${esc(nextLesson.title)}</div>
+        <div class="note">${esc(nextLesson.topic)} · ${nextLesson.duration_min} min</div></div>
+        <span class="btn sm">Start</span></div></a>`
+    : myCourses.length ? `<div class="card" style="margin-top:14px"><b style="font-size:var(--fs-2)">You're up to date</b>
+        <p class="note" style="margin:6px 0 0">Every published lesson in your courses has been attempted. Try Mirage to check whether the mastery is genuine.</p></div>`
+    : ""}
+  ${g.topics.length ? `
+    <div class="sec">Your topics</div>
+    <div class="card">${g.topics.map(t=>barRow(t.topic,t.score,t.score<60,`${t.subject||""} · ${t.evidence} attempt${t.evidence===1?"":"s"}`)).join("")}</div>`
+   : empty("Your genome is empty, for now",
+      "Nothing has been graded on this account yet. Join a course and complete a lesson checkpoint, or run a past paper through ExamLens, and this fills in with your real numbers.",
+      `<a class="btn" href="#/learn">Find a course</a>`)}
+  <div class="sec">Recent work</div>
+  ${S.attempts.length ? `<div class="card list">
+      ${S.attempts.slice(0,6).map(a=>`<div class="item">
+        <div><div style="font-size:var(--fs-2);font-weight:600">${esc(a.topic)}</div>
+          <div class="note">${esc(a.kind)} · ${ago(a.created_at)}</div></div>
+        <b class="pct ${a.score<60?"warn":""}">${Math.round(a.score)}%</b></div>`).join("")}</div>`
+   : `<div class="card"><div class="note">Nothing recorded yet.</div></div>`}`;
+};
+
+V.learn = () => {
+  const mine = S.courses.filter(c=>S.enrolled.includes(c.id));
+  const open = S.courses.filter(c=>!S.enrolled.includes(c.id));
+  const card = (c, joined) => {
+    const ls = S.lessons.filter(l=>l.course_id===c.id && l.published);
+    const done = ls.filter(l=>S.attempts.some(a=>a.lesson_id===l.id)).length;
+    return `<div class="card">
+      <div class="between"><div><div style="font-weight:700">${esc(c.title)}</div>
+        <div class="note">${esc(c.subject)}${c.code?" · "+esc(c.code):""} · ${ls.length} lesson${ls.length===1?"":"s"}</div></div>
+        ${joined?`<span class="chip teal">${ls.length?Math.round(done/ls.length*100):0}% done</span>`:`<button class="btn sm" data-act="join" data-id="${c.id}">Join</button>`}</div>
+      ${c.description?`<p class="note" style="margin:9px 0 0">${esc(c.description)}</p>`:""}
+      ${joined?`<div class="bar" style="margin-top:11px"><i style="width:${ls.length?done/ls.length*100:0}%"></i></div>
+        <div style="margin-top:11px"><a class="btn ghost sm" href="#/course/${c.id}">Open course</a></div>`:""}
+    </div>`;
+  };
+  return `
+  <div class="topbar"><div><h1 class="h1">Learn</h1>
+    <div class="sub">${mine.length} course${mine.length===1?"":"s"} joined · ${S.courses.length} available</div></div>
+    <button class="btn ghost sm" data-act="refresh">${busy("refresh","Refresh")}</button></div>
+  ${mine.length?`<div class="grid" style="gap:12px">${mine.map(c=>card(c,true)).join("")}</div>`
+    : empty("You haven't joined a course yet",
+        S.courses.length
+          ? "There are published courses below. Join one and its lessons become your learning record."
+          : "No teacher at your school has published a course yet. When one does, it appears here — press Refresh if you're waiting on it.")}
+  ${open.length?`<div class="sec">Available at your school</div>
+    <div class="grid" style="gap:12px">${open.map(c=>card(c,false)).join("")}</div>`:""}`;
+};
+
+V.course = () => {
+  const c = S.courses.find(x=>x.id===S.course);
+  if(!c) return empty("Course not found","It may have been unpublished by the teacher.");
+  const ls = S.lessons.filter(l=>l.course_id===c.id && l.published).sort((a,b)=>a.position-b.position);
+  return `
+  <div class="crumb"><a href="#/learn">Learn</a> · ${esc(c.subject)}</div>
+  <div class="topbar"><div><h1 class="h1" style="font-size:var(--fs-6)">${esc(c.title)}</h1>
+    <div class="sub">${esc(c.description||c.subject)}</div></div></div>
+  ${ls.length?`<div class="card list">
+    ${ls.map(l=>{
+      const a = S.attempts.find(x=>x.lesson_id===l.id);
+      return `<a class="item" href="#/lesson/${l.id}">
+        <div><div style="font-size:var(--fs-2);font-weight:600">${esc(l.title)}</div>
+          <div class="note">${esc(l.topic)} · ${l.duration_min} min</div></div>
+        ${a?`<span class="pct ${a.score<60?"warn":""}">${Math.round(a.score)}%</span>`:`<span class="note">Not started</span>`}</a>`;
+    }).join("")}</div>`
+   : empty("No lessons published yet","Your teacher is still building this course.")}`;
+};
+
+V.lesson = () => {
+  const l = S.lessons.find(x=>x.id===S.lesson);
+  if(!l) return empty("Lesson not found","");
+  const c = S.courses.find(x=>x.id===l.course_id);
+  const prior = S.attempts.find(a=>a.lesson_id===l.id);
+  const cp = l.checkpoint;
+  return `
+  <div class="crumb"><a href="#/learn">Learn</a> · <a href="#/course/${l.course_id}">${esc(c?c.title:"Course")}</a> · ${esc(l.topic)}</div>
+  <div class="topbar"><div><h1 class="h1" style="font-size:var(--fs-6)">${esc(l.title)}</h1>
+    <div class="sub">${esc(l.topic)} · ${l.duration_min} min</div></div>
+    ${prior?`<span class="chip ${prior.score<60?"warn":"teal"}">Checkpoint ${Math.round(prior.score)}%</span>`:""}</div>
+  ${l.video_url?`<div class="card" style="padding:0;overflow:hidden">${videoEmbed(l.video_url)}</div>`:""}
+  ${l.summary?`<div class="ai" style="margin-top:14px"><div class="who">${I.ai} Before you watch</div>
+    <p class="prose" style="font-size:var(--fs-2);margin:0">${esc(l.summary)}</p></div>`:""}
+  <div class="card" style="margin-top:14px"><div class="prose">${esc(l.body||"Your teacher hasn't added notes to this lesson yet.")}</div></div>
+  ${l.transcript?`<div class="card flat" style="margin-top:12px">
+    <button class="btn ghost sm" data-act="toggle-transcript">Show transcript</button>
+    <div id="trans" style="display:none;margin-top:12px" class="prose note">${esc(l.transcript)}</div></div>`:""}
+  ${cp && cp.question ? `
+    <div class="sec">Checkpoint</div>
+    <div class="card" id="cp">
+      <p style="margin:0 0 12px;font-weight:600">${esc(cp.question)}</p>
+      <div class="grid" style="gap:8px">
+        ${(cp.options||[]).map((o,i)=>`<button class="btn ghost" style="justify-content:flex-start;text-align:left"
+          data-act="answer-cp" data-i="${i}">${esc(o)}</button>`).join("")}
+      </div>
+      <div id="cpOut"></div>
+    </div>`
+   : `<div class="card" style="margin-top:14px"><div class="note">This lesson has no checkpoint, so nothing is recorded to your genome from it.</div></div>`}`;
+};
+
+V.genome = () => {
+  const sub = S.gSubject, top = S.gTopic;
+  const all = S.attempts;
+  if(!all.length) return `
+    <div class="topbar"><div><h1 class="h1">Learning genome</h1>
+      <div class="sub">Built from your own graded work</div></div>
+      <a class="btn ghost sm" href="#/weights">How is this scored?</a></div>
+    ${empty("Nothing to model yet",
+      "The genome needs evidence before it can say anything true about you. A lesson checkpoint, an ExamLens analysis or a Mirage run will start it off.",
+      `<a class="btn" href="#/learn">Go to Learn</a>`)}`;
+
+  const enc = encodeURIComponent;
+  let level, items, atts, crumb, title, caption, drillTo;
+
+  if(!sub){
+    level = "subject"; atts = all;
+    items = nodesBy(atts, a=>a.subject);
+    title = "Learning genome";
+    caption = "Each strand is a subject. Click one to open its topics.";
+    crumb = "";
+    drillTo = t => `#/genome/${enc(t.name)}`;
+  } else if(!top){
+    level = "topic"; atts = all.filter(a=>(a.subject||"Unsorted")===sub);
+    items = nodesBy(atts, a=>a.topic);
+    title = sub;
+    caption = "Each strand is a topic in this subject. Click one to open its lessons.";
+    crumb = `<div class="crumb"><a href="#/genome">Genome</a> · ${esc(sub)}</div>`;
+    drillTo = t => `#/genome/${enc(sub)}/${enc(t.name)}`;
+  } else {
+    level = "lesson"; atts = all.filter(a=>(a.subject||"Unsorted")===sub && a.topic===top);
+    items = nodesBy(atts, a=> a.lesson_id ? (lessonName(a.lesson_id) || "Lesson") : ({
+      examlens:"ExamLens analysis", mirage:"Mirage run", paper:"Past paper", test:"Test", quiz:"Quiz"
+    }[a.kind] || a.kind));
+    title = top;
+    caption = "Each strand is one lesson or assessment inside this topic. This is the bottom of the genome.";
+    crumb = `<div class="crumb"><a href="#/genome">Genome</a> · <a href="#/genome/${enc(sub)}">${esc(sub)}</a> · ${esc(top)}</div>`;
+    drillTo = null;
+  }
+
+  const here = scoreOf(atts);
+  const weakest = items.filter(i=>i.score!==null)[0];
+
+  return `
+  ${crumb}
+  <div class="topbar">
+    <div><h1 class="h1" style="font-size:${level==="subject"?"var(--fs-7)":"var(--fs-6)"}">${esc(title)}</h1>
+      <div class="sub">${caption}</div></div>
+    <div class="row" style="gap:8px">
+      ${sub?`<a class="btn ghost sm" href="${top?`#/genome/${enc(sub)}`:"#/genome"}">Back</a>`:""}
+      <a class="btn ghost sm" href="#/weights">How is this scored?</a></div>
+  </div>
+
+  <div class="grid g3">
+    <div class="stat"><div class="k">${level==="subject"?"Across everything":level==="topic"?"Subject score":"Topic score"}</div>
+      <div class="v">${here.score===null?"—":here.score+"%"}</div>
+      <div class="note">${here.evidence} attempt${here.evidence===1?"":"s"}</div></div>
+    <div class="stat ${weakest && weakest.score<60?"warn":""}"><div class="k">Weakest strand</div>
+      <div class="v" style="font-size:var(--fs-4)">${weakest?esc(weakest.name):"—"}</div>
+      <div class="note">${weakest?weakest.score+"%":"nothing yet"}</div></div>
+    <div class="stat"><div class="k">Confidence</div><div class="v">${here.confidence}%</div>
+      <div class="note">how much evidence is behind this</div></div>
+  </div>
+
+  <div class="card" style="margin-top:14px;display:grid;place-items:center">
+    ${web(items, drillTo)}
+  </div>
+
+  <div class="sec">${level==="subject"?"Subjects":level==="topic"?"Topics":"Lessons and assessments"}</div>
+  <div class="card">
+    ${items.map(t=>{
+      const row = barRow(t.name, t.score, t.score!==null && t.score<60,
+        `${t.evidence} attempt${t.evidence===1?"":"s"} · last ${ago(new Date(t.last))}`);
+      return drillTo
+        ? `<div data-act="drill" data-to="${drillTo(t)}" style="cursor:pointer">${row}</div>`
+        : row;
+    }).join("")}
+  </div>
+  ${drillTo?`<div class="note" style="margin-top:10px">Click any strand to go a level deeper.</div>`:
+    `<div class="note" style="margin-top:10px">Nothing sits below a lesson. If a strand here is weak, that's the thing to redo.</div>`}
+
+  ${weakest && weakest.score<60 ? `<div class="ai" style="margin-top:14px">
+    <div class="who">${I.ai} Edu AI</div>
+    <p>${esc(weakest.name)} is the weakest strand here at ${weakest.score}%. Ask me what to do about it and I'll answer from the questions you actually got wrong.</p>
+    <a class="btn sm" href="#/counsellor">Ask Edu AI</a></div>` : ""}`;
+};
+
+V.weights = () => `
+  <div class="crumb"><a href="#/genome">Learning genome</a> · Scoring</div>
+  <div class="topbar"><div><h1 class="h1">How your genome is scored</h1>
+    <div class="sub">Every activity feeds the model, but not equally. Supervised work carries more weight, because it's harder to guess your way through.</div></div></div>
+  <div class="card">
+    ${Object.entries(WEIGHTS).sort((a,b)=>b[1]-a[1]).map(([k,w])=>`
+      <div style="padding:11px 0;border-top:1px solid var(--line-soft)">
+        <div class="between" style="margin-bottom:7px"><b style="font-size:var(--fs-2);text-transform:capitalize">${esc(k)}</b><b class="mono">${w}</b></div>
+        <div class="bar"><i style="width:${w/30*100}%"></i></div></div>`).join("")}
+  </div>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card"><b style="font-size:var(--fs-2)">Older evidence counts less</b>
+      <p class="note" style="margin:7px 0 0">Each result fades with a ${HALF_LIFE_DAYS}-day half-life, so a paper from two months ago carries half the weight of one sat today.</p></div>
+    <div class="card"><b style="font-size:var(--fs-2)">Nothing is deleted</b>
+      <p class="note" style="margin:7px 0 0">Attempts are kept permanently. Change the weights and every genome can be rebuilt from the same history.</p></div>
+  </div>
+  <div class="card flat" style="margin-top:14px"><div class="note">
+    Score = sum of (result × source weight × decay) ÷ sum of (source weight × decay), calculated per topic.</div></div>`;
+
+/* ---------- ExamLens: real marking of a real answer ---------- */
+V.examlens = () => {
+  const past = S.attempts.filter(a=>a.kind==="examlens");
+  const r = S.cache.examlens;
+  const d = S.cache.examlensDraft || {};
+  return `
+  <div class="topbar"><div><h1 class="h1">ExamLens</h1>
+    <div class="sub">Photograph a question and your answer, or type them in. Every lost mark gets a cause, not just a number.</div></div></div>
+  <div class="card" style="margin-bottom:14px">
+    <label class="f" for="exPhoto">Photo of the question — and your answer, if it's on the same page</label>
+    <input type="file" accept="image/*" capture="environment" id="exPhoto" multiple>
+    <div class="note" style="margin-top:6px">Up to 3 photos. This reads the text into the fields below for you to check before marking.</div>
+    <button class="btn ghost sm" style="margin-top:10px" data-act="examlens-ocr">${busy("examlensOcr","Read photo with AI")}</button>
+  </div>
+  <div class="card">
+    <div class="grid g2">
+      <div><label class="f" for="exSub">Subject</label><input id="exSub" placeholder="Physics" value="${esc(d.subject||"")}"></div>
+      <div><label class="f" for="exTopic">Topic</label><input id="exTopic" placeholder="Electromagnetic induction" value="${esc(d.topic||"")}"></div>
+    </div>
+    <label class="f" for="exQ">Question</label>
+    <textarea id="exQ" placeholder="A conducting rod of length 0.4 m moves at 3 m/s perpendicular to a 0.25 T field. Find the induced emf and state its direction.">${esc(d.question||"")}</textarea>
+    <label class="f" for="exA">Your answer, exactly as you wrote it</label>
+    <textarea id="exA" placeholder="Write your working here, mistakes and all — that's the point.">${esc(d.answer||"")}</textarea>
+    <label class="f" for="exE">Mark scheme or expected answer (optional)</label>
+    <textarea id="exE" style="min-height:70px">${esc(d.expected||"")}</textarea>
+    <button class="btn" style="margin-top:14px" data-act="run-examlens">${busy("examlens","Analyse this answer")}</button>
+  </div>
+  ${r ? `
+    <div class="sec">Analysis</div>
+    <div class="grid g3">
+      <div class="stat ${r.score<60?"warn":""}"><div class="k">Marked</div><div class="v">${Math.round(r.score)}%</div></div>
+      <div class="stat"><div class="k">Cause</div><div class="v" style="font-size:var(--fs-4);text-transform:capitalize">${esc(r.cause)}</div></div>
+      <div class="stat"><div class="k">Topic</div><div class="v" style="font-size:var(--fs-4)">${esc(r.topic||"—")}</div></div>
+    </div>
+    <div class="card" style="margin-top:14px;${r.score<60?"border-color:var(--warn-line)":""}">
+      <b style="font-size:var(--fs-2)">${esc(r.verdict)}</b>
+      <p class="prose" style="margin:10px 0 0;font-size:var(--fs-2)">${esc(r.explanation)}</p>
+      ${r.correct_working?`<div class="card flat" style="margin-top:12px"><div class="note">Correct working</div>
+        <div class="prose" style="font-size:var(--fs-2);margin-top:5px">${esc(r.correct_working)}</div></div>`:""}
+    </div>
+    <div class="card flat" style="margin-top:12px"><div class="note">Saved to your genome under ${esc(r.topic||"this topic")}, weighted ${WEIGHTS.examlens} of 100.</div></div>`
+   : ""}
+  ${past.length?`<div class="sec">Earlier analyses</div>
+    <div class="card list">${past.slice(0,8).map(a=>`<div class="item">
+      <div><div style="font-size:var(--fs-2);font-weight:600">${esc(a.topic)}</div>
+        <div class="note">${esc((a.meta&&a.meta.cause)||"")} · ${ago(a.created_at)}</div></div>
+      <b class="pct ${a.score<60?"warn":""}">${Math.round(a.score)}%</b></div>`).join("")}</div>`:""}`;
+};
+
+/* ---------- Mirage: genuine vs apparent mastery ---------- */
+V.mirage = () => {
+  const g = G(), m = S.cache.mirage;
+  const d = S.cache.mirageDraft || {};
+  const topicOptions = g.topics.map(t=>`<option value="${esc(t.topic)}" ${d.topic===t.topic?"selected":""}>${esc(t.topic)} — ${t.score}%</option>`).join("");
+  return `
+  <div class="topbar"><div><h1 class="h1">Mirage</h1>
+    <div class="sub">Tests the same idea five ways, from the familiar form to the inverse. A score that collapses is memorised, not understood.</div></div></div>
+  <div class="card">
+    <div class="grid g2">
+      <div><label class="f" for="miTopic">Topic</label>
+        ${g.topics.length?`<select id="miTopic">${topicOptions}</select>`:`<input id="miTopic" placeholder="Simple harmonic motion" value="${esc(d.topic||"")}">`}</div>
+      <div><label class="f" for="miSub">Subject</label><input id="miSub" placeholder="Physics" value="${esc(d.subject || (g.topics[0]?g.topics[0].subject:""))}"></div>
+    </div>
+    <button class="btn" style="margin-top:14px" data-act="mirage-generate">${busy("mirage","Generate a run")}</button>
+  </div>
+  ${m && m.questions ? `
+    <div class="sec">Run in progress · ${m.questions.length} questions</div>
+    <div class="grid" style="gap:12px">
+      ${m.questions.map((q,i)=>`<div class="card">
+        <div class="between"><span class="chip">${esc(q.label)}</span>
+          ${m.results?`<b class="pct ${m.results[i]&&m.results[i].score<60?"warn":""}">${m.results[i]?Math.round(m.results[i].score)+"%":"—"}</b>`:""}</div>
+        <p style="margin:10px 0;font-size:var(--fs-2)">${esc(q.question)}</p>
+        <textarea id="mi${i}" style="min-height:64px" ${m.results?"disabled":""} placeholder="Answer in a sentence or two">${esc((m.answers&&m.answers[i])||"")}</textarea>
+        ${m.results&&m.results[i]?`<div class="note" style="margin-top:8px">${esc(m.results[i].note)}</div>`:""}
+      </div>`).join("")}
+    </div>
+    ${!m.results?`<button class="btn" style="margin-top:14px" data-act="mirage-mark">${busy("mirageMark","Submit run")}</button>`:""}`
+   : ""}
+  ${m && m.results ? (()=>{
+      const lv = n => m.results.find(r=>r.level===n) || {score:0};
+      const apparent = Math.round((lv(1).score+lv(2).score)/2);
+      const genuine  = Math.round((lv(4).score+lv(5).score)/2);
+      return `
+      <div class="sec">Verdict</div>
+      <div class="grid g3">
+        <div class="stat"><div class="k">Apparent mastery</div><div class="v">${apparent}%</div><div class="note">Familiar forms</div></div>
+        <div class="stat" style="border-color:rgba(47,227,192,.4)"><div class="k">Genuine mastery</div>
+          <div class="v teal-text">${genuine}%</div><div class="note">New context and inverse</div></div>
+        <div class="stat ${apparent-genuine>=25?"warn":""}"><div class="k">Mirage gap</div><div class="v">${apparent-genuine} pts</div>
+          <div class="note">${apparent-genuine>=25?"False mastery flagged":"Within tolerance"}</div></div>
+      </div>
+      <div class="card" style="margin-top:14px;${apparent-genuine>=25?"border-color:var(--warn-line);background:var(--warn-soft)":""}">
+        <p class="prose" style="margin:0;font-size:var(--fs-2)">${esc(m.verdict)}</p>
+        ${m.root_cause?`<div class="note" style="margin-top:10px">Root cause: ${esc(m.root_cause)}</div>`:""}
+      </div>
+      <div class="card flat" style="margin-top:12px"><div class="note">Genuine mastery was written to your genome, not the apparent score.</div></div>`;
+    })() : ""}`;
+};
+
+/* ---------- Study doctor: reads the real session ---------- */
+V.doctor = () => {
+  const since = Date.now()-1000*60*60*24*14;
+  const session = S.attempts.filter(a=>new Date(a.created_at).getTime()>since);
+  const d = S.cache.doctor;
+  const timed = session.filter(a=>a.seconds);
+  const avg = timed.length ? Math.round(timed.reduce((s,a)=>s+a.seconds,0)/timed.length) : null;
+  return `
+  <div class="topbar"><div><h1 class="h1">Study doctor</h1>
+    <div class="sub">Looks at how you got things wrong, not just what you got wrong</div></div>
+    <span class="chip">Last 14 days</span></div>
+  ${session.length ? `
+    <div class="grid g4">
+      <div class="stat"><div class="k">Attempts</div><div class="v">${session.length}</div></div>
+      <div class="stat"><div class="k">Average score</div><div class="v">${Math.round(session.reduce((s,a)=>s+Number(a.score),0)/session.length)}%</div></div>
+      <div class="stat"><div class="k">Avg time</div><div class="v">${avg?avg+"s":"—"}</div></div>
+      <div class="stat ${session.filter(a=>a.score<50).length?"warn":""}"><div class="k">Below 50%</div>
+        <div class="v">${session.filter(a=>a.score<50).length}</div></div>
+    </div>
+    <div class="sec">This fortnight</div>
+    <div class="card list">${session.slice(0,10).map(a=>`<div class="item">
+      <div><div style="font-size:var(--fs-2);font-weight:600">${esc(a.topic)}</div>
+        <div class="note">${esc(a.kind)}${a.seconds?" · "+a.seconds+"s":""} · ${ago(a.created_at)}</div></div>
+      <b class="pct ${a.score<60?"warn":""}">${Math.round(a.score)}%</b></div>`).join("")}</div>
+    <button class="btn" style="margin-top:14px" data-act="run-doctor">${busy("doctor","Diagnose this fortnight")}</button>`
+   : empty("Not enough to diagnose yet","The doctor reads your real attempts. Complete a checkpoint or run a paper through ExamLens first.",
+      `<a class="btn" href="#/examlens">Open ExamLens</a>`)}
+  ${d ? `
+    <div class="sec">What the doctor found</div>
+    <div class="grid" style="gap:10px">
+      ${(d.findings||[]).map(f=>`<div class="card ${f.kind==="gap"?"":"flat"}" ${f.kind==="gap"?'style="border-color:var(--warn-line);background:var(--warn-soft)"':""}>
+        <div class="row" style="align-items:flex-start;gap:10px">
+          <span class="tag ${f.kind==="gap"?"gap":"slip"}">${esc(String(f.kind).toUpperCase())}</span>
+          <div><div style="font-weight:600;font-size:var(--fs-2)">${esc(f.title)}</div>
+            <div class="note" style="margin-top:3px">${esc(f.text)}</div></div></div></div>`).join("")}
+    </div>
+    <div class="ai" style="margin-top:14px"><div class="who">${I.ai} Prescription</div>
+      <p class="prose" style="font-size:var(--fs-2)">${esc(d.prescription)}</p></div>`
+   : ""}`;
+};
+
+/* ---------- Edu AI ---------- */
+V.counsellor = () => `
+  <div class="topbar"><div><h1 class="h1">Edu AI</h1>
+    <div class="sub">Answers from your own records only. Your conversations stay private to you.</div></div></div>
+  <div class="chat" id="chat"></div>
+  <div class="composer">
+    <input id="ask" placeholder="Ask anything about your studies" autocomplete="off">
+    <button class="btn" data-act="send">Send</button>
+  </div>
+  <div class="suggests">
+    <button data-act="ask" data-q="What should I work on first, and why?">What should I work on first?</button>
+    <button data-act="ask" data-q="Where am I losing the most marks?">Where am I losing marks?</button>
+    <button data-act="ask" data-q="Build me a revision plan for the next two weeks.">Plan my next two weeks</button>
+    <button data-act="ask" data-q="Is my strongest topic actually strong, or just familiar?">Is my best topic really strong?</button>
+  </div>`;
+
+function renderChat(){
+  const c = $("#chat"); if(!c) return;
+  if(!S.chat.length){
+    c.innerHTML = `<div class="card empty"><b>Ask me anything about your work</b>
+      <p class="note">I read your genome, your attempts and your goal. If there's no evidence for something, I'll tell you that instead of guessing.</p></div>`;
+    return;
+  }
+  c.innerHTML = S.chat.map(m=>{
+    if(m.role==="user") return `<div class="msg me">${esc(m.content)}</div>`;
+    if(m.role==="typing") return `<div class="msg ai typing"><i></i><i></i><i></i></div>`;
+    return `<div class="msg ai fade"><div class="prose" style="font-size:var(--fs-2)">${esc(m.content)}</div>
+      ${m.topics&&m.topics.length?`<div class="sources">${m.topics.map(t=>`<span class="chip teal">${esc(t.topic)} ${t.score}%</span>`).join("")}</div>`:""}
+      </div>`;
+  }).join("");
+  c.lastElementChild && c.lastElementChild.scrollIntoView({block:"end"});
+}
+async function send(text){
+  if(!text || !text.trim()) return;
+  S.chat.push({role:"user", content:text}); S.chat.push({role:"typing"}); renderChat();
+  try{
+    const history = S.chat.filter(m=>m.role==="user"||m.role==="assistant").slice(-6)
+      .map(m=>({role:m.role, content:m.content}));
+    const out = await ai("chat",{ message:text, history: history.slice(0,-1) });
+    S.chat.pop(); S.chat.push({role:"assistant", content:out.reply, topics:out.topics});
+  }catch(e){
+    S.chat.pop(); S.chat.push({role:"assistant", content:"I couldn't reach the AI service. "+e.message});
+  }
+  renderChat();
+}
+
+/* ---------- profile and portfolio ---------- */
+V.profile = () => {
+  const me = S.me, g = G();
+  const myCourses = S.courses.filter(c=>S.enrolled.includes(c.id));
+  return `
+  <div class="topbar">
+    <div class="row"><div class="avatar" style="width:52px;height:52px;font-size:var(--fs-4)">${esc(initials(me.full_name))}</div>
+      <div><h1 class="h1" style="font-size:var(--fs-6)">${esc(me.full_name)}</h1>
+        <div class="sub">${esc(me.grade||"Class not set")} · joined ${new Date(me.created_at).toLocaleDateString()}</div></div></div>
+    <a class="btn ghost sm" href="#/portfolio">Portfolio</a></div>
+  <div class="grid g2">
+    <div>
+      <div class="sec" style="margin-top:0">Your goal</div>
+      <div class="card">
+        <label class="f" for="pGoal">What are you aiming for?</label>
+        <input id="pGoal" value="${esc(me.goal||"")}" placeholder="Mechanical engineering, 2027 intake">
+        <label class="f" for="pInt">Interests, separated by commas</label>
+        <input id="pInt" value="${esc((me.interests||[]).join(", "))}" placeholder="Robotics, debating">
+        <label class="f" for="pGrade">Class</label>
+        <input id="pGrade" value="${esc(me.grade||"")}" placeholder="Grade 13-C">
+        <button class="btn" style="margin-top:14px" data-act="save-profile">Save</button>
+      </div>
+      <div class="sec">Courses</div>
+      ${myCourses.length?`<div class="card list">${myCourses.map(c=>`<div class="item">
+        <span style="font-size:var(--fs-2)">${esc(c.title)}</span><span class="note">${esc(c.subject)}</span></div>`).join("")}</div>`
+       :`<div class="card"><div class="note">Not enrolled in anything yet.</div></div>`}
+    </div>
+    <div>
+      <div class="sec" style="margin-top:0">Where you stand</div>
+      <div class="card">${g.topics.length?g.topics.map(t=>barRow(t.topic,t.score,t.score<60)).join("")
+        :`<div class="note">No graded work yet.</div>`}</div>
+      <div class="sec">Advisor</div>
+      <div class="card">
+        <p class="note" style="margin:0 0 12px">Ask the advisor to judge which pathways fit your record. It uses your topic scores and your stated goal, and it will tell you what's blocking you.</p>
+        <button class="btn sm" data-act="run-advisor" ${g.topics.length?"":"disabled"}>${busy("advisor","Check my pathways")}</button>
+        ${g.topics.length?"":`<div class="note" style="margin-top:8px">Needs some graded work first.</div>`}
+      </div>
+      ${S.cache.advisor?(()=>{const a=S.cache.advisor;return `
+        <div class="card" style="margin-top:12px;border-color:rgba(47,227,192,.4);background:var(--teal-ghost)">
+          ${(a.matches||[]).map((m,i)=>`<div style="padding:9px 0;${i?"border-top:1px solid var(--line-soft)":""}">
+            <div class="between"><b style="font-size:var(--fs-2)">${esc(m.name)}</b><b class="pct">${m.fit}%</b></div>
+            <div class="bar" style="margin:7px 0"><i style="width:${m.fit}%"></i></div>
+            <div class="note">${esc(m.why)}</div></div>`).join("")}
+        </div>
+        <div class="card list" style="margin-top:12px">${(a.requirements||[]).map(r=>`<div class="item">
+          <span class="row" style="gap:9px"><span class="${r.met?"done":"warn-text"}">${r.met?"✓":"○"}</span>
+          <span style="font-size:var(--fs-2)">${esc(r.title)}</span></span>
+          <span class="note ${r.met?"":"warn-text"}">${esc(r.status)}</span></div>`).join("")}</div>
+        ${a.blocking?`<div class="card" style="margin-top:12px;border-color:var(--warn-line);background:var(--warn-soft)">
+          <div class="note warn-text">${esc(a.blocking)}</div></div>`:""}
+        <div class="card flat" style="margin-top:12px"><div class="note">Advisory only. Suggestions from your record, not decisions.</div></div>`})():""}
+    </div>
+  </div>`;
+};
+
+V.portfolio = () => `
+  <div class="topbar"><div><h1 class="h1">Portfolio</h1>
+    <div class="sub">${S.portfolio.length} item${S.portfolio.length===1?"":"s"} · ${S.portfolio.filter(i=>i.visible).length} visible</div></div></div>
+  <div class="card">
+    <div class="grid g2">
+      <div><label class="f" for="poTitle">Title</label><input id="poTitle" placeholder="Line-following robot with PID control"></div>
+      <div><label class="f" for="poKind">Type</label>
+        <select id="poKind"><option>Project</option><option>Certificate</option><option>Academic</option><option>Activity</option></select></div>
+    </div>
+    <label class="f" for="poDesc">What it was, and what you did</label>
+    <textarea id="poDesc" style="min-height:80px"></textarea>
+    <label class="f" for="poLink">Link (optional)</label><input id="poLink" placeholder="https://">
+    <button class="btn" style="margin-top:14px" data-act="add-portfolio">Add to portfolio</button>
+  </div>
+  ${S.portfolio.length ? `<div class="grid g2" style="margin-top:14px">
+      ${S.portfolio.map(p=>`<div class="card">
+        <div class="between"><b style="font-size:var(--fs-2)">${esc(p.title)}</b>
+          <span class="chip">${esc(p.kind)}</span></div>
+        ${p.description?`<p class="note" style="margin:8px 0">${esc(p.description)}</p>`:""}
+        ${p.link?`<a class="note teal-text" href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.link)}</a>`:""}
+        <div class="row" style="gap:8px;margin-top:11px">
+          <button class="btn ghost sm" data-act="toggle-portfolio" data-id="${p.id}">${p.visible?"Hide":"Show"}</button>
+          <button class="btn ghost sm" data-act="del-portfolio" data-id="${p.id}">Remove</button></div>
+      </div>`).join("")}</div>`
+   : empty("Nothing here yet","Add the projects, certificates and coursework you'd want a university to see. Nothing is added for you.")}`;
+
+/* ================= teacher views ================= */
+V.courses = () => {
+  const mine = S.courses.filter(c=>c.teacher_id===S.me.id);
+  return `
+  <div class="topbar"><div><h1 class="h1">My courses</h1>
+    <div class="sub">Build the lessons your students learn from</div></div>
+    <div class="avatar">${esc(initials(S.me.full_name))}</div></div>
+  <div class="card">
+    <div class="grid g3">
+      <div><label class="f" for="cTitle">Course title</label><input id="cTitle" placeholder="Physics 9702 — A2"></div>
+      <div><label class="f" for="cSubject">Subject</label><input id="cSubject" placeholder="Physics"></div>
+      <div><label class="f" for="cCode">Code (optional)</label><input id="cCode" placeholder="9702"></div>
+    </div>
+    <label class="f" for="cDesc">Description</label><input id="cDesc" placeholder="Waves, fields and electromagnetism">
+    <button class="btn" style="margin-top:14px" data-act="create-course">Create course</button>
+  </div>
+  ${mine.length ? `<div class="grid" style="gap:12px;margin-top:14px">
+    ${mine.map(c=>{
+      const ls = S.lessons.filter(l=>l.course_id===c.id);
+      const joined = S.students.filter(s=>(S.enrollRows||[]).some(e=>e.course_id===c.id && e.student_id===s.id)).length;
+      return `<div class="card">
+        <div class="between"><div><div style="font-weight:700">${esc(c.title)}</div>
+          <div class="note">${esc(c.subject)} · ${ls.length} lesson${ls.length===1?"":"s"} · ${joined} student${joined===1?"":"s"} joined</div></div>
+          <span class="chip ${c.published?"teal":"warn"}">${c.published?"Students can see this":"Hidden from students"}</span></div>
+        <div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap">
+          <a class="btn sm" href="#/edit/${c.id}">Open</a>
+          <button class="btn ghost sm" data-act="toggle-course" data-id="${c.id}">${c.published?"Unpublish":"Publish"}</button>
+        </div></div>`;
+    }).join("")}</div>`
+   : empty("No courses yet","Create one above. Students see it as soon as you publish it.")}`;
+};
+
+V.edit = () => {
+  const c = S.courses.find(x=>x.id===S.course);
+  if(!c) return empty("Course not found","");
+  const ls = S.lessons.filter(l=>l.course_id===c.id).sort((a,b)=>a.position-b.position);
+  const d = S.cache.draft || {};
+  return `
+  <div class="crumb"><a href="#/courses">My courses</a> · ${esc(c.subject)}</div>
+  <div class="topbar"><div><h1 class="h1" style="font-size:var(--fs-6)">${esc(c.title)}</h1>
+    <div class="sub">${ls.length} lesson${ls.length===1?"":"s"}</div></div>
+    <button class="btn ${c.published?"ghost ":""}sm" data-act="toggle-course" data-id="${c.id}">${c.published?"Unpublish":"Publish to students"}</button></div>
+  <div class="card ${c.published?"flat":""}" style="margin-bottom:14px;${c.published?"":"border-color:var(--warn-line);background:var(--warn-soft)"}">
+    <div class="note ${c.published?"":"warn-text"}">${c.published
+      ? `Students can see this course in Learn and join it. ${ls.filter(l=>l.published).length} of ${ls.length} lesson${ls.length===1?"":"s"} are published.`
+      : "This course is a draft, so no student can see it yet. Publish it and it appears in their Learn page."}</div>
+  </div>
+
+  <div class="card">
+    <b style="font-size:var(--fs-2)">Add a lesson</b>
+    <div class="grid g3" style="margin-top:10px">
+      <div><label class="f" for="lTitle">Lesson title</label><input id="lTitle" value="${esc(d.title||"")}" placeholder="Electromagnetic induction — Lenz's law"></div>
+      <div><label class="f" for="lTopic">Topic it teaches</label><input id="lTopic" value="${esc(d.topic||"")}" placeholder="Electromagnetic induction"></div>
+      <div><label class="f" for="lMin">Minutes</label><input id="lMin" type="number" value="${d.duration_min||20}"></div>
+    </div>
+
+    <label class="f" for="lVideo">Video link (YouTube, optional)</label>
+    <input id="lVideo" value="${esc(d.video_url||"")}" placeholder="https://www.youtube.com/watch?v=...">
+    <div class="row" style="gap:8px;margin-top:9px;flex-wrap:wrap">
+      <button class="btn ghost sm" data-act="fetch-captions">${busy("captions","Read the video")}</button>
+      ${d.transcript?`<button class="btn ghost sm" data-act="summarise-video">${busy("summarise","Summarise it for students")}</button>`:""}
+      ${d.transcript?`<span class="chip teal">Transcript: ${d.transcript.split(/\s+/).length} words</span>`:""}
+    </div>
+    <div class="note" style="margin-top:7px">Edu AI reads text, not pictures, so it works from the video's captions. If the video has none, paste the transcript below yourself.</div>
+
+    <label class="f" for="lTrans">Transcript</label>
+    <textarea id="lTrans" style="min-height:90px" placeholder="Fetched captions appear here, or paste your own.">${esc(d.transcript||"")}</textarea>
+
+    <label class="f" for="lSummary">Summary students see before watching</label>
+    <textarea id="lSummary" style="min-height:70px" placeholder="Written by you, or generated from the transcript.">${esc(d.summary||"")}</textarea>
+
+    <label class="f" for="lBody">Lesson notes</label>
+    <textarea id="lBody" placeholder="Write the notes, or let Edu AI draft them and edit what it gives you.">${esc(d.body||"")}</textarea>
+    <div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="btn ghost sm" data-act="ai-lesson">${busy("aiLesson","Draft notes with AI")}</button>
+      <button class="btn ghost sm" data-act="ai-checkpoint">${busy("aiCp","Write the checkpoint with AI")}</button>
+    </div>
+
+    ${d.checkpoint ? `
+      <div class="card flat" style="margin-top:12px">
+        <div class="note">Checkpoint</div>
+        <label class="f" for="cpQ">Question</label><input id="cpQ" value="${esc(d.checkpoint.question||"")}">
+        ${(d.checkpoint.options||[]).map((o,i)=>`<label class="f" for="cpO${i}">Option ${i+1}${i===d.checkpoint.answer?" (correct)":""}</label>
+          <input id="cpO${i}" value="${esc(o)}">`).join("")}
+        <label class="f" for="cpAns">Correct option number</label>
+        <input id="cpAns" type="number" min="1" max="${(d.checkpoint.options||[]).length}" value="${(d.checkpoint.answer??0)+1}">
+      </div>` : `<div class="note" style="margin-top:10px">A lesson without a checkpoint records nothing to the genome.</div>`}
+
+    <div class="row" style="gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn" data-act="add-lesson">Add lesson</button>
+      <button class="btn ghost" data-act="clear-draft">Clear</button>
+    </div>
+  </div>
+
+  ${ls.length ? `<div class="sec">Lessons</div>
+    <div class="grid" style="gap:10px">
+      ${ls.map(l=>`<div class="card">
+        <div class="between"><div><b style="font-size:var(--fs-2)">${l.position}. ${esc(l.title)}</b>
+          <div class="note">${esc(l.topic)} · ${l.duration_min} min · ${l.video_url?"video · ":""}${l.checkpoint&&l.checkpoint.question?"checkpoint set":"no checkpoint"}</div></div>
+          <span class="chip ${l.published?"teal":""}">${l.published?"Published":"Draft"}</span></div>
+        <div class="row" style="gap:8px;margin-top:11px">
+          <button class="btn ghost sm" data-act="toggle-lesson" data-id="${l.id}">${l.published?"Unpublish":"Publish"}</button>
+          <button class="btn ghost sm" data-act="del-lesson" data-id="${l.id}">Delete</button></div></div>`).join("")}
+    </div>` : ""}`;
+};
+
+V.class = () => {
+  const rows = S.students.map(s=>({ ...s, g: genomeFrom(S.classAttempts.filter(a=>a.student_id===s.id)) }));
+  const withData = rows.filter(r=>r.g.topics.length);
+  const weakCount = {};
+  withData.forEach(r=>{ if(r.g.weakest) weakCount[r.g.weakest.topic] = (weakCount[r.g.weakest.topic]||0)+1; });
+  const shared = Object.entries(weakCount).sort((a,b)=>b[1]-a[1])[0];
+  return `
+  <div class="topbar"><div><h1 class="h1">My class</h1>
+    <div class="sub">${rows.length} student${rows.length===1?"":"s"} · ${withData.length} with graded work</div></div>
+    <div class="avatar">${esc(initials(S.me.full_name))}</div></div>
+  ${rows.length ? `<div class="grid" style="gap:10px">
+      ${rows.map(r=>`<button class="card" style="text-align:left;width:100%" data-act="view-student" data-id="${r.id}">
+        <div class="between">
+          <div class="row"><div class="avatar">${esc(initials(r.full_name))}</div>
+            <div><div style="font-weight:700">${esc(r.full_name)}</div>
+              <div class="note">${esc(r.grade||"Class not set")}</div></div></div>
+          <div class="row" style="gap:12px">
+            ${r.g.weakest?`<span class="chip ${r.g.weakest.score<60?"warn":""}">${esc(r.g.weakest.topic)} ${r.g.weakest.score}%</span>
+              <b class="pct">${r.g.overall}%</b>`:`<span class="chip">No work yet</span>`}
+          </div></div></button>`).join("")}</div>`
+   : empty("No students yet","They appear here as soon as they create an account and join one of your courses.")}
+  ${withData.length?`<div class="sec">Across the class</div>
+    <div class="grid g3">
+      <div class="card flat"><b style="font-size:var(--fs-2)">Shared weak topic</b>
+        <div class="note" style="margin-top:5px">${shared?esc(shared[0])+" is the weakest topic for "+shared[1]+" student"+(shared[1]===1?"":"s"):"No pattern yet"}</div></div>
+      <div class="card flat"><b style="font-size:var(--fs-2)">Class average</b>
+        <div class="note" style="margin-top:5px">${Math.round(withData.reduce((s,r)=>s+r.g.overall,0)/withData.length)}% across every topic with evidence</div></div>
+      <div class="card flat"><b style="font-size:var(--fs-2)">Evidence collected</b>
+        <div class="note" style="margin-top:5px">${S.classAttempts.length} attempts recorded by your students</div></div>
+    </div>`:""}
+  <div class="card flat" style="margin-top:14px"><div class="note">
+    You see academic records only. Edu AI conversations stay private to the student, enforced by the database, not by hidden buttons.</div></div>`;
+};
+
+V.student = () => {
+  const s = S.students.find(x=>x.id===S.viewing);
+  if(!s) { location.hash="#/class"; return ""; }
+  const att = S.classAttempts.filter(a=>a.student_id===s.id);
+  const g = genomeFrom(att);
+  return `
+  <div class="crumb"><a href="#/class">My class</a> · ${esc(s.full_name)} · read only</div>
+  <div class="topbar"><div><h1 class="h1" style="font-size:var(--fs-6)">${esc(s.full_name)}</h1>
+    <div class="sub">${esc(s.grade||"Class not set")} · ${att.length} attempts</div></div>
+    ${g.overall!==null?`<div class="stat"><div class="k">Genome</div><div class="v">${g.overall}%</div></div>`:""}</div>
+  ${g.topics.length?`<div class="card">${g.topics.map(t=>barRow(t.topic,t.score,t.score<60,
+      `${t.evidence} attempt${t.evidence===1?"":"s"} · last ${ago(t.last)}`)).join("")}</div>
+    <div class="sec">Recent work</div>
+    <div class="card list">${att.slice(0,10).map(a=>`<div class="item">
+      <div><div style="font-size:var(--fs-2);font-weight:600">${esc(a.topic)}</div>
+        <div class="note">${esc(a.kind)} · ${ago(a.created_at)}</div></div>
+      <b class="pct ${a.score<60?"warn":""}">${Math.round(a.score)}%</b></div>`).join("")}</div>`
+   : empty("No graded work yet",`${s.full_name} hasn't completed anything that feeds the genome.`)}`;
+};
+
+/* ================= navigation ================= */
+function routesFor(role){
+  return role==="student" ? [
+    {h:"#/home",t:"Home",i:"home",g:"main"},
+    {h:"#/learn",t:"Learn",i:"learn",g:"main"},
+    {h:"#/genome",t:"Genome",i:"growth",g:"main"},
+    {h:"#/counsellor",t:"Edu AI",i:"ai",g:"main"},
+    {h:"#/examlens",t:"ExamLens",i:"lens",g:"quick"},
+    {h:"#/mirage",t:"Mirage",i:"mirage",g:"quick"},
+    {h:"#/doctor",t:"Study doctor",i:"doctor",g:"quick"},
+    {h:"#/portfolio",t:"Portfolio",i:"folder",g:"quick"},
+    {h:"#/profile",t:"Profile",i:"user",g:"quick"}
+  ] : [
+    {h:"#/class",t:"My class",i:"school",g:"main"},
+    {h:"#/courses",t:"Courses",i:"learn",g:"main"},
+    {h:"#/profile",t:"Profile",i:"user",g:"quick"}
+  ];
+}
+function buildNav(){
+  const rs = routesFor(S.me.role), here = (location.hash.split("/")[1]||"");
+  const on = h => h.split("/")[1]===here ? "on":"";
+  $("#nav").innerHTML = rs.filter(r=>r.g==="main").map(r=>`<a class="${on(r.h)}" href="${r.h}">${I[r.i]}${r.t}</a>`).join("")
+    + (rs.some(r=>r.g==="quick")?`<div class="nav-label">Quick access</div>`:"")
+    + rs.filter(r=>r.g==="quick").map(r=>`<a class="${on(r.h)}" href="${r.h}">${I[r.i]}${r.t}</a>`).join("");
+  $("#mobilebar").innerHTML = rs.slice(0,5).map(r=>`<a class="${on(r.h)}" href="${r.h}">${I[r.i]}${r.t}</a>`).join("");
+}
+function aside(view){
+  const g = G();
+  if(S.me.role!=="student") return `<div class="card"><b style="font-size:var(--fs-2)">Teaching</b>
+    <p class="note" style="margin:7px 0 0">Lessons you publish become the evidence your students' genomes are built from. A lesson without a checkpoint records nothing.</p></div>`;
+  if(!g.topics.length) return `<div class="card"><b style="font-size:var(--fs-2)">Nothing recorded yet</b>
+    <p class="note" style="margin:7px 0 0">Your genome, your advisor and Edu AI all read the same rows. Complete a checkpoint and every screen here changes.</p></div>`;
+  return `<div class="ai" style="margin-bottom:14px"><div class="who">${I.ai} Edu AI</div>
+      <p>${esc(g.weakest.topic)} is your weakest topic at ${g.weakest.score}%. Ask me what to do about it.</p>
+      <a class="btn sm" href="#/counsellor" style="width:100%">Ask a question</a></div>
+    <div class="note" style="margin-bottom:8px">Topics with evidence</div>
+    <div class="card list">${g.topics.slice(0,6).map(t=>`<div class="item">
+      <span style="font-size:var(--fs-2)">${esc(t.topic)}</span>
+      <b class="pct ${t.score<60?"warn":""}">${t.score}%</b></div>`).join("")}</div>
+    <div class="note" style="margin-top:12px">Weighted by source, faded by age. ${S.attempts.length} attempts behind these numbers.</div>`;
+}
+
+/* ================= router ================= */
+function route(){
+  const parts = location.hash.replace(/^#\//,"").split("/");
+  let view = parts[0] || (S.me.role==="student" ? "home" : "class");
+  S.course = null; S.lesson = null;
+  if(view==="course" || view==="edit") S.course = parts[1];
+  S.gSubject = view==="genome" && parts[1] ? decodeURIComponent(parts[1]) : null;
+  S.gTopic   = view==="genome" && parts[2] ? decodeURIComponent(parts[2]) : null;
+  if(view==="lesson") S.lesson = parts[1];
+  if(!V[view]) view = S.me.role==="student" ? "home" : "class";
+  if(S.me.role!=="student" && ["home","learn","genome","examlens","mirage","doctor","portfolio","course","lesson"].includes(view))
+    view = "class";
+  $("#main").innerHTML = `<div class="fade">${V[view]()}</div>`;
+  $("#aside").innerHTML = aside(view);
+  buildNav();
+  if(view==="counsellor"){
+    renderChat();
+    const i = $("#ask");
+    i && i.addEventListener("keydown", e=>{ if(e.key==="Enter"){ send(i.value); i.value=""; }});
+  }
+  window.scrollTo(0,0);
+}
+const rerender = () => route();
+
+/* Re-rendering wipes the form, so read it into the draft first.
+   This is what was clearing the lesson pane when the AI ran. */
+function captureDraft(){
+  if(!$("#lTitle")) return;
+  const d = S.cache.draft || {};
+  d.title = $("#lTitle").value.trim();
+  d.topic = $("#lTopic").value.trim();
+  d.duration_min = Number($("#lMin").value) || 20;
+  if($("#lBody"))    d.body = $("#lBody").value;
+  if($("#lVideo"))   d.video_url = $("#lVideo").value.trim();
+  if($("#lTrans"))   d.transcript = $("#lTrans").value;
+  if($("#lSummary")) d.summary = $("#lSummary").value;
+  if($("#cpQ")){
+    const options = $$("[id^=cpO]").map(i=>i.value.trim()).filter(Boolean);
+    d.checkpoint = { question:$("#cpQ").value.trim(), options,
+      answer: Math.max(0, Math.min(options.length-1, Number($("#cpAns").value)-1)),
+      explanation: (d.checkpoint && d.checkpoint.explanation) || "" };
+  }
+  S.cache.draft = d;
+}
+async function withBusy(key, fn){
+  S.busy[key]=true; rerender();
+  try{ await fn(); }catch(e){ toast(e.message||"Something went wrong"); }
+  S.busy[key]=false; rerender();
+}
+
+/* ================= actions ================= */
+const ACT = {
+  async join(el){
+    const { error } = await sb.from("enrollments").insert({student_id:S.me.id, course_id:el.dataset.id});
+    if(error) return toast(error.message);
+    S.enrolled.push(el.dataset.id); toast("Joined"); rerender();
+  },
+  async "answer-cp"(el){
+    const l = S.lessons.find(x=>x.id===S.lesson), cp = l.checkpoint;
+    const chosen = Number(el.dataset.i), right = chosen === Number(cp.answer);
+    $$("[data-act=answer-cp]").forEach(b=>{ b.style.opacity=.5; b.disabled=true; });
+    el.style.opacity=1; el.style.borderColor = right ? "var(--teal)" : "var(--warn-line)";
+    $("#cpOut").innerHTML = `<div class="card" style="margin-top:12px;border-color:${right?"rgba(47,227,192,.4)":"var(--warn-line)"};background:${right?"var(--teal-ghost)":"var(--warn-soft)"}">
+      <b class="${right?"teal-text":"warn-text"}" style="font-size:var(--fs-2)">${right?"Correct":"Not correct"}</b>
+      <p class="note" style="margin:8px 0 0"><span class="spin"></span>Edu AI is looking at your reasoning…</p></div>`;
+    const course = S.courses.find(c=>c.id===l.course_id);
+    await record({ kind:"lesson", subject:course?course.subject:null, topic:l.topic,
+                   score: right?100:0, lesson_id:l.id,
+                   meta:{ chosen, question:cp.question,
+                          chosenText:(cp.options||[])[chosen],
+                          correctText:(cp.options||[])[cp.answer] } });
+    let text = cp.explanation || "";
+    try{
+      const out = await ai("checkpoint",{ topic:l.topic, question:cp.question, options:cp.options,
+        chosen:(cp.options||[])[chosen], correct:(cp.options||[])[cp.answer], wasRight:right });
+      text = out.text || text;
+    }catch(e){ text = text || "Saved. The AI explanation is unavailable right now."; }
+    $("#cpOut").innerHTML = `<div class="card" style="margin-top:12px;border-color:${right?"rgba(47,227,192,.4)":"var(--warn-line)"};background:${right?"var(--teal-ghost)":"var(--warn-soft)"}">
+      <b class="${right?"teal-text":"warn-text"}" style="font-size:var(--fs-2)">${right?"Correct":"Not correct"}</b>
+      <p class="prose" style="margin:8px 0 0;font-size:var(--fs-2)">${esc(text)}</p>
+      <div class="note" style="margin-top:10px">Recorded to your genome under ${esc(l.topic)}.</div></div>`;
+  },
+  "run-examlens"(){
+    /* Read the form BEFORE withBusy's rerender wipes these fields — same trap
+       captureDraft() exists for on the lesson editor. */
+    const d = S.cache.examlensDraft = {
+      subject:($("#exSub")||{}).value?.trim()||"", topic:($("#exTopic")||{}).value?.trim()||"",
+      question:($("#exQ")||{}).value?.trim()||"", answer:($("#exA")||{}).value?.trim()||"",
+      expected:($("#exE")||{}).value?.trim()||""
+    };
+    if(!d.question||!d.answer) return toast("Add the question and your answer first");
+    withBusy("examlens", async ()=>{
+      const out = await ai("examlens",{ question:d.question, answer:d.answer, expected:d.expected, subject:d.subject, topic:d.topic });
+      S.cache.examlens = out;
+      await record({ kind:"examlens", subject:d.subject, topic: out.topic||d.topic||"Unspecified topic",
+        score: Number(out.score)||0,
+        meta:{ cause:out.cause, verdict:out.verdict, question:d.question, answer:d.answer,
+               explanation:out.explanation, correct_working:out.correct_working } });
+    });
+  },
+  "examlens-ocr"(){
+    const files = [...((($("#exPhoto")||{}).files)||[])];
+    if(!files.length) return toast("Choose or take a photo first");
+    const cur = S.cache.examlensDraft = {
+      subject:($("#exSub")||{}).value?.trim()||"", topic:($("#exTopic")||{}).value?.trim()||"",
+      question:($("#exQ")||{}).value?.trim()||"", answer:($("#exA")||{}).value?.trim()||"",
+      expected:($("#exE")||{}).value?.trim()||""
+    };
+    withBusy("examlensOcr", async ()=>{
+      const images = await Promise.all(files.slice(0,3).map(f=>fileToCompressedDataURL(f)));
+      const out = await ai("examlens_ocr",{images});
+      S.cache.examlensDraft = {
+        subject: cur.subject || out.subject_guess || "",
+        topic: cur.topic || out.topic_guess || "",
+        question: out.question || cur.question || "",
+        answer: out.answer || cur.answer || "",
+        expected: out.expected || cur.expected || ""
+      };
+      toast("Read from photo — check it's right, then Analyse");
+    });
+  },
+  "mirage-generate"(){
+    const d = S.cache.mirageDraft = {
+      topic: ($("#miTopic")||{}).value?.trim()||"", subject: ($("#miSub")||{}).value?.trim()||""
+    };
+    if(!d.topic) return toast("Choose a topic first");
+    withBusy("mirage", async ()=>{
+      const out = await ai("mirage_generate",{ topic:d.topic, subject:d.subject });
+      S.cache.mirage = { topic:d.topic, subject:d.subject, questions: out.questions || [], answers:[], results:null };
+    });
+  },
+  "mirage-mark"(){
+    const m = S.cache.mirage;
+    m.answers = m.questions.map((_,i)=> ($("#mi"+i)||{}).value || "");
+    withBusy("mirageMark", async ()=>{
+      const out = await ai("mirage_mark",{ topic:m.topic,
+        answers: m.questions.map((q,i)=>({ ...q, answer:m.answers[i] })) });
+      m.results = out.results || []; m.verdict = out.verdict; m.root_cause = out.root_cause;
+      const lv = n => m.results.find(r=>r.level===n) || {score:0};
+      const genuine = Math.round((lv(4).score + lv(5).score)/2);
+      const apparent = Math.round((lv(1).score+lv(2).score)/2);
+      const breakdown = m.questions.map((q,i)=>({
+        level:q.level, label:q.label, question:q.question, expected:q.expected,
+        answer:m.answers[i], score:(m.results[i]||{}).score, note:(m.results[i]||{}).note
+      }));
+      await record({ kind:"mirage", subject:m.subject, topic:m.topic, score:genuine,
+        meta:{ apparent, genuine, verdict:m.verdict, root_cause:m.root_cause, breakdown } });
+    });
+  },
+  "run-doctor"(){ withBusy("doctor", async ()=>{
+    const since = Date.now()-1000*60*60*24*14;
+    const session = S.attempts.filter(a=>new Date(a.created_at).getTime()>since)
+      .map(a=>({kind:a.kind, topic:a.topic, score:a.score, seconds:a.seconds}));
+    S.cache.doctor = await ai("doctor",{ session });
+  });},
+  "run-advisor"(){ withBusy("advisor", async ()=>{ S.cache.advisor = await ai("advisor",{}); });},
+  send(){ const i=$("#ask"); send(i.value); i.value=""; },
+  ask(el){ send(el.dataset.q); },
+  async "save-profile"(){
+    const interests = $("#pInt").value.split(",").map(s=>s.trim()).filter(Boolean);
+    const patch = { goal:$("#pGoal").value.trim(), grade:$("#pGrade").value.trim(), interests };
+    const { error } = await sb.from("profiles").update(patch).eq("id",S.me.id);
+    if(error) return toast(error.message);
+    Object.assign(S.me, patch); toast("Saved"); rerender();
+  },
+  async "add-portfolio"(){
+    const title = $("#poTitle").value.trim();
+    if(!title) return toast("Give it a title");
+    const row = { student_id:S.me.id, title, kind:$("#poKind").value,
+      description:$("#poDesc").value.trim(), link:$("#poLink").value.trim()||null };
+    const { data, error } = await sb.from("portfolio_items").insert(row).select().single();
+    if(error) return toast(error.message);
+    S.portfolio.unshift(data); toast("Added"); rerender();
+  },
+  async "toggle-portfolio"(el){
+    const p = S.portfolio.find(x=>x.id===el.dataset.id);
+    const { error } = await sb.from("portfolio_items").update({visible:!p.visible}).eq("id",p.id);
+    if(error) return toast(error.message);
+    p.visible = !p.visible; rerender();
+  },
+  async "del-portfolio"(el){
+    const { error } = await sb.from("portfolio_items").delete().eq("id",el.dataset.id);
+    if(error) return toast(error.message);
+    S.portfolio = S.portfolio.filter(x=>x.id!==el.dataset.id); rerender();
+  },
+  /* ---- teacher ---- */
+  async "create-course"(){
+    const title=$("#cTitle").value.trim(), subject=$("#cSubject").value.trim();
+    if(!title||!subject) return toast("Title and subject are needed");
+    const { data, error } = await sb.from("courses").insert({ teacher_id:S.me.id, title, subject,
+      code:$("#cCode").value.trim()||null, description:$("#cDesc").value.trim()||null,
+      published:true }).select().single();
+    if(error) return toast(/does not exist|schema cache/i.test(error.message)
+      ? "The courses table is missing. Run the newer schema.sql in Supabase, then reload."
+      : error.message);
+    S.courses.unshift(data); toast("Course created"); location.hash = "#/edit/"+data.id;
+  },
+  async "toggle-course"(el){
+    const c = S.courses.find(x=>x.id===el.dataset.id);
+    const { error } = await sb.from("courses").update({published:!c.published}).eq("id",c.id);
+    if(error) return toast(error.message);
+    c.published = !c.published; toast(c.published?"Published to students":"Unpublished"); rerender();
+  },
+  "ai-lesson"(){ captureDraft(); withBusy("aiLesson", async ()=>{
+    const c = S.courses.find(x=>x.id===S.course), d = S.cache.draft || {};
+    if(!d.title || !d.topic) throw new Error("Add a lesson title and topic first");
+    const out = await ai("generate_lesson",{ subject:c.subject, title:d.title, topic:d.topic });
+    S.cache.draft = { ...d, body: out.body };
+  });},
+  "ai-checkpoint"(){ captureDraft(); withBusy("aiCp", async ()=>{
+    const c = S.courses.find(x=>x.id===S.course), d = S.cache.draft || {};
+    if(!d.title || !d.topic) throw new Error("Add a lesson title and topic first");
+    const cp = await ai("generate_checkpoint",{ subject:c.subject, title:d.title, topic:d.topic,
+      body: d.transcript ? (d.body||"") + "\n\nVideo transcript:\n" + d.transcript : (d.body||"") });
+    S.cache.draft = { ...d, checkpoint: cp };
+  });},
+  "fetch-captions"(){ captureDraft(); withBusy("captions", async ()=>{
+    const d = S.cache.draft || {};
+    if(!d.video_url) throw new Error("Paste a video link first");
+    const out = await ai("video_transcript",{ url:d.video_url });
+    S.cache.draft = { ...d, transcript: out.transcript };
+    toast("Captions read — " + out.transcript.split(/\s+/).length + " words");
+  });},
+  "summarise-video"(){ captureDraft(); withBusy("summarise", async ()=>{
+    const c = S.courses.find(x=>x.id===S.course), d = S.cache.draft || {};
+    if(!d.transcript) throw new Error("Read the video or paste a transcript first");
+    const out = await ai("summarise_video",{ subject:c.subject, title:d.title, topic:d.topic, transcript:d.transcript });
+    const points = (out.key_points||[]).map(k=>"• "+k).join("\n");
+    S.cache.draft = { ...d,
+      summary: out.summary || d.summary,
+      body: [out.notes, points].filter(Boolean).join("\n\n") || d.body,
+      checkpoint: out.checkpoint || d.checkpoint };
+    toast("Summary, notes and checkpoint written from the video");
+  });},
+  "clear-draft"(){ S.cache.draft = null; rerender(); },
+  "toggle-transcript"(el){
+    const t = $("#trans"); if(!t) return;
+    const open = t.style.display !== "none";
+    t.style.display = open ? "none" : "block";
+    el.textContent = open ? "Show transcript" : "Hide transcript";
+  },
+  async "add-lesson"(){
+    captureDraft();
+    const c = S.courses.find(x=>x.id===S.course), d = S.cache.draft || {};
+    if(!d.title || !d.topic) return toast("Lesson title and topic are needed");
+    const position = S.lessons.filter(l=>l.course_id===c.id).length + 1;
+    const { data, error } = await sb.from("lessons").insert({
+      course_id:c.id, title:d.title, topic:d.topic, position, duration_min:d.duration_min||20,
+      body:d.body||null, video_url:d.video_url||null, transcript:d.transcript||null,
+      summary:d.summary||null, checkpoint:d.checkpoint||null, published:true
+    }).select().single();
+    if(error) return toast(error.message);
+    S.lessons.push(data); S.cache.draft = null;
+    if(!c.published){
+      const up = await sb.from("courses").update({published:true}).eq("id",c.id);
+      if(!up.error){ c.published = true; toast("Lesson added — course published, students can see it now"); }
+      else toast("Lesson added, but the course is still a draft: "+up.error.message);
+    } else {
+      toast("Lesson added and visible to students");
+    }
+    rerender();
+  },
+  async "toggle-lesson"(el){
+    const l = S.lessons.find(x=>x.id===el.dataset.id);
+    const { error } = await sb.from("lessons").update({published:!l.published}).eq("id",l.id);
+    if(error) return toast(error.message);
+    l.published = !l.published; rerender();
+  },
+  async "del-lesson"(el){
+    const { error } = await sb.from("lessons").delete().eq("id",el.dataset.id);
+    if(error) return toast(error.message);
+    S.lessons = S.lessons.filter(x=>x.id!==el.dataset.id); rerender();
+  },
+  drill(el){ location.hash = el.dataset.to; },
+  refresh(){ withBusy("refresh", async ()=>{
+    S.me.role==="student" ? await loadStudent() : await loadTeacher();
+    toast("Up to date");
+  });},
+  "view-student"(el){ S.viewing = el.dataset.id; location.hash = "#/student"; }
+};
+document.addEventListener("click", e=>{
+  const el = e.target.closest("[data-act]");
+  if(!el) return;
+  const fn = ACT[el.dataset.act];
+  if(fn){ e.preventDefault(); fn(el); }
+});
+window.addEventListener("hashchange", route);
+
+/* ================= boot ================= */
+async function loadStudent(){
+  const [{data:courses},{data:enrol},{data:attempts},{data:port}] = await Promise.all([
+    sb.from("courses").select("*").eq("published",true).order("created_at",{ascending:false}),
+    sb.from("enrollments").select("course_id").eq("student_id",S.me.id),
+    sb.from("attempts").select("*").eq("student_id",S.me.id).order("created_at",{ascending:false}).limit(300),
+    sb.from("portfolio_items").select("*").eq("student_id",S.me.id).order("created_at",{ascending:false})
+  ]);
+  S.courses = courses||[]; S.enrolled = (enrol||[]).map(e=>e.course_id);
+  S.attempts = attempts||[]; S.portfolio = port||[];
+  const ids = S.courses.map(c=>c.id);
+  if(ids.length){
+    const { data:lessons } = await sb.from("lessons").select("*").in("course_id",ids).eq("published",true);
+    S.lessons = lessons||[];
+  }
+}
+async function loadTeacher(){
+  const [{data:courses},{data:students}] = await Promise.all([
+    sb.from("courses").select("*").eq("teacher_id",S.me.id).order("created_at",{ascending:false}),
+    sb.from("profiles").select("id, full_name, grade, created_at").eq("role","student").order("full_name")
+  ]);
+  S.courses = courses||[]; S.students = students||[];
+  const ids = S.courses.map(c=>c.id);
+  if(ids.length){
+    const [{data:lessons},{data:enrol}] = await Promise.all([
+      sb.from("lessons").select("*").in("course_id",ids),
+      sb.from("enrollments").select("*").in("course_id",ids)
+    ]);
+    S.lessons = lessons||[]; S.enrollRows = enrol||[];
+  }
+  const { data:att } = await sb.from("attempts").select("*").order("created_at",{ascending:false}).limit(1000);
+  S.classAttempts = att||[];
+}
+async function boot(){
+  if(!sb){
+    $("#gate").innerHTML = `<div style="max-width:380px;text-align:center;padding:20px">
+      <b style="color:var(--ink)">Not connected</b>
+      <p style="margin-top:8px">${esc(configProblem)}</p></div>`;
+    return;
+  }
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session){ location.replace("login.html"); return; }
+  const { data:profile, error } = await sb.from("profiles").select("*").eq("id",session.user.id).single();
+  if(error || !profile){
+    $("#gate").innerHTML = `<div style="text-align:center;padding:20px">Your profile row is missing. Run schema.sql, then sign in again.
+      <br><br><button class="btn" onclick="signOut()">Sign out</button></div>`;
+    return;
+  }
+  S.me = profile;
+
+  // Is the v2 schema actually there?
+  const probe = await sb.from("courses").select("id").limit(1);
+  if(probe.error){
+    const missing = /does not exist|schema cache|relation/i.test(probe.error.message);
+    $("#gate").innerHTML = `<div style="max-width:460px;padding:24px;text-align:center">
+      <b style="color:var(--ink);font-size:16px">${missing?"The database is out of date":"Cannot read the database"}</b>
+      <p style="margin-top:10px;line-height:1.6">${missing
+        ? "This version needs the newer schema.sql, with the courses, lessons and attempts tables. Open Supabase → SQL Editor, paste the whole of schema.sql, and run it. Then reload this page."
+        : esc(probe.error.message)}</p>
+      <p style="margin-top:10px;font-size:11px">If you have just run it and still see this, go to Settings → API and click Reload schema cache.</p>
+      <button class="btn" style="margin-top:14px" onclick="location.reload()">Reload</button>
+      <button class="btn ghost" style="margin-top:8px" onclick="signOut()">Sign out</button></div>`;
+    return;
+  }
+
+  try{ S.me.role==="student" ? await loadStudent() : await loadTeacher(); }
+  catch(e){ toast("Could not load your data: "+e.message); }
+  $("#whoami").innerHTML = `${esc(S.me.full_name)}<br><span style="color:var(--teal)">${esc(S.me.role)}</span>`;
+  $("#signout").onclick = signOut;
+  $("#gate").remove();
+  $("#shell").style.visibility = "visible";
+  if(!location.hash) location.hash = S.me.role==="student" ? "#/home" : "#/class";
+  route();
+}
+async function signOut(){ await sb.auth.signOut(); location.replace("login.html"); }
+boot();
+</script>
+</body>
+</html>

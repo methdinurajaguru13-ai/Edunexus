@@ -1,0 +1,130 @@
+<!--
+  EduNexus — "Confirm signup" email template.
+  Paste into Supabase: Authentication -> Email Templates -> Confirm signup
+  (switch that template to the HTML/source view before pasting).
+  Supabase variables used: {{ .ConfirmationURL }} {{ .SiteURL }} {{ .Email }}
+
+  Light-first by design: most email clients default to light mode and
+  support for prefers-color-scheme in email is inconsistent, so a fixed
+  dark design looks wrong more often than a fixed light one does. Clients
+  that DO honour color-scheme / prefers-color-scheme (Apple Mail, Outlook
+  on Mac/iOS, some webmail) get the dark variant below via !important
+  overrides — the one styling mechanism that reliably beats inline styles.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<meta name="format-detection" content="telephone=no">
+<title>Confirm your email</title>
+<style>
+  @media only screen and (max-width:480px) {
+    .em-wrap   { padding:20px 10px !important; }
+    .em-card   { border-radius:0 !important; }
+    .em-pad    { padding-left:22px !important; padding-right:22px !important; }
+    .em-h1     { font-size:22px !important; }
+    .em-btn a  { padding:16px 20px !important; font-size:15px !important; }
+  }
+  @media (prefers-color-scheme: dark) {
+    .em-body   { background-color:#040a09 !important; }
+    .em-wrap   { background-color:#040a09 !important; }
+    .em-card   { background-color:#0a1614 !important; border-color:#153630 !important; }
+    .em-h1     { color:#e6f6f2 !important; }
+    .em-p      { color:#a9c8c1 !important; }
+    .em-email  { color:#e6f6f2 !important; }
+    .em-fallback-p { color:#6f918a !important; }
+    .em-link   { color:#2fe3c0 !important; }
+    .em-divider { border-color:#102520 !important; }
+    .em-footer-p { color:#6f918a !important; }
+    .em-outer-footer { color:#6f918a !important; }
+  }
+</style>
+</head>
+<body class="em-body" style="margin:0;padding:0;background-color:#eef3f1;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">
+  One click and your EduNexus account is ready.
+</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="em-wrap" style="background-color:#eef3f1;padding:32px 16px;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="480" cellpadding="0" cellspacing="0" class="em-card" style="max-width:480px;width:100%;background-color:#ffffff;border:1px solid #dfe8e5;border-radius:16px;overflow:hidden;">
+
+        <!-- header / brand -->
+        <tr>
+          <td class="em-pad" align="center" style="padding:36px 32px 8px;">
+            <img src="https://qbzvejosycmeokswzyij.supabase.co/storage/v1/object/public/Branding/EduNexus-wordmark-transparent.png" alt="EduNexus" width="220" height="56"
+                 style="display:block;width:220px;height:56px;border:0;outline:none;">
+          </td>
+        </tr>
+
+        <!-- body -->
+        <tr>
+          <td class="em-pad" style="padding:26px 32px 6px;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+            <h1 class="em-h1" style="margin:0 0 10px;font-size:21px;line-height:1.3;font-weight:800;letter-spacing:-.02em;color:#0a1614;">Confirm your email</h1>
+            <p class="em-p" style="margin:0 0 22px;font-size:14px;line-height:1.6;color:#4b6b64;">
+              Dear {{ .Data.full_name }},<br><br>
+              You're one click from starting your genome. Confirm
+              <span class="em-email" style="color:#0a1614;font-weight:600;">{{ .Email }}</span>
+              to sign in and get going.
+            </p>
+          </td>
+        </tr>
+
+        <!-- CTA button -->
+        <tr>
+          <td class="em-pad" style="padding:0 32px 26px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" width="100%" class="em-btn">
+              <tr>
+                <td align="center" style="border-radius:10px;background-color:#2fe3c0;">
+                  <a href="{{ .ConfirmationURL }}" target="_blank"
+                     style="display:block;padding:13px 20px;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#032019;text-decoration:none;border-radius:10px;">
+                    Confirm email &amp; sign in
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- fallback link -->
+        <tr>
+          <td class="em-pad" style="padding:0 32px 28px;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+            <p class="em-fallback-p" style="margin:0;font-size:12px;line-height:1.6;color:#6f8880;">
+              Button not working?
+              <a href="{{ .ConfirmationURL }}" class="em-link" style="color:#1c8c78;font-weight:600;">Open the confirmation link</a>
+              instead.
+            </p>
+          </td>
+        </tr>
+
+        <!-- divider -->
+        <tr><td class="em-divider" style="border-top:1px solid #e3ece9;"></td></tr>
+
+        <!-- footer -->
+        <tr>
+          <td class="em-pad" style="padding:18px 32px 26px;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+            <p class="em-footer-p" style="margin:0;font-size:11px;line-height:1.6;color:#6f8880;">
+              Didn't create this account? You can ignore this email — nothing happens until the link above is used.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+
+      <!-- outside-card footer -->
+      <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;">
+        <tr>
+          <td align="center" class="em-outer-footer" style="padding:18px 12px 0;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;color:#6f8880;">
+            EduNexus · CODEFEST 2026 · G027
+          </td>
+        </tr>
+      </table>
+
+    </td>
+  </tr>
+</table>
+</body>
+</html>

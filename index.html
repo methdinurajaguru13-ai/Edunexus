@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EduNexus</title>
+</head>
+<body>
+<script>
+  /* Supabase's email-confirm / magic-link redirects land here whenever the
+     project's Site URL is set to the bare origin. The auth tokens live in
+     the URL hash, which browsers never send to the server, so we carry it
+     over manually rather than relying on Supabase's redirect config being
+     exactly right. */
+  location.replace("app.html" + location.hash);
+</script>
+</body>
+</html>

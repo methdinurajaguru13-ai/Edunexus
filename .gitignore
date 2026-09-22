@@ -1,0 +1,9 @@
+# Supabase CLI local machine state — never shared, tied to whoever ran `supabase link`
+supabase/.temp/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Editor/scratch
+_test/
