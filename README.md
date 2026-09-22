@@ -34,10 +34,6 @@ EduNexus is built around a **Learning Genome** — a live, per-topic mastery sco
 - **Vanilla JavaScript** — a single responsive web app with no build step: a hash router, template-string views, one global state object. Runs the same on mobile and desktop from one codebase, `app.html`; `login.html` handles sign-in and registration.
 - **Groq** — `openai/gpt-oss-120b` for reasoning and chat, and `qwen/qwen3.8-27b` for reading photographed or handwritten exam answers in ExamLens. Every model call is routed through a Supabase Edge Function that checks the caller's identity first, so the API key never touches the browser, and every prompt is grounded in that student's own Learning Genome rather than giving generic advice.
 
-## Screenshots
-
-*Add screenshots here — see the note below for the easiest way.*
-
 ## Getting started
 
 Full setup — database, environment, deploying the AI function, and a step-by-step demo script — is in **[SETUP.md](SETUP.md)**. Short version: run `schema.sql` in Supabase, drop your project URL/key into `config.js`, deploy `supabase/functions/ai/index.ts`, then serve the folder statically and open `login.html`.
