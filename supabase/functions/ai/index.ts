@@ -212,6 +212,115 @@ Deno.serve(async (req) => {
         out = asJson(await groq(messages, true));
         break;
       }
+      case "teacher_chat": {
+        /* The teaching assistant. Reads this teacher's own courses and their
+           students' results, keeps a running conversation, and maintains a
+           small memory of durable facts between sessions. */
+        const { data: me } = await sb.from("profiles").select("full_name, role, subject").eq("id", user.id).single();
+        if (!me || !["teacher", "admin"].includes(me.role)) return json({ error: "The teaching assistant is for teachers" }, 403);
+        const message = String(payload.message ?? "").slice(0, 4000).trim();
+        if (!message) throw new Error("Empty message");
+
+        const { data: courses }: any = await sb.from("courses").select("id, title, subject, published").eq("teacher_id", user.id);
+        const cids = (courses ?? []).map((c: any) => c.id);
+        let lessons: any[] = [], enrol: any[] = [];
+        if (cids.length) {
+          const [l, e]: any = await Promise.all([
+            sb.from("lessons").select("course_id, title, topic, position, published, checkpoint").in("course_id", cids),
+            sb.from("enrollments").select("student_id, course_id").in("course_id", cids),
+          ]);
+          lessons = l.data ?? []; enrol = e.data ?? [];
+        }
+        const sids = [...new Set(enrol.map((e: any) => e.student_id))];
+        let studs: any[] = [], att: any[] = [];
+        if (sids.length) {
+          const [p, a]: any = await Promise.all([
+            sb.from("profiles").select("id, full_name, grade").in("id", sids),
+            sb.from("attempts").select("student_id, kind, subject, topic, score, meta, created_at")
+              .in("student_id", sids).order("created_at", { ascending: false }).limit(1500),
+          ]);
+          studs = p.data ?? []; att = a.data ?? [];
+        }
+
+        // per-student picture
+        const perStudent = studs.map((s: any) => {
+          const rows = att.filter((a: any) => a.student_id === s.id);
+          const g = genomeSummary(rows);
+          const overall = g.length ? Math.round(g.reduce((t: number, x: any) => t + x.score, 0) / g.length) : null;
+          const last = rows[0]?.created_at ? new Date(rows[0].created_at).toDateString() : "never";
+          return `${s.full_name} (${s.grade ?? "no class"}): ${overall === null ? "no graded work" : `genome ${overall}%`}, ` +
+            `${rows.length} attempts, last active ${last}` +
+            (g.length ? `; weakest: ${g.slice(0, 2).map((t: any) => `${t.topic} ${t.score}%`).join(", ")}` : "");
+        });
+        // class-wide patterns
+        const byTopic: Record<string, number[]> = {};
+        studs.forEach((s: any) => genomeSummary(att.filter((a: any) => a.student_id === s.id))
+          .forEach((t: any) => (byTopic[t.topic] ||= []).push(t.score)));
+        const topicLines = Object.entries(byTopic)
+          .map(([t, sc]) => ({ t, avg: Math.round(sc.reduce((a, b) => a + b, 0) / sc.length), weak: sc.filter(v => v < 60).length, n: sc.length }))
+          .sort((a, b) => a.avg - b.avg)
+          .map(x => `${x.t}: class average ${x.avg}% across ${x.n} students, ${x.weak} below 60%`);
+        const causes: Record<string, number> = {};
+        att.filter((a: any) => a.kind === "examlens" && a.meta?.cause && a.meta.cause !== "none")
+          .forEach((a: any) => { const k = `${a.topic} — ${a.meta.cause}`; causes[k] = (causes[k] || 0) + 1; });
+        const causeLines = Object.entries(causes).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([k, n]) => `${k} (${n}×)`);
+        const falseMastery: Record<string, number> = {};
+        att.filter((a: any) => a.kind === "mirage" && a.meta && Number(a.meta.apparent) - Number(a.meta.genuine) >= 25)
+          .forEach((a: any) => { falseMastery[a.topic] = (falseMastery[a.topic] || 0) + 1; });
+        const courseLines = (courses ?? []).map((c: any) => {
+          const ls = lessons.filter((l: any) => l.course_id === c.id).sort((a: any, b: any) => a.position - b.position);
+          return `${c.title} [${c.subject}, ${c.published ? "published" : "draft"}, ${enrol.filter((e: any) => e.course_id === c.id).length} students]: ` +
+            (ls.map((l: any) => `${l.position}. ${l.title} (${l.topic}${l.checkpoint?.question ? "" : ", no checkpoint"})`).join("; ") || "no lessons yet");
+        });
+
+        // memory and conversation so far
+        const { data: memory }: any = await sb.from("assistant_memory").select("id, note, source, created_at")
+          .eq("teacher_id", user.id).order("created_at", { ascending: true }).limit(80);
+        const { data: hist }: any = await sb.from("assistant_messages").select("role, content")
+          .eq("teacher_id", user.id).order("created_at", { ascending: false }).limit(16);
+        const history = (hist ?? []).reverse().map((m: any) => ({ role: m.role, content: m.content }));
+
+        const system =
+          `You are Edu AI, the teaching assistant inside EduNexus, working for ${me.full_name}` +
+          `${me.subject ? `, who teaches ${me.subject}` : ""}. Be concise, practical and professional, like an experienced ` +
+          `head of department. Use ONLY the class data below for any claim about students or results; if the data doesn't ` +
+          `cover something, say so. You can plan lessons, write checkpoint questions, suggest reteaching, draft messages to ` +
+          `students or parents, and spot patterns. Use short paragraphs; use a list only when it genuinely helps.` + noMath +
+          `\n\nMEMORY. You keep durable notes about this teacher between conversations. Save a note only for things that ` +
+          `will still matter next week: their preferences, teaching style, plans, decisions, deadlines, or context about ` +
+          `the class that is not already in the data. Never save grades or scores, since those are live data. At most 3 new ` +
+          `notes per reply, each one short sentence. If the teacher asks you to remember something, save it. If they ask ` +
+          `you to forget something, or a note is now wrong, list its id in forget. Do not repeat notes you already have.` +
+          `\n\nReturn JSON only: {"reply":string,"remember":[string],"forget":[string]}.` +
+          `\n\nWHAT YOU REMEMBER ABOUT THIS TEACHER:\n` +
+          ((memory ?? []).map((m: any) => `[${m.id}] ${m.note}`).join("\n") || "nothing yet") +
+          `\n\nCOURSES AND LESSONS:\n${courseLines.join("\n") || "no courses yet"}` +
+          `\n\nSTUDENTS (${studs.length}):\n${perStudent.join("\n") || "no students enrolled yet"}` +
+          `\n\nTOPICS, WEAKEST FIRST:\n${topicLines.join("\n") || "no graded work yet"}` +
+          `\n\nMOST COMMON EXAMLENS ERRORS:\n${causeLines.join("\n") || "none recorded"}` +
+          `\n\nFALSE MASTERY FLAGGED BY MIRAGE:\n${Object.entries(falseMastery).map(([t, n]) => `${t} (${n} students)`).join("\n") || "none"}`;
+
+        const res = asJson(await groq([{ role: "system", content: system }, ...history, { role: "user", content: message }], true, MODEL, 1800));
+        const reply = String(res.reply ?? "").trim() || "Sorry, I couldn't put an answer together. Try asking again.";
+        const known = new Set((memory ?? []).map((m: any) => m.note.toLowerCase()));
+        const remember = (Array.isArray(res.remember) ? res.remember : []).map((n: any) => String(n).trim().slice(0, 400))
+          .filter((n: string) => n && !known.has(n.toLowerCase())).slice(0, 3);
+        const ids = new Set((memory ?? []).map((m: any) => m.id));
+        const forget = (Array.isArray(res.forget) ? res.forget : []).map(String).filter((id: string) => ids.has(id));
+
+        await sb.from("assistant_messages").insert([
+          { teacher_id: user.id, role: "user", content: message },
+          { teacher_id: user.id, role: "assistant", content: reply },
+        ]);
+        if (remember.length) await sb.from("assistant_memory").insert(remember.map((note: string) => ({ teacher_id: user.id, note, source: "assistant" })));
+        if (forget.length) await sb.from("assistant_memory").delete().in("id", forget).eq("teacher_id", user.id);
+        const { data: memNow }: any = await sb.from("assistant_memory").select("id, note, source, created_at")
+          .eq("teacher_id", user.id).order("created_at", { ascending: true });
+
+        out = { reply, remembered: remember, forgot: forget.length, memory: memNow ?? [],
+                context: { students: studs.length, courses: (courses ?? []).length, attempts: att.length } };
+        break;
+      }
       default:
         return json({ error: `Unknown task: ${task}` }, 400);
     }
