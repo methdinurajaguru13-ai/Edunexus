@@ -6,7 +6,7 @@
 <title>EduNexus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&family=Caveat:wght@700&family=Playfair+Display:ital,wght@0,700;1,800&family=JetBrains+Mono:wght@700&family=Orbitron:wght@800&family=Press+Start+2P&family=Bungee&family=Cinzel:wght@800&display=swap" rel="stylesheet">
 <script>
 /* Runs before the page draws, so there is no flash of the wrong theme. */
 (function(){
@@ -63,6 +63,127 @@
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 30px rgba(0,0,0,.25);background-size:auto;}
 .pbanner::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.35),transparent 55%);pointer-events:none}
 .pbanner > *{position:relative;z-index:1}
+.pbanner{min-height:148px}
+.pbanner.small{min-height:0}
+/* the legendary banner moves: a slow sheen sweeps across it */
+.shine{position:relative;overflow:hidden}
+.shine::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(105deg,transparent 35%,rgba(170,255,235,.22) 48%,rgba(200,170,255,.18) 52%,transparent 65%);
+  background-size:260% 100%;animation:sheen 7s linear infinite}
+@keyframes sheen{from{background-position:130% 0}to{background-position:-130% 0}}
+:root[data-motion="reduced"] .shine::before{animation:none;opacity:0}
+.bn-tile{height:104px}
+/* ---- avatar borders ---- */
+.pb-ring{padding:0;background:none}
+.br-frame{position:relative;display:inline-grid;place-items:center;padding:var(--pad);border-radius:50%;flex:none;
+  box-shadow:0 0 0 1px rgba(0,0,0,.25), 0 0 18px -2px var(--glow, transparent)}
+.br-ring{position:absolute;inset:0;border-radius:50%;z-index:0}
+.br-frame.br-spinning .br-ring{animation:brspin 6s linear infinite}
+@keyframes brspin{to{transform:rotate(360deg)}}
+.br-frame > .avatar{position:relative;z-index:1;border:2px solid rgba(0,0,0,.45)}
+.br-deco{position:absolute;z-index:2;pointer-events:none}
+.br-deco.crown{width:46%;top:-26%;left:27%;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+.br-deco.stars{inset:-10%}
+.br-deco.stars i{position:absolute;width:6px;height:6px;border-radius:50%;background:#e8fbff;box-shadow:0 0 8px 2px #6af0ff;animation:twinkle 2.4s ease-in-out infinite}
+.br-deco.stars i:nth-child(1){top:4%;right:14%}
+.br-deco.stars i:nth-child(2){bottom:10%;left:2%;animation-delay:.8s}
+.br-deco.stars i:nth-child(3){top:40%;right:-2%;width:4px;height:4px;animation-delay:1.5s}
+@keyframes twinkle{0%,100%{opacity:.25;transform:scale(.7)}50%{opacity:1;transform:scale(1.15)}}
+:root[data-motion="reduced"] .br-frame.br-spinning .br-ring,:root[data-motion="reduced"] .br-deco.stars i{animation:none}
+.br-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:12px}
+.br-tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:42px 10px 14px;border:1px solid var(--line);
+  border-radius:var(--r);background:var(--bg2);transition:border-color .15s,transform .15s}
+.br-tile:hover{border-color:rgba(var(--accent-rgb),.45)}
+.br-tile.on{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal) inset;background:var(--teal-ghost)}
+.br-tile.locked .br-frame{filter:grayscale(1) brightness(.7)}
+.br-tile.locked{cursor:default}
+.br-tile.r-legendary{box-shadow:0 0 0 1px rgba(255,224,138,.35)}
+.br-name{font-weight:700;font-size:var(--fs-2)}
+/* ---- name styles ---- */
+.pb-name[class*="ns-"]{line-height:1.15;padding:2px 0}
+.pb-name.ns-mint{color:#7ff5de}
+.pb-name.ns-modern{font-family:"Space Grotesk",sans-serif;letter-spacing:-.01em;color:#dff4ff}
+.pb-name.ns-hand{font-family:"Caveat",cursive;font-size:calc(var(--fs-5) * 1.3);letter-spacing:0;color:#fff2dc;font-weight:700}
+.pb-name.ns-scholar{font-family:"Playfair Display",serif;font-style:italic;letter-spacing:0;color:#f3e2b8}
+.pb-name.ns-sunset,.pb-name.ns-blaze,.pb-name.ns-glacial,.pb-name.ns-royal,.pb-name.ns-aurora{-webkit-background-clip:text;background-clip:text;color:transparent;
+  -webkit-text-fill-color:transparent;text-shadow:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.45))}
+.pb-name.ns-sunset{background-image:linear-gradient(90deg,#ffd27a,#ff7e6b 55%,#e06bd1)}
+.pb-name.ns-terminal{font-family:"JetBrains Mono",ui-monospace,monospace;letter-spacing:0;color:#6bff9a;text-shadow:0 0 8px rgba(107,255,154,.55)}
+.pb-name.ns-terminal::after{content:"_";animation:caret 1s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
+.pb-name.ns-neon{font-family:"Orbitron",sans-serif;letter-spacing:.04em;color:#ffe6fb;
+  text-shadow:0 0 4px #fff,0 0 10px #ff4fd8,0 0 22px #ff4fd8,0 0 38px #b000ff;animation:flicker 5s infinite}
+@keyframes flicker{0%,19%,21%,62%,64%,100%{opacity:1}20%,63%{opacity:.55}}
+.pb-name.ns-arcade{font-family:"Press Start 2P",monospace;font-size:calc(var(--fs-5) * .72);letter-spacing:0;line-height:1.5;
+  color:#ffe066;text-shadow:3px 3px 0 #d6336c,6px 6px 0 rgba(0,0,0,.35)}
+.pb-name.ns-blaze{font-family:"Bungee",sans-serif;letter-spacing:.02em;font-weight:400;
+  background-image:linear-gradient(0deg,#b3200f,#ff7a1a 45%,#ffdf6b 80%,#fff6c2);background-size:100% 200%;animation:blaze 1.6s ease-in-out infinite alternate}
+@keyframes blaze{from{background-position:0 0}to{background-position:0 100%}}
+.pb-name.ns-glacial{font-family:"Cinzel",serif;letter-spacing:.06em;
+  background-image:linear-gradient(100deg,#e6fbff 20%,#62c6f0 40%,#ffffff 50%,#62c6f0 60%,#e6fbff 80%);background-size:250% 100%;animation:glint 4.5s linear infinite}
+.pb-name.ns-royal{font-family:"Cinzel",serif;letter-spacing:.06em;
+  background-image:linear-gradient(100deg,#c9901c 20%,#ffe08a 40%,#fff6d6 50%,#ffe08a 60%,#c9901c 80%);background-size:250% 100%;animation:glint 3.5s linear infinite;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.55)) drop-shadow(0 0 10px rgba(255,214,107,.35))}
+@keyframes glint{from{background-position:130% 0}to{background-position:-130% 0}}
+.pb-name.ns-aurora{background-image:linear-gradient(90deg,#37ffd0,#6af0ff,#9b7bff,#ff8ad8,#37ffd0);background-size:300% 100%;animation:auroraName 6s linear infinite;
+  filter:drop-shadow(0 0 10px rgba(106,240,255,.55)) drop-shadow(0 2px 4px rgba(0,0,0,.45))}
+@keyframes auroraName{from{background-position:0 0}to{background-position:300% 0}}
+:root[data-motion="reduced"] [class*="ns-"],:root[data-motion="reduced"] .ns-terminal::after{animation:none!important}
+.ns-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.ns-tile{position:relative;display:flex;flex-direction:column;gap:10px;text-align:left;padding:34px 12px 12px;border:1px solid var(--line);
+  border-radius:var(--r);background:var(--bg2);transition:border-color .15s}
+.ns-tile:hover{border-color:rgba(var(--accent-rgb),.45)}
+.ns-tile.on{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal) inset}
+.ns-tile.locked{cursor:default}
+.ns-tile.locked .ns-stage{filter:grayscale(1) brightness(.75)}
+.ns-tile.r-legendary{box-shadow:0 0 0 1px rgba(255,224,138,.35)}
+.ns-stage{display:flex;align-items:center;min-height:62px;padding:10px 12px;border-radius:10px;overflow:hidden;color:#fff;
+  background:linear-gradient(120deg,#062420,#0b3a33 60%,#0a1f2e)}
+.ns-stage .pb-name{font-size:var(--fs-4)}
+.ns-stage .pb-name.ns-hand{font-size:calc(var(--fs-4) * 1.3)}
+.ns-stage .pb-name.ns-arcade{font-size:calc(var(--fs-4) * .72)}
+/* ---- teacher identity: quiet and professional ---- */
+.pbanner.pb-teacher{box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 6px 18px rgba(0,0,0,.18)}
+.pbanner.pb-teacher::after{background:none}
+.pbanner.pb-light{color:#1a1f24;border-color:rgba(0,0,0,.08)}
+.pbanner.pb-light .pb-name{color:#15191d;text-shadow:none}
+.pbanner.pb-light .pb-sub{color:#4d5761}
+.pbanner.pb-inset{box-shadow:inset 0 0 0 1px rgba(255,255,255,.14),inset 0 0 0 7px #0b0b0c,inset 0 0 0 8px rgba(255,255,255,.1)}
+.bn-tile.t-tile{height:88px}
+.bn-tile.light .bn-name{color:#15191d;text-shadow:none}
+.br-frame.br-double{background:none}
+.br-frame.br-double .br-ring{box-shadow:inset 0 0 0 2px #e9ecef;background:transparent!important}
+.br-frame.br-double::after{content:"";position:absolute;inset:calc(var(--pad) - 4px);border-radius:50%;box-shadow:inset 0 0 0 1.5px #e9ecef;z-index:0}
+.br-frame.br-none{box-shadow:none}
+.pb-name.ns-t-standard{font-weight:700;letter-spacing:-.01em}
+.pb-name.ns-t-serif{font-family:"Playfair Display",Georgia,serif;font-style:normal;font-weight:700;letter-spacing:0}
+.pb-name.ns-t-caps{text-transform:uppercase;letter-spacing:.14em;font-size:calc(var(--fs-5) * .78);font-weight:700}
+.pb-name.ns-t-light{font-weight:500;letter-spacing:-.02em}
+.pb-name.ns-t-grotesk{font-family:"Space Grotesk",sans-serif;font-weight:700;letter-spacing:-.01em}
+.pb-name.ns-t-mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-weight:700;letter-spacing:0;font-size:calc(var(--fs-5) * .88)}
+.ns-stage.t-stage{background:linear-gradient(135deg,#1b242e,#232f3b)}
+.ns-stage.t-stage .pb-name{color:#f2f4f6;text-shadow:none}
+/* ---- teaching assistant ---- */
+.ta-wrap{display:block}
+.only-narrow{display:none}
+@media (max-width:1180px){ .only-narrow{display:block} }
+.mem-list{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow:auto}
+.mem-item{display:flex;align-items:flex-start;gap:9px;padding:9px 10px;border-radius:10px;background:var(--bg2);border:1px solid var(--line-soft)}
+.mem-dot{flex:none;width:8px;height:8px;border-radius:50%;margin-top:6px;background:var(--teal)}
+.mem-dot.you{background:var(--ink-2)}
+.mem-note{flex:1;font-size:var(--fs-2);line-height:1.5}
+.mem-x{flex:none;color:var(--mute);font-size:12px;padding:2px 4px;border-radius:6px}
+.mem-x:hover{color:var(--ink);background:var(--panel2)}
+.mem-add{display:flex;gap:8px;margin-top:12px}
+.mem-add input{padding:9px 12px}
+
+.ns-meta{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:var(--fs-2)}
+.bn-rar{position:absolute;top:9px;right:10px;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+  padding:2px 7px;border-radius:99px;background:rgba(0,0,0,.5)}
+.bn-tile.r-legendary{box-shadow:0 0 0 1px rgba(255,224,138,.45),0 0 22px -6px rgba(255,224,138,.6)}
+.bn-tile.r-legendary.locked{box-shadow:0 0 0 1px rgba(255,224,138,.25)}
+.bn-tile .bn-name{position:relative}
+.legend-hint{border-color:rgba(255,224,138,.35)}
 .pb-left{display:flex;align-items:center;gap:14px;min-width:0}
 .pb-ring{padding:3px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,.9),rgba(255,255,255,.25));flex:none}
 .pb-ring .avatar{border:2px solid rgba(0,0,0,.35);background:#0d1d1a;color:#fff}
@@ -95,6 +216,99 @@
 .bd-card.locked{cursor:default}
 .bd-name{font-weight:700;font-size:var(--fs-2)}
 .bd-tier{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+
+/* ================= form controls (all screens) =================
+   Inputs with no type attribute weren't matched before and rendered as
+   unstyled grey browser boxes. */
+input:not([type]),input[type=text],input[type=email],input[type=url],input[type=search],input[type=password],input[type=number],select,textarea{
+  width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+  color:var(--ink);font:inherit;font-size:var(--fs-2);}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:transparent}
+input::placeholder,textarea::placeholder{color:var(--mute)}
+input[type=file]{font:inherit;font-size:var(--fs-2);color:var(--mute);max-width:100%}
+input[type=file]::file-selector-button{font:inherit;font-weight:700;font-size:var(--fs-2);margin-right:10px;padding:8px 13px;
+  border-radius:var(--r-sm);border:1px solid var(--line);background:var(--panel2);color:var(--ink);cursor:pointer}
+.btn{white-space:nowrap}
+.chip{white-space:nowrap}
+
+/* ================= "More" sheet ================= */
+.sheet-back{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.45);opacity:0;transition:opacity .18s}
+.sheet-back.open{opacity:1}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--panel);border-top:1px solid var(--line);
+  border-radius:20px 20px 0 0;padding:8px 14px calc(18px + env(safe-area-inset-bottom));
+  transform:translateY(100%);transition:transform .18s ease-out;max-height:80vh;overflow:auto}
+.sheet.open{transform:none}
+.sheet-grab{width:40px;height:4px;border-radius:99px;background:var(--line);margin:4px auto 12px}
+.sheet-who{display:flex;align-items:center;gap:12px;padding:6px 8px 14px;border-bottom:1px solid var(--line-soft);margin-bottom:6px}
+.sheet a{display:flex;align-items:center;gap:13px;padding:14px 10px;border-radius:12px;font-weight:600;color:var(--ink-2);font-size:var(--fs-3)}
+.sheet a.on{background:var(--teal-ghost);color:var(--teal)}
+.sheet-out{width:100%;margin-top:8px;padding:14px;border-radius:12px;border:1px solid var(--line);font-weight:700;color:var(--ink-2)}
+
+/* ================= phones ================= */
+@media (max-width:860px){
+  /* iOS zooms into any field under 16px when tapped; this stops that. */
+  input:not([type=file]),select,textarea{font-size:16px}
+  /* Belt and braces against a stray pixel of sideways scroll. "clip", unlike
+     "hidden", doesn't turn body into a scroll box, so sticky headers keep working. */
+  html,body{overflow-x:clip}
+
+  .main{padding:14px 14px calc(92px + env(safe-area-inset-bottom))}
+  .mobiletop{position:sticky;top:0;z-index:15;margin:-14px -14px 14px;padding:10px 14px;
+    background:var(--bar);border-bottom:1px solid var(--line-soft);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+
+  /* bottom bar: bigger targets, labels that never wrap */
+  .mobilebar{padding:6px 4px calc(6px + env(safe-area-inset-bottom));backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .mobilebar a{min-height:50px;justify-content:center;border-radius:12px;font-size:10.5px}
+  .mobilebar a span{white-space:nowrap}
+  .mobilebar a.on{background:var(--teal-ghost)}
+
+  /* headings: title on its own line, actions underneath when they don't fit */
+  .topbar{flex-wrap:wrap;gap:10px;margin-bottom:16px}
+  .topbar > div:first-child{flex:1 1 230px;min-width:0}
+  .h1{font-size:var(--fs-6);word-break:break-word}
+  .crumb{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* stat tiles two-up instead of one tall column; an odd one out spans the row */
+  .grid.g3:has(> .stat),.grid.g4:has(> .stat){grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .grid.g3 > .stat:last-child:nth-child(odd),.grid.g4 > .stat:last-child:nth-child(odd){grid-column:1 / -1}
+  .stat{padding:11px 12px}
+  .stat .v{font-size:var(--fs-5)}
+
+  /* touch targets: 40px minimum */
+  .btn{min-height:40px}
+  .btn.sm{min-height:36px;padding:8px 13px}
+  .tabs button{padding:9px 15px}
+  .tabs{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-left:-2px;padding:2px}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{flex:none}
+  .list .item{padding:12px 10px}
+  .suggests button{padding:9px 13px}
+
+  /* rows that must be allowed to break */
+  .wrap-sm{flex-wrap:wrap}
+  .wrap-sm > :last-child{margin-left:auto}
+  .wrap-sm > .row:first-child{flex-wrap:nowrap;min-width:0;flex:1 1 200px}
+  .topbar > .avatar{display:none}   /* already in the phone header */
+
+  /* Edu AI: the message box stays above the tab bar while you scroll */
+  .composer{position:sticky;bottom:calc(70px + env(safe-area-inset-bottom));z-index:5;margin:16px -14px 0;padding:10px 14px;
+    background:var(--bar);border-top:1px solid var(--line-soft);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .msg{max-width:88%}
+
+  .cmp{grid-template-columns:1fr}
+  /* long answer options and full-width buttons must wrap, not push off-screen */
+  .grid > .btn,.btn[style*="text-align:left"]{white-space:normal;line-height:1.4;padding-top:11px;padding-bottom:11px}
+  .suggests button{min-height:38px}
+  /* small labels that were under 11px */
+  .pb-slot span,.bd-tier,.bn-lock{font-size:11px}
+  .note{font-size:max(var(--fs-1),11.5px)}
+  .card{padding:14px}
+  .prose{font-size:15px;line-height:1.7}
+}
+@media (max-width:400px){
+  .h1{font-size:var(--fs-5)}
+  .pb-slot{padding:6px 2px}
+}
 
 .swatches{display:flex;gap:10px;flex-wrap:wrap}
 .swatch{display:flex;align-items:center;gap:9px;padding:9px 13px;border:1px solid var(--line);border-radius:var(--r-sm);
@@ -290,6 +504,154 @@ label.f{display:block;font-size:var(--fs-1);color:var(--mute);margin:12px 0 5px;
   border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
 @keyframes sp{to{transform:rotate(360deg)}}
 .prose{font-size:var(--fs-3);line-height:1.65;white-space:pre-wrap}
+
+/* =====================================================================
+   POLISH LAYER — one consistent feel for fields, cards, buttons, headings
+   ===================================================================== */
+::selection{background:rgba(var(--accent-rgb),.28)}
+*{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px;border:3px solid transparent;background-clip:padding-box}
+
+/* ---- fields: inset, calm, clear focus ---- */
+input:not([type]),input[type=text],input[type=email],input[type=url],input[type=search],input[type=password],input[type=number],select,textarea{
+  background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--ink);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.18);transition:border-color .15s,box-shadow .15s,background .15s;line-height:1.5}
+input:not([type]):hover,input[type=text]:hover,input[type=email]:hover,input[type=url]:hover,input[type=number]:hover,select:hover,textarea:hover{
+  border-color:rgba(var(--accent-rgb),.35)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal);background:var(--panel);
+  box-shadow:0 0 0 3px rgba(var(--accent-rgb),.16),inset 0 1px 2px rgba(0,0,0,.12)}
+textarea{min-height:110px;resize:vertical}
+select{appearance:none;-webkit-appearance:none;padding-right:40px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2388a39d' stroke-width='1.6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center}
+label.f{display:block;font-size:12px;color:var(--ink-2);font-weight:600;margin:16px 0 7px;letter-spacing:.01em}
+label.f .note{font-weight:500;margin-left:6px}
+
+/* ---- buttons ---- */
+.btn{transition:transform .08s,filter .15s,background .15s,border-color .15s,box-shadow .15s;
+  box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 6px 16px -8px rgba(var(--accent-rgb),.6)}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{box-shadow:none;background:transparent}
+.btn.ghost:hover{border-color:rgba(var(--accent-rgb),.5);background:var(--teal-ghost);filter:none}
+.btn.big{padding:13px 22px;font-size:var(--fs-3);border-radius:12px}
+.btn[disabled]{box-shadow:none}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+/* ---- cards and headings ---- */
+.card{background:linear-gradient(180deg,rgba(255,255,255,.018),transparent 40%),var(--panel)}
+a.card,button.card{transition:border-color .15s,transform .15s,background .15s}
+a.card:hover,button.card:hover{border-color:rgba(var(--accent-rgb),.45);transform:translateY(-1px)}
+.sec{text-transform:uppercase;letter-spacing:.09em;font-size:11px;font-weight:700;color:var(--mute);
+  display:flex;align-items:center;gap:10px;margin:28px 0 12px}
+.sec::after{content:"";flex:1;height:1px;background:var(--line-soft)}
+.sec:empty{display:none}
+.stat{background:linear-gradient(180deg,rgba(255,255,255,.02),transparent),var(--panel);transition:border-color .15s}
+.stat .v{font-variant-numeric:tabular-nums}
+.chip.warn{text-transform:none}
+.empty{padding:34px 20px}
+.empty-ico{width:52px;height:52px;margin:0 auto 12px;border-radius:16px;display:grid;place-items:center;
+  background:var(--teal-ghost);color:var(--teal);border:1px solid rgba(var(--accent-rgb),.3)}
+.empty-ico svg{width:24px;height:24px}
+.list .item{transition:background .15s}
+.list a.item:hover,.list .item[data-act]:hover{background:var(--teal-ghost)}
+.nav a{transition:background .15s,color .15s}
+
+/* ---- shared "form section" header used by ExamLens and Portfolio ---- */
+.lens-card{padding:20px}
+.lens-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.lens-head b{font-size:var(--fs-4)}
+.lens-badge{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:800;
+  background:var(--teal-ghost);color:var(--teal);border:1px solid rgba(var(--accent-rgb),.35)}
+
+/* ---- ExamLens ---- */
+.steps{display:flex;align-items:center;gap:8px;margin:-4px 0 16px;font-size:var(--fs-2);color:var(--mute);font-weight:600}
+.steps i{flex:1;max-width:48px;height:1px;background:var(--line)}
+.step-dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;
+  border:1px solid var(--line);color:var(--mute)}
+.step-dot.on{background:var(--teal);border-color:var(--teal);color:var(--on-accent)}
+.drop{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;margin-top:14px;padding:22px 16px;
+  border:1.5px dashed rgba(var(--accent-rgb),.35);border-radius:14px;background:rgba(var(--accent-rgb),.04);cursor:pointer;
+  transition:border-color .15s,background .15s}
+.drop:hover,.drop.has{border-color:var(--teal);background:var(--teal-ghost)}
+.drop input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.drop-ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--panel2);color:var(--teal)}
+.drop-ico svg{width:22px;height:22px}
+.drop-main{font-weight:700;font-size:var(--fs-3)}
+.drop-thumbs{display:flex;gap:8px;margin-top:6px}
+.drop-thumbs img{width:64px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.or{display:flex;align-items:center;gap:12px;margin:18px 0 2px;color:var(--mute);font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line-soft)}
+.q-box{min-height:96px}
+/* the answer box looks like a sheet of ruled exam paper, in theme colours */
+.paper{position:relative;margin-top:12px;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  background:var(--bg2);box-shadow:inset 0 1px 2px rgba(0,0,0,.18);transition:border-color .15s,box-shadow .15s}
+.paper::before{content:"";position:absolute;top:0;bottom:0;left:44px;width:1px;background:rgba(var(--accent-rgb),.28);pointer-events:none}
+.paper:focus-within{border-color:var(--teal);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.16)}
+.paper textarea{display:block;width:100%;min-height:224px;border:0;border-radius:0;box-shadow:none;background:transparent;
+  padding:6px 16px 6px 58px;line-height:32px;font-size:15px;
+  font-family:ui-monospace,"SF Mono","Cascadia Mono","Segoe UI Mono",Menlo,Consolas,monospace;
+  background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,var(--line-soft) 31px,var(--line-soft) 32px);
+  background-attachment:local;background-position:0 6px}
+.paper textarea:focus{box-shadow:none;background-color:transparent}
+.fold{margin-top:14px;border:1px solid var(--line-soft);border-radius:12px;padding:12px 14px;background:var(--bg2)}
+.fold summary{cursor:pointer;font-weight:600;font-size:var(--fs-2);list-style:none;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary::before{content:"+";width:20px;height:20px;border-radius:6px;display:grid;place-items:center;
+  background:var(--teal-ghost);color:var(--teal);font-weight:800}
+.fold[open] summary::before{content:"–"}
+.report{padding:20px}
+.report.weak{border-color:var(--warn-line)}
+.report-top{display:flex;align-items:center;gap:18px}
+.ring{flex:none}
+.report-verdict{font-size:var(--fs-4);font-weight:700;line-height:1.35}
+.mono-ans{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.cmp .box{border-radius:12px;padding:12px 14px}
+.cmp .lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.report-foot{display:flex;align-items:center;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line-soft);
+  font-size:var(--fs-2);color:var(--mute)}
+.report-foot svg{color:var(--teal);width:15px;height:15px;flex:none}
+
+/* ---- Portfolio ---- */
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg button{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);
+  background:var(--bg2);color:var(--ink-2);font-weight:600;font-size:var(--fs-2);transition:all .15s}
+.seg button svg{width:16px;height:16px}
+.seg button:hover{border-color:rgba(var(--accent-rgb),.45)}
+.seg button.on{border-color:var(--teal);background:var(--teal-ghost);color:var(--teal);box-shadow:0 0 0 1px var(--teal) inset}
+.po-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.po-card{display:flex;flex-direction:column;gap:10px;padding:18px;border:1px solid var(--line);border-radius:var(--r);
+  background:linear-gradient(180deg,rgba(var(--accent-rgb),.05),transparent 45%),var(--panel);transition:border-color .15s,transform .15s}
+.po-card:hover{border-color:rgba(var(--accent-rgb),.4);transform:translateY(-1px)}
+.po-card.is-hidden{opacity:.62;background:var(--panel)}
+.po-top{display:flex;align-items:flex-start;gap:12px}
+.po-ico{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+  background:var(--teal-ghost);color:var(--teal);border:1px solid rgba(var(--accent-rgb),.3)}
+.po-ico svg{width:20px;height:20px}
+.po-kind{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mute)}
+.po-title{margin:3px 0 0;font-size:var(--fs-4);line-height:1.3;font-weight:700;word-break:break-word}
+.po-desc{margin:0;font-size:var(--fs-2);color:var(--ink-2);line-height:1.6}
+.po-link{align-self:flex-start;font-size:var(--fs-2);font-weight:600;color:var(--teal);padding:5px 10px;border-radius:99px;
+  background:var(--teal-ghost);border:1px solid rgba(var(--accent-rgb),.25);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.po-actions{display:flex;gap:8px;margin-top:auto;padding-top:6px}
+.po-actions .btn svg{width:15px;height:15px}
+
+:root[data-theme="light"] input:not([type]),:root[data-theme="light"] input[type=text],:root[data-theme="light"] textarea,
+:root[data-theme="light"] select,:root[data-theme="light"] .paper{box-shadow:inset 0 1px 2px rgba(12,32,28,.06)}
+
+@media (max-width:860px){
+  .lens-card,.report{padding:16px}
+  .report-top{gap:14px}
+  .ring{width:76px;height:76px}
+  .paper::before{left:34px}
+  .paper textarea{padding-left:46px;min-height:200px}
+  .steps span{display:none}
+  .steps i{max-width:none}
+  .po-grid{grid-template-columns:1fr}
+  .seg button{flex:1 1 calc(50% - 8px);justify-content:center}
+}
 </style>
 </head>
 <body>
@@ -311,6 +673,8 @@ label.f{display:block;font-size:var(--fs-1);color:var(--mute);margin:12px 0 5px;
   <aside class="aside" id="aside"></aside>
 </div>
 <nav class="mobilebar" id="mobilebar"></nav>
+<div class="sheet-back" id="sheetBack" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-label="More"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
@@ -469,6 +833,7 @@ const I = {
   folder:icon('<path d="M3 7h6l2 2h10v10H3z"/>'),
   ai:icon('<path d="M12 3v18M5 8l14 8M19 8L5 16"/>'),
   user:icon('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/>'),
+  more:icon('<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'),
   settings:icon('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
   mirage:icon('<path d="M4 18c3-8 13-8 16 0"/><circle cx="12" cy="8" r="2"/>')
 };
@@ -488,8 +853,17 @@ function web(items, drillTo){
   const n = items.length;
   if(n < 3) return `<div class="card flat"><div class="note">A web needs at least three points to be worth drawing.
     ${n===0?"Nothing here yet.":"There "+(n===1?"is one":"are two")+" here, shown below instead."}</div></div>`;
-  const cx=170, cy=160, R=105;
+  /* Wider canvas, labels anchored away from the centre and wrapped onto two lines,
+     so long topic names don't run off the edge of a phone screen. */
+  const W=420, cx=210, cy=168, R=90;
   const pt=(i,r)=>[cx+r*Math.cos(-Math.PI/2+i*2*Math.PI/n), cy+r*Math.sin(-Math.PI/2+i*2*Math.PI/n)];
+  const wrap = name => {
+    const words = name.split(/\s+/), lines = [""];
+    words.forEach(w=>{ const cur = lines[lines.length-1];
+      if((cur+" "+w).trim().length <= 13 || !cur) lines[lines.length-1] = (cur+" "+w).trim(); else lines.push(w); });
+    if(lines.length > 2){ lines.length = 2; lines[1] = lines[1].slice(0,11)+"…"; }
+    return lines.map(l=> l.length>14 ? l.slice(0,13)+"…" : l);
+  };
   const rings=[25,50,75,100].map(p=>`<polygon points="${items.map((_,i)=>pt(i,R*p/100).join(",")).join(" ")}"
       fill="none" stroke="var(--line)"/>`).join("");
   const spokes=items.map((_,i)=>{const [x,y]=pt(i,R);
@@ -497,22 +871,26 @@ function web(items, drillTo){
   const shape=items.map((t,i)=>pt(i,R*(t.score||0)/100).join(",")).join(" ");
   const parts=items.map((t,i)=>{
     const [dx,dy]=pt(i,R*(t.score||0)/100);
-    const [lx,ly]=pt(i,R+28);
+    const [lx,ly]=pt(i,R+14);
+    const side = lx - cx;
+    const anchor = Math.abs(side) < 12 ? "middle" : side > 0 ? "start" : "end";
+    const lines = wrap(t.name);
+    const top = ly < cy - R*0.6 ? ly - 15*lines.length : ly > cy + R*0.6 ? ly + 12 : ly - 7*(lines.length-1);
     const weak = t.score!==null && t.score<60;
-    const label = t.name.length>22 ? t.name.slice(0,20)+"…" : t.name;
     const click = drillTo ? `data-act="drill" data-to="${drillTo(t)}" style="cursor:pointer"` : "";
     return `<g ${click}>
-      <circle cx="${dx}" cy="${dy}" r="4" fill="${weak?"var(--warn)":"var(--teal)"}"/>
-      <circle cx="${lx}" cy="${ly-4}" r="26" fill="transparent"/>
-      <text x="${lx}" y="${ly}" font-size="10" text-anchor="middle" fill="${weak?"var(--warn)":"var(--ink-2)"}">${esc(label)}</text>
-      <text x="${lx}" y="${ly+12}" font-size="10" font-weight="700" text-anchor="middle"
-        fill="${weak?"var(--warn)":"var(--teal)"}">${t.score===null?"—":t.score+"%"}</text></g>`;
+      <circle cx="${dx}" cy="${dy}" r="4.5" fill="${weak?"var(--warn)":"var(--teal)"}"/>
+      <circle cx="${lx}" cy="${ly}" r="30" fill="transparent"/>
+      <text text-anchor="${anchor}" font-size="13.5" fill="${weak?"var(--warn)":"var(--ink-2)"}">
+        ${lines.map((l,k)=>`<tspan x="${lx}" y="${top+k*15}">${esc(l)}</tspan>`).join("")}
+        <tspan x="${lx}" y="${top+lines.length*15+1}" font-weight="700" fill="${weak?"var(--warn)":"var(--teal)"}">${t.score===null?"—":t.score+"%"}</tspan>
+      </text></g>`;
   }).join("");
-  return `<svg viewBox="0 0 340 330" role="img" aria-label="Genome web">
+  return `<svg viewBox="0 0 ${W} 345" role="img" aria-label="Genome web" style="width:100%;max-width:460px">
     ${rings}${spokes}
     <polygon points="${shape}" fill="rgba(var(--accent-rgb),.15)" stroke="var(--teal)" stroke-width="1.6"/>
     ${parts}
-    <text x="${cx}" y="322" font-size="9" text-anchor="middle" fill="var(--mute)">Rings mark 25, 50, 75 and 100 percent</text>
+    <text x="${cx}" y="340" font-size="9.5" text-anchor="middle" fill="var(--mute)">Rings mark 25, 50, 75 and 100 percent</text>
   </svg>`;
 }
 
@@ -763,49 +1141,105 @@ V.examlens = () => {
   const past = S.attempts.filter(a=>a.kind==="examlens");
   const r = S.cache.examlens;
   const d = S.cache.examlensDraft || {};
+  const causeTone = c => !c || c==="none" ? "teal" : /concept/.test(c) ? "warn" : "";
   return `
   <div class="topbar"><div><h1 class="h1">ExamLens</h1>
-    <div class="sub">Photograph a question and your answer, or type them in. Every lost mark gets a cause, not just a number.</div></div></div>
-  <div class="card" style="margin-bottom:14px">
-    <label class="f" for="exPhoto">Photo of the question — and your answer, if it's on the same page</label>
-    <input type="file" accept="image/*" capture="environment" id="exPhoto" multiple>
-    <div class="note" style="margin-top:6px">Up to 3 photos. This reads the text into the fields below for you to check before marking.</div>
-    <button class="btn ghost sm" style="margin-top:10px" data-act="examlens-ocr">${busy("examlensOcr","Read photo with AI")}</button>
+    <div class="sub">Show it one answer. Every lost mark gets a cause, not just a number.</div></div></div>
+
+  <div class="steps">
+    <div class="step-dot on">1</div><span>Question</span><i></i>
+    <div class="step-dot ${d.question?"on":""}">2</div><span>Your answer</span><i></i>
+    <div class="step-dot ${r?"on":""}">3</div><span>Analysis</span>
   </div>
-  <div class="card">
+
+  <div class="card lens-card">
+    <div class="lens-head"><span class="lens-badge">Q</span>
+      <div><b>The question</b><div class="note">Photograph it, or type it in</div></div></div>
+
+    <label class="drop" for="exPhoto">
+      <input type="file" accept="image/*" capture="environment" id="exPhoto" multiple>
+      <span class="drop-ico">${icon('<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>')}</span>
+      <span class="drop-main" id="exPhotoLabel">Take or choose a photo</span>
+      <span class="note">Up to 3 pages · question and answer on the same page is fine</span>
+      <span class="drop-thumbs" id="exThumbs"></span>
+    </label>
+    <div class="row" style="gap:10px;margin-top:10px;align-items:center">
+      <button class="btn ghost sm" data-act="examlens-ocr">${busy("examlensOcr","Read photo with AI")}</button>
+      <span class="note">It fills the boxes below. Check them before marking.</span>
+    </div>
+
+    <div class="or"><span>or type it</span></div>
+
     <div class="grid g2">
       <div><label class="f" for="exSub">Subject</label><input id="exSub" placeholder="Physics" value="${esc(d.subject||"")}"></div>
       <div><label class="f" for="exTopic">Topic</label><input id="exTopic" placeholder="Electromagnetic induction" value="${esc(d.topic||"")}"></div>
     </div>
     <label class="f" for="exQ">Question</label>
-    <textarea id="exQ" placeholder="A conducting rod of length 0.4 m moves at 3 m/s perpendicular to a 0.25 T field. Find the induced emf and state its direction.">${esc(d.question||"")}</textarea>
-    <label class="f" for="exA">Your answer, exactly as you wrote it</label>
-    <textarea id="exA" placeholder="Write your working here, mistakes and all — that's the point.">${esc(d.answer||"")}</textarea>
-    <label class="f" for="exE">Mark scheme or expected answer (optional)</label>
-    <textarea id="exE" style="min-height:70px">${esc(d.expected||"")}</textarea>
-    <button class="btn" style="margin-top:14px" data-act="run-examlens">${busy("examlens","Analyse this answer")}</button>
+    <textarea id="exQ" class="q-box" placeholder="A conducting rod of length 0.4 m moves at 3 m/s perpendicular to a 0.25 T field. Find the induced emf and state its direction.">${esc(d.question||"")}</textarea>
   </div>
+
+  <div class="card lens-card" style="margin-top:14px">
+    <div class="lens-head"><span class="lens-badge">A</span>
+      <div><b>Your answer</b><div class="note">Exactly as you wrote it — mistakes and all, that's the point</div></div></div>
+    <div class="paper">
+      <textarea id="exA" spellcheck="false" placeholder="ε = Blv cos θ …">${esc(d.answer||"")}</textarea>
+    </div>
+    <details class="fold" ${d.expected?"open":""}>
+      <summary>Add the mark scheme <span class="note">optional — sharper marking if you have it</span></summary>
+      <textarea id="exE" style="min-height:80px;margin-top:10px" placeholder="ε = Blv = 0.30 V, direction given by Lenz's law">${esc(d.expected||"")}</textarea>
+    </details>
+    <button class="btn big" style="margin-top:16px" data-act="run-examlens">${busy("examlens","Analyse this answer")}</button>
+  </div>
+
   ${r ? `
     <div class="sec">Analysis</div>
-    <div class="grid g3">
-      <div class="stat ${r.score<60?"warn":""}"><div class="k">Marked</div><div class="v">${Math.round(r.score)}%</div></div>
-      <div class="stat"><div class="k">Cause</div><div class="v" style="font-size:var(--fs-4);text-transform:capitalize">${esc(r.cause)}</div></div>
-      <div class="stat"><div class="k">Topic</div><div class="v" style="font-size:var(--fs-4)">${esc(r.topic||"—")}</div></div>
-    </div>
-    <div class="card" style="margin-top:14px;${r.score<60?"border-color:var(--warn-line)":""}">
-      <b style="font-size:var(--fs-2)">${esc(r.verdict)}</b>
-      <p class="prose" style="margin:10px 0 0;font-size:var(--fs-2)">${esc(r.explanation)}</p>
-      ${r.correct_working?`<div class="card flat" style="margin-top:12px"><div class="note">Correct working</div>
-        <div class="prose" style="font-size:var(--fs-2);margin-top:5px">${esc(r.correct_working)}</div></div>`:""}
-    </div>
-    <div class="card flat" style="margin-top:12px"><div class="note">Saved to your genome under ${esc(r.topic||"this topic")}, weighted ${WEIGHTS.examlens} of 100.</div></div>`
-   : ""}
+    <div class="card report ${r.score<60?"weak":""}">
+      <div class="report-top">
+        ${ring(Math.round(r.score))}
+        <div style="min-width:0">
+          <div class="row" style="gap:7px;flex-wrap:wrap;margin-bottom:8px">
+            <span class="chip ${causeTone(r.cause)}" style="text-transform:capitalize">${esc(r.cause && r.cause!=="none" ? r.cause : "No marks lost")}</span>
+            ${r.topic?`<span class="chip">${esc(r.topic)}</span>`:""}
+          </div>
+          <div class="report-verdict">${esc(r.verdict||"")}</div>
+        </div>
+      </div>
+      <p class="prose" style="margin:14px 0 0;font-size:var(--fs-3)">${esc(r.explanation||"")}</p>
+      ${(d.answer || r.correct_working) ? `<div class="cmp" style="margin-top:14px">
+        ${d.answer?`<div class="box yours"><div class="lbl">You wrote</div><div class="mono-ans">${esc(d.answer)}</div></div>`:""}
+        ${r.correct_working?`<div class="box right"><div class="lbl">Correct working</div><div class="mono-ans">${esc(r.correct_working)}</div></div>`:""}
+      </div>`:""}
+      <div class="report-foot">${icon('<path d="M12 3v18M5 8l14 8M19 8L5 16"/>')} Saved to your genome under ${esc(r.topic||"this topic")}, weighted ${WEIGHTS.examlens} of 100.</div>
+    </div>` : ""}
+
   ${past.length?`<div class="sec">Earlier analyses</div>
     <div class="card list">${past.slice(0,8).map(a=>`<div class="item">
-      <div><div style="font-size:var(--fs-2);font-weight:600">${esc(a.topic)}</div>
-        <div class="note">${esc((a.meta&&a.meta.cause)||"")} · ${ago(a.created_at)}</div></div>
+      <div style="min-width:0"><div style="font-size:var(--fs-2);font-weight:600">${esc(a.topic)}</div>
+        <div class="row" style="gap:6px;margin-top:4px">
+          ${a.meta&&a.meta.cause?`<span class="chip ${causeTone(a.meta.cause)}" style="text-transform:capitalize">${esc(a.meta.cause)}</span>`:""}
+          <span class="note">${ago(a.created_at)}</span></div></div>
       <b class="pct ${a.score<60?"warn":""}">${Math.round(a.score)}%</b></div>`).join("")}</div>`:""}`;
 };
+
+/* Score ring used by ExamLens reports. */
+function ring(v, size=92){
+  const r = 38, c = 2*Math.PI*r, weak = v < 60;
+  return `<svg class="ring" width="${size}" height="${size}" viewBox="0 0 92 92" role="img" aria-label="${v} percent">
+    <circle cx="46" cy="46" r="${r}" fill="none" stroke="var(--line)" stroke-width="8"/>
+    <circle cx="46" cy="46" r="${r}" fill="none" stroke="${weak?"var(--warn)":"var(--teal)"}" stroke-width="8" stroke-linecap="round"
+      stroke-dasharray="${c}" stroke-dashoffset="${c*(1-Math.max(0,Math.min(100,v))/100)}" transform="rotate(-90 46 46)"/>
+    <text x="46" y="52" text-anchor="middle" font-size="21" font-weight="800" fill="${weak?"var(--warn)":"var(--ink)"}">${v}%</text>
+  </svg>`;
+}
+/* Show which photos were picked, without re-rendering the form. */
+document.addEventListener("change", e=>{
+  if(e.target.id!=="exPhoto") return;
+  const files = [...e.target.files].slice(0,3);
+  const lbl = $("#exPhotoLabel"), th = $("#exThumbs");
+  if(lbl) lbl.textContent = files.length ? `${files.length} photo${files.length===1?"":"s"} ready` : "Take or choose a photo";
+  if(th) th.innerHTML = files.map(f=>`<img src="${URL.createObjectURL(f)}" alt="">`).join("");
+  e.target.closest(".drop")?.classList.toggle("has", files.length>0);
+});
 
 /* ---------- Mirage: genuine vs apparent mastery ---------- */
 V.mirage = () => {
@@ -964,6 +1398,7 @@ V.profile = () => {
   ${playerBanner(me, me.role==="student"?myBadgeCtx():{})}
   <div class="note" style="margin:8px 2px 0">Joined ${new Date(me.created_at).toLocaleDateString()}</div>
   ${customiser()}
+  ${me.role==="student" ? `
   <div class="sec"></div>
   <div class="grid g2">
     <div>
@@ -1012,34 +1447,73 @@ V.profile = () => {
           <div class="note warn-text">${esc(a.blocking)}</div></div>`:""}
         <div class="card flat" style="margin-top:12px"><div class="note">Advisory only. Suggestions from your record, not decisions.</div></div>`})():""}
     </div>
-  </div>`;
+  </div>` : teacherProfileSummary()}`;
 };
 
-V.portfolio = () => `
+const PO_KINDS = {
+  Project:     '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/>',
+  Certificate: '<circle cx="12" cy="9" r="5"/><path d="M9 13.5L7.5 21l4.5-2.5 4.5 2.5-1.5-7.5"/>',
+  Academic:    '<path d="M4 4h7v16H4zM13 4h7v16h-7z"/>',
+  Activity:    '<path d="M4 17l5-5 4 4 7-8"/><path d="M15 8h5v5"/>'
+};
+const hostOf = u => { try{ return new URL(u).hostname.replace(/^www\./,""); }catch(e){ return u; } };
+V.portfolio = () => {
+  const items = S.portfolio, vis = items.filter(i=>i.visible).length, ver = items.filter(i=>i.verified).length;
+  const kinds = Object.keys(PO_KINDS);
+  return `
   <div class="topbar"><div><h1 class="h1">Portfolio</h1>
-    <div class="sub">${S.portfolio.length} item${S.portfolio.length===1?"":"s"} · ${S.portfolio.filter(i=>i.visible).length} visible</div></div></div>
-  <div class="card">
-    <div class="grid g2">
-      <div><label class="f" for="poTitle">Title</label><input id="poTitle" placeholder="Line-following robot with PID control"></div>
-      <div><label class="f" for="poKind">Type</label>
-        <select id="poKind"><option>Project</option><option>Certificate</option><option>Academic</option><option>Activity</option></select></div>
-    </div>
-    <label class="f" for="poDesc">What it was, and what you did</label>
-    <textarea id="poDesc" style="min-height:80px"></textarea>
-    <label class="f" for="poLink">Link (optional)</label><input id="poLink" placeholder="https://">
-    <button class="btn" style="margin-top:14px" data-act="add-portfolio">Add to portfolio</button>
+    <div class="sub">What you'd want a university or scholarship panel to see.</div></div></div>
+
+  <div class="grid g3">
+    <div class="stat"><div class="k">Items</div><div class="v">${items.length}</div></div>
+    <div class="stat"><div class="k">Visible</div><div class="v">${vis}</div></div>
+    <div class="stat"><div class="k">Verified by school</div><div class="v">${ver}</div></div>
   </div>
-  ${S.portfolio.length ? `<div class="grid g2" style="margin-top:14px">
-      ${S.portfolio.map(p=>`<div class="card">
-        <div class="between"><b style="font-size:var(--fs-2)">${esc(p.title)}</b>
-          <span class="chip">${esc(p.kind)}</span></div>
-        ${p.description?`<p class="note" style="margin:8px 0">${esc(p.description)}</p>`:""}
-        ${p.link?`<a class="note teal-text" href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.link)}</a>`:""}
-        <div class="row" style="gap:8px;margin-top:11px">
-          <button class="btn ghost sm" data-act="toggle-portfolio" data-id="${p.id}">${p.visible?"Hide":"Show"}</button>
-          <button class="btn ghost sm" data-act="del-portfolio" data-id="${p.id}">Remove</button></div>
-      </div>`).join("")}</div>`
-   : empty("Nothing here yet","Add the projects, certificates and coursework you'd want a university to see. Nothing is added for you.")}`;
+
+  <div class="card lens-card" style="margin-top:14px">
+    <div class="lens-head"><span class="lens-badge">+</span>
+      <div><b>Add to your portfolio</b><div class="note">Projects, certificates, coursework, activities</div></div></div>
+    <label class="f">Type</label>
+    <input type="hidden" id="poKind" value="Project">
+    <div class="seg" role="radiogroup" aria-label="Type">
+      ${kinds.map((k,i)=>`<button class="${i?"":"on"}" role="radio" aria-checked="${i?"false":"true"}" data-act="po-kind" data-k="${k}">
+        ${icon(PO_KINDS[k])}${k}</button>`).join("")}
+    </div>
+    <label class="f" for="poTitle">Title</label>
+    <input id="poTitle" placeholder="Line-following robot with PID control">
+    <label class="f" for="poDesc">What it was, and what you did</label>
+    <textarea id="poDesc" style="min-height:90px" placeholder="Built an autonomous robot for the inter-school science exhibition. Tuned the PID controller myself; placed second of 31."></textarea>
+    <label class="f" for="poLink">Link <span class="note">optional</span></label>
+    <input id="poLink" type="url" inputmode="url" placeholder="https://">
+    <button class="btn big" style="margin-top:16px" data-act="add-portfolio">Add to portfolio</button>
+  </div>
+
+  ${items.length ? `<div class="sec">Your items</div>
+    <div class="po-grid">
+      ${items.map(p=>`<article class="po-card ${p.visible?"":"is-hidden"}">
+        <div class="po-top">
+          <span class="po-ico">${icon(PO_KINDS[p.kind]||PO_KINDS.Project)}</span>
+          <div style="min-width:0;flex:1">
+            <div class="po-kind">${esc(p.kind)}${p.verified?` · <span class="teal-text">Verified</span>`:""}</div>
+            <h3 class="po-title">${esc(p.title)}</h3>
+          </div>
+          ${p.visible?"":`<span class="chip">Hidden</span>`}
+        </div>
+        ${p.description?`<p class="po-desc">${esc(p.description)}</p>`:""}
+        ${p.link?`<a class="po-link" href="${esc(p.link)}" target="_blank" rel="noopener">${esc(hostOf(p.link))} ↗</a>`:""}
+        <div class="po-actions">
+          <button class="btn ghost sm" data-act="toggle-portfolio" data-id="${p.id}">
+            ${icon(p.visible?'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>':'<path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6C3.9 8.4 2 12 2 12s4 7 10 7c1.6 0 3-.4 4.3-1"/>')}
+            ${p.visible?"Visible":"Hidden"}</button>
+          <button class="btn ghost sm" data-act="del-portfolio" data-id="${p.id}">Remove</button>
+        </div>
+      </article>`).join("")}
+    </div>`
+   : `<div class="card empty" style="margin-top:14px">
+       <div class="empty-ico">${icon(PO_KINDS.Project)}</div>
+       <b>Nothing here yet</b>
+       <p class="note" style="margin:0 auto;max-width:420px">Add the projects, certificates and coursework you'd want a university to see. Nothing is added for you.</p></div>`}`;
+};
 
 /* ================= identity: photo, banner, badges ================= */
 
@@ -1051,19 +1525,300 @@ const PAT = {
   stripes: `repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 10px,transparent 10px 22px)`,
   diamond: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Cpath d='M18 2l16 16-16 16L2 18z' fill='none' stroke='%23f2c14e' stroke-opacity='.28'/%3E%3C/svg%3E")`
 };
+/* ---- scene banners: original vector art, drawn at 1600×400 and scaled to fit,
+   so they stay sharp on any screen. A seeded random keeps each scene identical
+   on every device. ---- */
+const svgURI = s => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
+function rng(seed){ return ()=> (seed = (seed*16807) % 2147483647) / 2147483647; }
+const SVG = (defs, body) => `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 400' preserveAspectRatio='xMidYMid slice'><defs>${defs}</defs>${body}</svg>`;
+const scene = s => `${svgURI(s)} center/cover no-repeat`;
+
+const SCENES = {
+  /* Glacier tiles: bevelled diamonds on a bright ice-blue field */
+  tiles: (()=>{ const r = rng(11);
+    const glints = Array.from({length:14},()=>`<circle cx='${(r()*1600)|0}' cy='${(r()*400)|0}' r='${(1.5+r()*4).toFixed(1)}' fill='#c8fbff' opacity='${(.4+r()*.6).toFixed(2)}'/>`).join("");
+    return SVG(`<linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#1753ad'/><stop offset='.5' stop-color='#37a3e6'/><stop offset='1' stop-color='#1a5cc0'/></linearGradient>
+      <radialGradient id='l' cx='.55' cy='.15' r='.65'><stop offset='0' stop-color='#b4f6ff' stop-opacity='.6'/><stop offset='1' stop-color='#b4f6ff' stop-opacity='0'/></radialGradient>
+      <pattern id='p' width='92' height='92' patternUnits='userSpaceOnUse' patternTransform='rotate(45)'>
+        <rect x='5' y='5' width='82' height='82' rx='12' fill='#fff' fill-opacity='.07' stroke='#0a3d8a' stroke-opacity='.6' stroke-width='4'/>
+        <rect x='11' y='11' width='70' height='26' rx='9' fill='#fff' fill-opacity='.08'/></pattern>`,
+      `<rect width='1600' height='400' fill='url(#g)'/><rect width='1600' height='400' fill='url(#p)'/><rect width='1600' height='400' fill='url(#l)'/>${glints}`);
+  })(),
+
+  /* Magma: cooled rock split by glowing seams, with embers rising */
+  magma: (()=>{ const r = rng(23); let cracks = "";
+    for(let i=0;i<34;i++){ let x=r()*1600, y=r()*400, d=`M${x|0} ${y|0}`;
+      const a0 = r()*Math.PI*2; for(let k=0;k<7;k++){ const a=a0+(r()-.5)*1.4; x+=Math.cos(a)*(30+r()*60); y+=Math.sin(a)*(20+r()*40); d+=` L${x|0} ${y|0}`; }
+      cracks += `<path d='${d}' stroke-width='${(2+r()*5).toFixed(1)}'/>`; }
+    const embers = Array.from({length:40},()=>`<circle cx='${(r()*1600)|0}' cy='${(r()*400)|0}' r='${(1+r()*3).toFixed(1)}' fill='#ffd27a' opacity='${(.3+r()*.7).toFixed(2)}'/>`).join("");
+    return SVG(`<radialGradient id='b' cx='.35' cy='.55' r='.8'><stop offset='0' stop-color='#6b1a06'/><stop offset='.6' stop-color='#2b0a04'/><stop offset='1' stop-color='#120402'/></radialGradient>
+      <filter id='glow' x='-20%' y='-20%' width='140%' height='140%'><feGaussianBlur stdDeviation='7' result='b'/><feMerge><feMergeNode in='b'/><feMergeNode in='b'/><feMergeNode in='SourceGraphic'/></feMerge></filter>
+      <radialGradient id='hot' cx='.3' cy='.5' r='.5'><stop offset='0' stop-color='#ff8a1f' stop-opacity='.55'/><stop offset='1' stop-color='#ff8a1f' stop-opacity='0'/></radialGradient>`,
+      `<rect width='1600' height='400' fill='url(#b)'/><rect width='1600' height='400' fill='url(#hot)'/>
+       <g fill='none' stroke='#ff9d2e' stroke-linecap='round' stroke-linejoin='round' filter='url(#glow)'>${cracks}</g>${embers}`);
+  })(),
+
+  /* Autumn sky: soft peach clouds with leaves on the wind */
+  autumn: (()=>{ const r = rng(37);
+    const clouds = Array.from({length:26},()=>`<ellipse cx='${(r()*1700-50)|0}' cy='${(150+r()*260)|0}' rx='${(90+r()*160)|0}' ry='${(50+r()*70)|0}' fill='#fff4ea' opacity='${(.35+r()*.45).toFixed(2)}'/>`).join("");
+    const leafPath = "M0 -16 C7 -9 14 -8 16 0 C9 3 7 9 0 16 C-7 9 -9 3 -16 0 C-14 -8 -7 -9 0 -16Z";
+    const cols = ["#d4491f","#e36b2b","#b8361a","#e89a3a"];
+    const leaves = Array.from({length:16},()=>{ const s=(.8+r()*1.6).toFixed(2);
+      return `<g transform='translate(${(r()*1600)|0} ${(r()*400)|0}) rotate(${(r()*360)|0}) scale(${s})'><path d='${leafPath}' fill='${cols[(r()*4)|0]}'/><path d='M0 -12 L0 20' stroke='#7a2a10' stroke-width='1.4'/></g>`; }).join("");
+    const sparks = Array.from({length:24},()=>`<circle cx='${(r()*1600)|0}' cy='${(r()*400)|0}' r='${(1+r()*2.2).toFixed(1)}' fill='#fff' opacity='.8'/>`).join("");
+    return SVG(`<linearGradient id='s' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#f2b48a'/><stop offset='.55' stop-color='#f6cfae'/><stop offset='1' stop-color='#e9a07c'/></linearGradient>
+      <filter id='soft'><feGaussianBlur stdDeviation='22'/></filter>`,
+      `<rect width='1600' height='400' fill='url(#s)'/><g filter='url(#soft)'>${clouds}</g>${sparks}${leaves}`);
+  })(),
+
+  /* Tidal wave: a curling breaker, foam, and a small red-sailed ship riding it out */
+  tidal: (()=>{ const r = rng(51);
+    const foam = Array.from({length:70},()=>{ const t=r(); const x=520+t*1000; const y=150-Math.sin(t*Math.PI)*90+r()*50;
+      return `<circle cx='${x|0}' cy='${y|0}' r='${(6+r()*20)|0}' fill='#f2fffd' opacity='${(.5+r()*.5).toFixed(2)}'/>`; }).join("");
+    const spray = Array.from({length:50},()=>`<circle cx='${(600+r()*900)|0}' cy='${(20+r()*140)|0}' r='${(1.5+r()*3.5).toFixed(1)}' fill='#fff' opacity='.85'/>`).join("");
+    return SVG(`<linearGradient id='sky' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#9fe6e0'/><stop offset='1' stop-color='#3ebdb4'/></linearGradient>
+      <linearGradient id='w' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#4fe0cf'/><stop offset='.5' stop-color='#16a79c'/><stop offset='1' stop-color='#0a5f5c'/></linearGradient>
+      <filter id='f'><feGaussianBlur stdDeviation='4'/></filter>`,
+      `<rect width='1600' height='400' fill='url(#sky)'/>
+       <path d='M0 300 C200 270 350 300 480 280 C650 250 700 120 900 70 C1100 20 1300 60 1440 150 C1500 190 1560 240 1600 260 L1600 400 L0 400Z' fill='url(#w)'/>
+       <path d='M900 70 C1050 40 1180 70 1260 130 C1180 110 1100 120 1040 170 C1000 130 950 100 900 70Z' fill='#0d6f6a' opacity='.55'/>
+       <g filter='url(#f)'>${foam}</g>${spray}
+       <path d='M0 330 C220 310 420 340 640 320 C860 300 1100 340 1600 320 L1600 400 L0 400Z' fill='#0a5a57' opacity='.7'/>
+       <g transform='translate(130 250)'>
+         <path d='M-70 30 L80 30 L60 58 L-52 58Z' fill='#5a2a18'/><path d='M-70 30 L80 30' stroke='#3a180c' stroke-width='3'/>
+         <rect x='2' y='-70' width='5' height='100' fill='#3a180c'/><rect x='-38' y='-40' width='4' height='70' fill='#3a180c'/>
+         <path d='M8 -66 L62 -40 L8 -14Z' fill='#d2362c'/><path d='M8 -12 L70 8 L8 26Z' fill='#e0463a'/>
+         <path d='M-33 -36 L6 -20 L-33 -4Z' fill='#c22f26'/><path d='M4 -72 L22 -78 L4 -84Z' fill='#ffd24a'/></g>`);
+  })(),
+
+  /* Misty pines: layered forest fading into fog under a pale moon */
+  pines: (()=>{ const r = rng(67);
+    const tree=(x,y,h,w)=>`M${x} ${y-h} L${x+w*.26} ${y-h*.64} L${x+w*.12} ${y-h*.64} L${x+w*.4} ${y-h*.32} L${x+w*.2} ${y-h*.32} L${x+w*.5} ${y} L${x-w*.5} ${y} L${x-w*.2} ${y-h*.32} L${x-w*.4} ${y-h*.32} L${x-w*.12} ${y-h*.64} L${x-w*.26} ${y-h*.64}Z`;
+    const layers = [["#a9c3d3",250,90,.9],["#7f9fb6",300,130,.95],["#4f7390",345,170,1],["#1f3d57",400,230,1]];
+    let body = "";
+    layers.forEach(([c,base,h,op],li)=>{ let d=""; let x=-40;
+      while(x<1650){ const hh=h*(.7+r()*.6), ww=hh*(.42+r()*.12); d+=tree(x|0,base+(r()*14|0),hh|0,ww|0); x+=ww*(.45+r()*.5); }
+      body += `<path d='${d}' fill='${c}' opacity='${op}'/>`;
+      if(li<3) body += `<rect y='${base-80}' width='1600' height='120' fill='url(#fog)'/>`; });
+    return SVG(`<linearGradient id='s' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#dbe9f1'/><stop offset='1' stop-color='#8fb0c5'/></linearGradient>
+      <linearGradient id='fog' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#e6f0f5' stop-opacity='0'/><stop offset='.6' stop-color='#e6f0f5' stop-opacity='.55'/><stop offset='1' stop-color='#e6f0f5' stop-opacity='0'/></linearGradient>
+      <radialGradient id='m' cx='.5' cy='.5' r='.5'><stop offset='.55' stop-color='#fff'/><stop offset='1' stop-color='#fff' stop-opacity='0'/></radialGradient>`,
+      `<rect width='1600' height='400' fill='url(#s)'/><circle cx='150' cy='95' r='120' fill='url(#m)' opacity='.6'/><circle cx='150' cy='95' r='62' fill='#fbfdff'/>${body}`);
+  })(),
+
+  /* Sakura dusk: blossom branch against a violet evening */
+  sakura: (()=>{ const r = rng(79);
+    const flower=(x,y,s)=>`<g transform='translate(${x} ${y}) scale(${s})'>${[0,72,144,216,288].map(a=>`<ellipse rx='7' ry='11' cy='-10' transform='rotate(${a})' fill='#ffc9dc'/>`).join("")}<circle r='4' fill='#e8558a'/></g>`;
+    const blooms = Array.from({length:34},()=>flower((r()*760)|0,(r()*230)|0,(.7+r()*.9).toFixed(2))).join("");
+    const petals = Array.from({length:36},()=>`<ellipse cx='${(r()*1600)|0}' cy='${(r()*400)|0}' rx='5' ry='3' transform='rotate(${(r()*180)|0} ${(r()*1600)|0} ${(r()*400)|0})' fill='#ffd6e5' opacity='.85'/>`).join("");
+    return SVG(`<linearGradient id='s' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#3a1d52'/><stop offset='.55' stop-color='#a4518c'/><stop offset='1' stop-color='#f3b6c9'/></linearGradient>`,
+      `<rect width='1600' height='400' fill='url(#s)'/>
+       <path d='M-20 40 C150 80 300 60 460 140 C560 190 640 170 760 210 M300 70 C330 140 380 170 420 230 M520 160 C560 110 620 90 700 80' fill='none' stroke='#2a1320' stroke-width='14' stroke-linecap='round'/>
+       ${blooms}${petals}`);
+  })(),
+
+  /* Dune sunset: warm sky, low sun, rolling sand */
+  dunes: (()=>{ return SVG(`<linearGradient id='s' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3b2a6b'/><stop offset='.5' stop-color='#e2726b'/><stop offset='1' stop-color='#ffc27a'/></linearGradient>`,
+      `<rect width='1600' height='400' fill='url(#s)'/><circle cx='1150' cy='250' r='90' fill='#ffe3a6'/>
+       <path d='M0 290 C300 230 520 300 800 260 C1080 220 1300 280 1600 240 L1600 400 L0 400Z' fill='#d98a4e'/>
+       <path d='M0 330 C260 290 560 350 900 310 C1200 280 1400 330 1600 300 L1600 400 L0 400Z' fill='#b8663a'/>
+       <path d='M0 370 C300 340 700 390 1100 350 C1300 335 1450 360 1600 350 L1600 400 L0 400Z' fill='#8a4526'/>`);
+  })(),
+
+  /* Constellation: deep night with linked stars */
+  constellation: (()=>{ const r = rng(97);
+    const stars = Array.from({length:150},()=>`<circle cx='${(r()*1600)|0}' cy='${(r()*400)|0}' r='${(.5+r()*1.8).toFixed(1)}' fill='#fff' opacity='${(.3+r()*.7).toFixed(2)}'/>`).join("");
+    const group = (pts)=>`<polyline points='${pts.map(p=>p.join(",")).join(" ")}' fill='none' stroke='#7fe8ff' stroke-opacity='.45' stroke-width='1.6'/>${pts.map(([x,y])=>`<circle cx='${x}' cy='${y}' r='4' fill='#e8fbff'/><circle cx='${x}' cy='${y}' r='11' fill='#7fe8ff' opacity='.18'/>`).join("")}`;
+    return SVG(`<radialGradient id='s' cx='.7' cy='.3' r='.9'><stop offset='0' stop-color='#1d2f6b'/><stop offset='1' stop-color='#070b1f'/></radialGradient>`,
+      `<rect width='1600' height='400' fill='url(#s)'/>${stars}
+       ${group([[820,90],[900,140],[990,120],[1060,190],[1150,170],[1210,250]])}
+       ${group([[1300,80],[1360,150],[1450,130],[1500,60]])}
+       ${group([[560,260],[640,210],[700,280],[760,230]])}`);
+  })(),
+
+  /* Neon horizon: striped sun over a glowing grid */
+  neon: (()=>{ let grid = "";
+    for(let i=-12;i<=12;i++) grid += `<line x1='${800+i*40}' y1='250' x2='${800+i*260}' y2='400'/>`;
+    [256,268,284,306,336,376].forEach(y=> grid += `<line x1='0' y1='${y}' x2='1600' y2='${y}'/>`);
+    return SVG(`<linearGradient id='s' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#0b0224'/><stop offset='1' stop-color='#3b0b5e'/></linearGradient>
+      <linearGradient id='sun' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#ffe066'/><stop offset='1' stop-color='#ff3fa4'/></linearGradient>
+      <mask id='cut'><rect width='1600' height='400' fill='#fff'/>${[190,208,224,238].map((y,i)=>`<rect y='${y}' width='1600' height='${4+i*2}' fill='#000'/>`).join("")}</mask>
+      <filter id='g'><feGaussianBlur stdDeviation='2.5' result='b'/><feMerge><feMergeNode in='b'/><feMergeNode in='SourceGraphic'/></feMerge></filter>`,
+      `<rect width='1600' height='400' fill='url(#s)'/><circle cx='800' cy='250' r='130' fill='url(#sun)' mask='url(#cut)'/>
+       <path d='M0 250 L180 170 L300 230 L460 140 L620 250 L980 250 L1120 150 L1260 220 L1420 160 L1600 250Z' fill='#1a0633'/>
+       <rect y='250' width='1600' height='150' fill='#12022a'/>
+       <g stroke='#ff4fd8' stroke-width='2' filter='url(#g)' opacity='.85'>${grid}</g>`);
+  })(),
+
+  /* Thunderstorm: heavy clouds, rain and a lightning strike */
+  storm: (()=>{ const r = rng(113);
+    const clouds = Array.from({length:30},()=>`<ellipse cx='${(r()*1700-50)|0}' cy='${(r()*170)|0}' rx='${(110+r()*170)|0}' ry='${(55+r()*60)|0}' fill='${["#2a3445","#39465a","#1c2433"][(r()*3)|0]}'/>`).join("");
+    const rain = Array.from({length:130},()=>{ const x=(r()*1650)|0, y=(r()*400)|0; return `<line x1='${x}' y1='${y}' x2='${x-12}' y2='${y+34}'/>`; }).join("");
+    return SVG(`<linearGradient id='s' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#1a212c'/><stop offset='1' stop-color='#3b4a5e'/></linearGradient>
+      <filter id='soft'><feGaussianBlur stdDeviation='18'/></filter>
+      <filter id='bolt'><feGaussianBlur stdDeviation='6' result='b'/><feMerge><feMergeNode in='b'/><feMergeNode in='b'/><feMergeNode in='SourceGraphic'/></feMerge></filter>`,
+      `<rect width='1600' height='400' fill='url(#s)'/><ellipse cx='1080' cy='260' rx='260' ry='160' fill='#9fb8d6' opacity='.18'/>
+       <g filter='url(#soft)'>${clouds}</g>
+       <g stroke='#9fb2c8' stroke-width='1.3' opacity='.45'>${rain}</g>
+       <path d='M1080 90 L1040 190 L1085 190 L1030 330 L1130 170 L1085 170 L1120 90Z' fill='#f4f7ff' filter='url(#bolt)'/>`);
+  })(),
+
+  /* Aurora borealis: the legendary one. Flowing curtains of light over a starry sky */
+  borealis: (()=>{ const r = rng(131);
+    const stars = Array.from({length:110},()=>`<circle cx='${(r()*1600)|0}' cy='${(r()*400)|0}' r='${(.6+r()*1.6).toFixed(1)}' fill='#fff' opacity='${(.4+r()*.6).toFixed(2)}'/>`).join("");
+    const streaks = Array.from({length:40},()=>{ const x=(r()*1600)|0; return `<rect x='${x}' y='${(r()*120)|0}' width='${(2+r()*6)|0}' height='${(120+r()*180)|0}' fill='#bafff0' opacity='${(.06+r()*.12).toFixed(2)}'/>`; }).join("");
+    return SVG(`<linearGradient id='s' x1='0' y1='0' x2='1' y2='.4'><stop offset='0' stop-color='#081a52'/><stop offset='.55' stop-color='#1b2d8f'/><stop offset='1' stop-color='#6a2bc4'/></linearGradient>
+      <linearGradient id='a1' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='#37ffd0'/><stop offset='.5' stop-color='#6af0ff'/><stop offset='1' stop-color='#9b7bff'/></linearGradient>
+      <linearGradient id='a2' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='#6af0ff'/><stop offset='1' stop-color='#37ffb0'/></linearGradient>
+      <filter id='blur' x='-20%' y='-50%' width='140%' height='200%'><feGaussianBlur stdDeviation='26'/></filter>
+      <filter id='blur2' x='-20%' y='-50%' width='140%' height='200%'><feGaussianBlur stdDeviation='10'/></filter>`,
+      `<rect width='1600' height='400' fill='url(#s)'/>${stars}
+       <g filter='url(#blur)' fill='none' stroke-linecap='round'>
+         <path d='M-50 250 C200 120 380 300 620 170 C860 40 1050 220 1300 120 C1450 60 1560 110 1650 70' stroke='url(#a1)' stroke-width='120' opacity='.75'/>
+         <path d='M-50 120 C220 40 420 180 700 90 C950 10 1150 150 1650 40' stroke='url(#a2)' stroke-width='80' opacity='.55'/>
+         <path d='M100 360 C400 250 700 360 1000 260 C1250 180 1450 280 1650 220' stroke='#37ffd0' stroke-width='70' opacity='.4'/></g>
+       <g filter='url(#blur2)'>${streaks}</g>`);
+  })()
+};
+
+/* Requirement helpers: a banner can ask for badge counts or specific badges. */
+const has = (list, id) => list.some(b=>b.earned && (b.id===id || (id==="strong:*" && b.id.startsWith("strong:"))));
+const count = list => list.filter(b=>b.earned).length;
+const strongCount = list => list.filter(b=>b.earned && b.id.startsWith("strong:") && b.id!=="strong:?").length;
+const needBadges = n => ({ text:`Earn ${n} badges`, check:l=>count(l)>=n, prog:l=>`${Math.min(count(l),n)}/${n}` });
+const needBadge = (id, name) => ({ text:`Unlock ${name}`, check:l=>has(l,id), prog:l=>has(l,id)?"Done":"Not yet" });
+
 const BANNERS = [
-  { id:"circuit", name:"Circuit",  bg:`${PAT.circuit}, linear-gradient(120deg,#062420,#0b3a33 60%,#052019)` },
-  { id:"aurora",  name:"Aurora",   bg:`${PAT.dots}, linear-gradient(115deg,#0b3b3a,#1d2f6b 55%,#3b1d62)` },
-  { id:"ocean",   name:"Deep Sea", bg:`radial-gradient(120% 90% at 10% 110%,#1c6d9c 0,transparent 55%), ${PAT.dots}, linear-gradient(160deg,#051a2c,#0a2d4a)` },
-  { id:"nebula",  name:"Nebula",   bg:`radial-gradient(60% 80% at 80% 20%,rgba(176,140,255,.45),transparent 60%), ${PAT.dots}, linear-gradient(135deg,#140b2e,#2a1552)` },
-  { id:"forest",  name:"Canopy",   bg:`${PAT.stripes}, linear-gradient(120deg,#0d2a14,#1e4a22 60%,#0f2c16)` },
-  { id:"slate",   name:"Blueprint",bg:`${PAT.grid}, linear-gradient(135deg,#111a24,#1b2735)` },
-  { id:"royal",   name:"Royal",    bg:`${PAT.diamond}, radial-gradient(80% 120% at 50% 0,#4a2a7a,transparent 70%), linear-gradient(135deg,#1a0f33,#2d1650)`,
-    unlock:{ badges:5, text:"Earn 5 badges" } },
-  { id:"legend",  name:"Legend",   bg:`radial-gradient(50% 140% at 50% 50%,rgba(242,193,78,.35),transparent 70%), ${PAT.diamond}, linear-gradient(135deg,#0c0a06,#2a2008 50%,#0c0a06)`,
-    unlock:{ badges:9, text:"Earn 9 badges" } }
+  /* Free for everyone */
+  { id:"circuit", name:"Circuit",   rarity:"common", bg:`${PAT.circuit}, linear-gradient(120deg,#062420,#0b3a33 60%,#052019)` },
+  { id:"aurora",  name:"Twilight",  rarity:"common", bg:`${PAT.dots}, linear-gradient(115deg,#0b3b3a,#1d2f6b 55%,#3b1d62)` },
+  { id:"ocean",   name:"Deep Sea",  rarity:"common", bg:`radial-gradient(120% 90% at 10% 110%,#1c6d9c 0,transparent 55%), ${PAT.dots}, linear-gradient(160deg,#051a2c,#0a2d4a)` },
+  { id:"nebula",  name:"Nebula",    rarity:"common", bg:`radial-gradient(60% 80% at 80% 20%,rgba(176,140,255,.45),transparent 60%), ${PAT.dots}, linear-gradient(135deg,#140b2e,#2a1552)` },
+  { id:"forest",  name:"Canopy",    rarity:"common", bg:`${PAT.stripes}, linear-gradient(120deg,#0d2a14,#1e4a22 60%,#0f2c16)` },
+  { id:"slate",   name:"Blueprint", rarity:"common", bg:`${PAT.grid}, linear-gradient(135deg,#111a24,#1b2735)` },
+  { id:"tiles",   name:"Glacier Tiles", rarity:"common", bg:scene(SCENES.tiles) },
+  { id:"pines",   name:"Misty Pines",   rarity:"common", bg:scene(SCENES.pines) },
+  /* Earned */
+  { id:"dunes",   name:"Dune Sunset",   rarity:"rare", bg:scene(SCENES.dunes),   unlock:needBadges(3) },
+  { id:"autumn",  name:"Autumn Sky",    rarity:"rare", bg:scene(SCENES.autumn),  unlock:needBadge("login7","Regular") },
+  { id:"sakura",  name:"Sakura Dusk",   rarity:"rare", bg:scene(SCENES.sakura),  unlock:needBadges(4) },
+  { id:"constellation", name:"Constellation", rarity:"rare", bg:scene(SCENES.constellation), unlock:needBadge("night","Night Owl") },
+  { id:"royal",   name:"Royal",   rarity:"epic", bg:`${PAT.diamond}, radial-gradient(80% 120% at 50% 0,#4a2a7a,transparent 70%), linear-gradient(135deg,#1a0f33,#2d1650)`, unlock:needBadges(5) },
+  { id:"tidal",   name:"Tidal Wave",    rarity:"epic", bg:scene(SCENES.tidal),   unlock:needBadge("comeback","Comeback") },
+  { id:"neon",    name:"Neon Horizon",  rarity:"epic", bg:scene(SCENES.neon),    unlock:needBadge("polymath","Polymath") },
+  { id:"storm",   name:"Thunderstorm",  rarity:"epic", bg:scene(SCENES.storm),   unlock:needBadges(8) },
+  { id:"magma",   name:"Magma",         rarity:"epic", bg:scene(SCENES.magma),   unlock:needBadge("streak14","Unstoppable") },
+  { id:"legend",  name:"Legend",  rarity:"legendary", bg:`radial-gradient(50% 140% at 50% 50%,rgba(242,193,78,.35),transparent 70%), ${PAT.diamond}, linear-gradient(135deg,#0c0a06,#2a2008 50%,#0c0a06)`, unlock:needBadges(10) },
+  /* The rarest banner in EduNexus. Four separate, hard requirements. */
+  { id:"borealis", name:"Aurora Borealis", rarity:"legendary", bg:scene(SCENES.borealis), animated:true,
+    unlock:{
+      text:"Legendary: The Real Deal, Strong Genome in 2 subjects, a 14-day streak and 15 badges",
+      check:l=> has(l,"realdeal") && strongCount(l)>=2 && has(l,"streak14") && count(l)>=15,
+      prog:l=>`${[has(l,"realdeal"), strongCount(l)>=2, has(l,"streak14"), count(l)>=15].filter(Boolean).length}/4 conditions`,
+      steps:l=>[
+        ["The Real Deal badge", has(l,"realdeal")],
+        [`Strong Genome in 2 subjects (${Math.min(strongCount(l),2)}/2)`, strongCount(l)>=2],
+        ["Unstoppable — a 14-day sign-in streak", has(l,"streak14")],
+        [`15 badges (${Math.min(count(l),15)}/15)`, count(l)>=15]
+      ] } }
 ];
 const bannerOf = id => BANNERS.find(b=>b.id===id) || BANNERS[0];
+const bannerUnlocked = (b, list) => !b.unlock || !!(list && list.__all) || b.unlock.check(list||[]);
+
+/* ---- profile picture borders ----
+   ring:  the band's colours (a conic gradient, so it can spin)
+   glow:  optional halo;  spin: slowly rotates;  deco: a small ornament on top */
+const BORDERS = [
+  { id:"classic",  name:"Classic",   rarity:"common", ring:"conic-gradient(#ffffff,#9fb3ad,#ffffff,#9fb3ad,#ffffff)" },
+  { id:"mint",     name:"Mint",      rarity:"common", ring:"conic-gradient(#2fe3c0,#127a68,#2fe3c0,#127a68,#2fe3c0)" },
+  { id:"slate",    name:"Graphite",  rarity:"common", ring:"conic-gradient(#5b6b7a,#1c2530,#5b6b7a,#1c2530,#5b6b7a)" },
+  { id:"ocean",    name:"Tide",      rarity:"common", ring:"conic-gradient(#5cbeff,#1a4f9c,#5cbeff,#1a4f9c,#5cbeff)" },
+  { id:"rose",     name:"Rose",      rarity:"rare",   ring:"conic-gradient(#ffc2d6,#d14f86,#ffc2d6,#d14f86,#ffc2d6)", unlock:needBadges(3) },
+  { id:"frost",    name:"Frost",     rarity:"rare",   ring:"conic-gradient(#ffffff,#9fe8ff,#e6fbff,#62c6f0,#ffffff)", glow:"#9fe8ff", unlock:needBadge("early","Early Bird") },
+  { id:"sunset",   name:"Sunset",    rarity:"rare",   ring:"conic-gradient(#ffd27a,#ff7e6b,#b44a9c,#ff7e6b,#ffd27a)", unlock:needBadge("login7","Regular") },
+  { id:"gold",     name:"Gold",      rarity:"epic",   ring:"conic-gradient(#fff1b8,#c9901c,#ffe08a,#8a5f10,#fff1b8)", glow:"#ffd66b", unlock:needBadges(6) },
+  { id:"ember",    name:"Ember",     rarity:"epic",   ring:"conic-gradient(#ffdf6b,#ff7a1a,#b3200f,#ff7a1a,#ffdf6b)", glow:"#ff8a3a", spin:true, unlock:needBadge("streak14","Unstoppable") },
+  { id:"nebula",   name:"Nebula",    rarity:"epic",   ring:"conic-gradient(#c6a8ff,#5b2bb8,#ff8ad8,#5b2bb8,#c6a8ff)", glow:"#b08cff", spin:true, unlock:needBadge("polymath","Polymath") },
+  { id:"prism",    name:"Prism",     rarity:"epic",   ring:"conic-gradient(#ff6b6b,#ffd36b,#6bff9a,#6bd6ff,#a36bff,#ff6b6b)", glow:"#ffffff", spin:true, unlock:needBadges(12) },
+  { id:"crown",    name:"Crown",     rarity:"legendary", ring:"conic-gradient(#fff1b8,#c9901c,#ffe08a,#8a5f10,#fff1b8)", glow:"#ffd66b", deco:"crown",
+    unlock:needBadge("centurion","Centurion") },
+  /* matches the Aurora Borealis banner, with the same four conditions */
+  { id:"aurora",   name:"Aurora",    rarity:"legendary", ring:"conic-gradient(#37ffd0,#6af0ff,#9b7bff,#ff8ad8,#37ffd0)", glow:"#6af0ff", spin:true, deco:"stars",
+    unlock:{ text:"Legendary: same four conditions as the Aurora Borealis banner",
+      check:l=> has(l,"realdeal") && strongCount(l)>=2 && has(l,"streak14") && count(l)>=15,
+      prog:l=>`${[has(l,"realdeal"), strongCount(l)>=2, has(l,"streak14"), count(l)>=15].filter(Boolean).length}/4 conditions` } }
+];
+const borderOf = id => BORDERS.find(b=>b.id===id) || BORDERS[0];
+
+/* ---- name styles: a font and a colour treatment for your name on the banner ---- */
+const NAME_STYLES = [
+  { id:"plain",   name:"Classic",     rarity:"common" },
+  { id:"mint",    name:"Mint",        rarity:"common" },
+  { id:"modern",  name:"Modern",      rarity:"common" },
+  { id:"hand",    name:"Handwritten", rarity:"common" },
+  { id:"scholar", name:"Scholar",     rarity:"rare",   unlock:needBadge("scholar","Scholar") },
+  { id:"sunset",  name:"Sunset",      rarity:"rare",   unlock:needBadges(4) },
+  { id:"terminal",name:"Terminal",    rarity:"rare",   unlock:needBadge("night","Night Owl") },
+  { id:"neon",    name:"Neon",        rarity:"epic",   unlock:needBadge("polymath","Polymath") },
+  { id:"arcade",  name:"Arcade",      rarity:"epic",   unlock:needBadges(8) },
+  { id:"blaze",   name:"Blaze",       rarity:"epic",   unlock:needBadge("streak14","Unstoppable") },
+  { id:"glacial", name:"Glacial",     rarity:"epic",   unlock:needBadges(10) },
+  { id:"royal",   name:"Royal",       rarity:"legendary", unlock:needBadge("centurion","Centurion") },
+  { id:"aurora",  name:"Aurora",      rarity:"legendary",
+    unlock:{ text:"Legendary: same four conditions as the Aurora Borealis banner",
+      check:l=> has(l,"realdeal") && strongCount(l)>=2 && has(l,"streak14") && count(l)>=15,
+      prog:l=>`${[has(l,"realdeal"), strongCount(l)>=2, has(l,"streak14"), count(l)>=15].filter(Boolean).length}/4 conditions` } }
+];
+const nameStyleOf = id => NAME_STYLES.find(n=>n.id===id) || NAME_STYLES[0];
+
+/* ---- teachers get their own set: quieter, professional, and all available.
+   Staff aren't graded, so nothing is locked behind badges. ---- */
+const TEACHER_BANNERS = [
+  { id:"t-slate",    name:"Slate",      bg:"linear-gradient(135deg,#1b242e,#232f3b)" },
+  { id:"t-ink",      name:"Ink",        bg:`${PAT.grid}, linear-gradient(135deg,#0c1626,#132238)` },
+  { id:"t-oxford",   name:"Oxford",     bg:"linear-gradient(0deg,#b8975a 0,#b8975a 3px,transparent 3px), linear-gradient(135deg,#0d1f3a,#16305a)" },
+  { id:"t-evergreen",name:"Evergreen",  bg:"linear-gradient(0deg,rgba(255,255,255,.18) 0,rgba(255,255,255,.18) 1px,transparent 1px) 0 calc(100% - 14px)/100% 1px no-repeat, linear-gradient(135deg,#10241b,#183526)" },
+  { id:"t-graphite", name:"Graphite",   bg:"repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 1px,transparent 1px 64px), linear-gradient(135deg,#1c1d20,#2a2c31)" },
+  { id:"t-sandstone",name:"Sandstone",  bg:"linear-gradient(135deg,#2f2821,#3e3429)" },
+  { id:"t-mono",     name:"Monochrome", bg:"linear-gradient(#0b0b0c,#0b0b0c) padding-box, linear-gradient(#0b0b0c,#0b0b0c)", inset:true },
+  { id:"t-linen",    name:"Linen",      bg:"linear-gradient(135deg,#efe9df,#e4dccf)", light:true },
+  { id:"t-paper",    name:"Paper",      bg:`${PAT.grid.replace("%23ffffff","%23000000")}, linear-gradient(135deg,#f3f4f5,#e6e8ea)`, light:true }
+];
+const TEACHER_BORDERS = [
+  { id:"t-hairline", name:"Hairline",   ring:"rgba(255,255,255,.75)", thin:true },
+  { id:"t-silver",   name:"Silver",     ring:"linear-gradient(135deg,#f1f3f5,#9aa3ab)" },
+  { id:"t-graphite", name:"Graphite",   ring:"#4b5360" },
+  { id:"t-navy",     name:"Navy",       ring:"#23406e" },
+  { id:"t-brass",    name:"Brass",      ring:"linear-gradient(135deg,#d9c08a,#9c7c3c)" },
+  { id:"t-double",   name:"Double rule",ring:"conic-gradient(#e9ecef,#e9ecef)", double:true },
+  { id:"t-none",     name:"None",       ring:"transparent", none:true }
+];
+const TEACHER_NAME_STYLES = [
+  { id:"t-standard", name:"Standard" },
+  { id:"t-serif",    name:"Serif" },
+  { id:"t-caps",     name:"Small caps" },
+  { id:"t-light",    name:"Light" },
+  { id:"t-grotesk",  name:"Grotesk" },
+  { id:"t-mono",     name:"Monospace" }
+];
+const isTeacherRole = p => p && p.role && p.role!=="student";
+const bannersFor = p => isTeacherRole(p) ? TEACHER_BANNERS : BANNERS;
+const bordersFor = p => isTeacherRole(p) ? TEACHER_BORDERS : BORDERS;
+const namesFor   = p => isTeacherRole(p) ? TEACHER_NAME_STYLES : NAME_STYLES;
+const pick = (list, id) => list.find(x=>x.id===id) || list[0];
+const DECO = {
+  crown:`<svg class="br-deco crown" viewBox="0 0 40 24" aria-hidden="true"><path d="M3 21 L6 6 L14 13 L20 2 L26 13 L34 6 L37 21Z" fill="#ffd66b" stroke="#8a5f10" stroke-width="1.6" stroke-linejoin="round"/><circle cx="20" cy="2.5" r="2.2" fill="#fff1b8"/><circle cx="6" cy="6" r="1.8" fill="#fff1b8"/><circle cx="34" cy="6" r="1.8" fill="#fff1b8"/></svg>`,
+  stars:`<span class="br-deco stars" aria-hidden="true"><i></i><i></i><i></i></span>`
+};
+/* An avatar wrapped in a border. Used on the player banner and in the picker. */
+function framedAvatar(p, size, border){
+  const b = border || BORDERS[0];
+  const pad = b.none ? 0 : b.thin ? Math.max(2, Math.round(size*0.025)) : b.double ? Math.max(5, Math.round(size*0.08)) : Math.max(3, Math.round(size*0.06));
+  return `<div class="br-frame ${b.spin?"br-spinning":""} ${b.double?"br-double":""} ${b.none?"br-none":""}" style="--pad:${pad}px;${b.glow?`--glow:${b.glow};`:""}">
+      <span class="br-ring" style="background:${b.ring}"></span>
+      ${avatarHtml(p, size)}${b.deco?DECO[b.deco]:""}</div>`;
+}
+
 
 /* ---- badge rarity, like card rarity ---- */
 const TIERS = {
@@ -1073,6 +1828,16 @@ const TIERS = {
   legendary: { label:"Legendary", a:"#ffe08a", b:"#c28a1c" }
 };
 const GLYPH = {
+  moon:'<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/>',
+  sunrise:'<path d="M4 18h16M7 18a5 5 0 0 1 10 0M12 5v4M5 11l2 1.5M19 11l-2 1.5"/>',
+  compass:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+  star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
+  mountain:'<path d="M3 20l6.5-11 4 6 2.5-3.5L21 20z"/>',
+  bolt:'<path d="M13 3L5 13h6l-1 8 8-10h-6z"/>',
+  stack:'<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
+  trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9 17h6"/>',
+  twin:'<path d="M12 5c-1-1-3-1-4 .5-2 0-3 2-2 3.5-1.5 1-1 3.5 1 4 0 2 2 3 4 2M12 5c1-1 3-1 4 .5 2 0 3 2 2 3.5 1.5 1 1 3.5-1 4 0 2-2 3-4 2M12 5v13"/><path d="M4 20h16"/>',
   sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>',
   cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/>',
   flame:'<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-3 2-4 2-7 1 1 2 2 3 4 0-3 0-5 0-7z"/>',
@@ -1124,6 +1889,14 @@ function badgesFor(ctx){
     return Object.values(byTopic).some(sc=>sc.some((v,i)=>sc.slice(i+1).some(w=>w>=v+30)));
   })();
   const n = (have, need) => ({ earned: have>=need, progress: Math.min(1, have/need), progressText: `${Math.min(have,need)} / ${need}` });
+  const flag = ok => ({ earned:ok, progress:ok?1:0, progressText:ok?"Done":"Not yet" });
+  const hours = attempts.map(a=>new Date(a.created_at).getHours());
+  const perfect = attempts.filter(a=>Number(a.score)>=100).length;
+  const mirageRuns = attempts.filter(a=>a.kind==="mirage").length;
+  const cleanSheet = attempts.some(a=>a.kind==="examlens" && Number(a.score)>=100);
+  const subjectsTouched = new Set(attempts.map(a=>a.subject).filter(Boolean)).size;
+  const busiestDay = (()=>{ const c={}; attempts.forEach(a=>{ const d=new Date(a.created_at).toDateString(); c[d]=(c[d]||0)+1; });
+    return Math.max(0, ...Object.values(c)); })();
   const list = [
     { id:"login1",   name:"First Day",           tier:"common",    icon:"sun",   desc:"Sign in for the first time",           ...n(st.days,1) },
     { id:"enrolled", name:"Enrolled",            tier:"common",    icon:"book",  desc:"Join a course",                        ...n(enrolledCount,1) },
@@ -1137,7 +1910,19 @@ function badgesFor(ctx){
     { id:"comeback", name:"Comeback",            tier:"epic",      icon:"up",    desc:"Beat an earlier score on a topic by 30 points",
       earned:comeback, progress:comeback?1:0, progressText:comeback?"Done":"Not yet" },
     { id:"realdeal", name:"The Real Deal",       tier:"legendary", icon:"gem",   desc:"Mirage: 80%+ genuine mastery with almost no gap",
-      earned:realDeal, progress:realDeal?1:0, progressText:realDeal?"Done":"Not yet" }
+      earned:realDeal, progress:realDeal?1:0, progressText:realDeal?"Done":"Not yet" },
+    { id:"explorer", name:"Explorer",      tier:"common", icon:"compass",  desc:"Join 3 courses",                         ...n(enrolledCount,3) },
+    { id:"early",    name:"Early Bird",    tier:"rare",   icon:"sunrise",  desc:"Complete work before 7 in the morning",  ...flag(hours.some(h=>h>=4 && h<7)) },
+    { id:"night",    name:"Night Owl",     tier:"rare",   icon:"moon",     desc:"Complete work after 10 at night",        ...flag(hours.some(h=>h>=22 || h<4)) },
+    { id:"scholar",  name:"Scholar",       tier:"rare",   icon:"stack",    desc:"Record 25 pieces of graded work",        ...n(attempts.length,25) },
+    { id:"perfect",  name:"Perfectionist", tier:"rare",   icon:"star",     desc:"Score 100% five times",                  ...n(perfect,5) },
+    { id:"deep",     name:"Deep Diver",    tier:"rare",   icon:"target",   desc:"Complete 3 Mirage runs",                 ...n(mirageRuns,3) },
+    { id:"curator",  name:"Curator",       tier:"rare",   icon:"folder",   desc:"Keep 6 items in your portfolio",         ...n(portfolioCount,6) },
+    { id:"streak14", name:"Unstoppable",   tier:"epic",   icon:"bolt",     desc:"Sign in 14 days in a row",               ...n(st.best,14) },
+    { id:"polymath", name:"Polymath",      tier:"epic",   icon:"compass",  desc:"Have graded work in 3 different subjects", ...n(subjectsTouched,3) },
+    { id:"marathon", name:"Marathon",      tier:"epic",   icon:"mountain", desc:"Complete 10 pieces of work in one day",  ...n(busiestDay,10) },
+    { id:"clean",    name:"Clean Sheet",   tier:"epic",   icon:"check",    desc:"Score 100% on an ExamLens analysis",     ...flag(cleanSheet) },
+    { id:"centurion",name:"Centurion",     tier:"legendary", icon:"trophy",desc:"Record 100 pieces of graded work",       ...n(attempts.length,100) }
   ];
   /* Strong Genome: one badge per subject scored 80% or more, on at least 3 attempts. */
   const subjects = {};
@@ -1150,20 +1935,31 @@ function badgesFor(ctx){
       desc:`${sub} genome at 80% or above`, earned:true, progress:1, progressText:`${sc}%` });
     else if(!best || sc>best.sc) best = { sub, sc, n:rows.length };
   });
+  const strongN = list.filter(b=>b.id.startsWith("strong:")).length;
+  list.push({ id:"dual", name:"Dual Mastery", tier:"legendary", icon:"twin",
+    desc:"Strong Genome in two different subjects", ...n(strongN,2) });
   if(!list.some(b=>b.id.startsWith("strong:")))
     list.push({ id:"strong:?", name:"Strong Genome", tier:"legendary", icon:"brain",
       desc:"Reach 80% or more on a subject, over at least 3 attempts", earned:false,
       progress: best ? Math.min(1,(best.sc||0)/80) : 0,
       progressText: best ? `Best: ${best.sub} ${best.sc}%` : "No subjects yet" });
+  if(ctx.unlockAll){
+    /* Granted by an admin in the database: everything counts as earned. */
+    const real = list.filter(b=>b.id!=="strong:?");
+    real.forEach(b=>{ b.earned = true; b.progress = 1; if(!/\d/.test(b.progressText||"")) b.progressText = "Granted"; });
+    real.__all = true;
+    return real;
+  }
   return list;
 }
 const myBadgeCtx = () => ({ attempts:S.attempts, loginDays:S.loginDays||[],
-  portfolioCount:S.portfolio.length, enrolledCount:S.enrolled.length });
+  portfolioCount:S.portfolio.length, enrolledCount:S.enrolled.length, unlockAll:!!S.me.unlock_all });
 const studentBadgeCtx = id => ({
   attempts: (S.classAttempts||[]).filter(a=>a.student_id===id),
   loginDays: (S.classLogins||[]).filter(l=>l.user_id===id).map(l=>l.day),
   portfolioCount: (S.classPortfolio||[]).filter(p=>p.student_id===id).length,
-  enrolledCount: (S.allEnrol||[]).filter(e=>e.student_id===id).length
+  enrolledCount: (S.allEnrol||[]).filter(e=>e.student_id===id).length,
+  unlockAll: !!((S.students||[]).find(x=>x.id===id)||{}).unlock_all
 });
 
 /* ---- avatar and banner components ---- */
@@ -1186,12 +1982,18 @@ function playerBanner(p, ctx, opts={}){
         ${emblem(b, opts.small?34:44)}<span>${esc(b.sub||b.name)}</span></div>`
       : `<div class="pb-slot empty">${opts.small?"":"<span>Empty</span>"}</div>`;
   }).join("");
-  return `<div class="pbanner ${opts.small?"small":""}" style="background:${esc(bannerOf(p.banner).bg)}">
+  const bnSet = bannersFor(p), chosen = pick(bnSet, p.banner);
+  const bn = (!isTeacherRole(p) ? bannerUnlocked(chosen, all) : true) ? chosen : bnSet[0];
+  return `<div class="pbanner bn-${bn.id} ${bn.animated?"shine":""} ${bn.light?"pb-light":""} ${bn.inset?"pb-inset":""} ${isTeacherRole(p)?"pb-teacher":""} ${opts.small?"small":""}" style="background:${esc(bn.bg)}">
     <div class="pb-left">
-      <div class="pb-ring">${avatarHtml(p, opts.small?46:68)}</div>
+      <div class="pb-ring">${(()=>{ const set = bordersFor(p), ch = pick(set, p.border);
+        const okB = !isTeacherRole(p) ? bannerUnlocked(ch, all) : true;
+        return framedAvatar(p, opts.small?46:68, okB ? ch : set[0]); })()}</div>
       <div style="min-width:0">
-        <div class="pb-name">${esc(p.full_name)}</div>
-        <div class="pb-sub">${esc(p.grade || (p.role==="student"?"Student":"Teacher"+(p.subject?" · "+p.subject:"")))}</div>
+        ${(()=>{ const set = namesFor(p), ch = pick(set, p.name_style);
+          const ok = !isTeacherRole(p) ? bannerUnlocked(ch, all) : true;
+          return `<div class="pb-name ns-${ok?ch.id:set[0].id}" data-text="${esc(p.full_name)}">${esc(p.full_name)}</div>`; })()}
+        <div class="pb-sub">${esc(isTeacherRole(p) ? "Teacher"+(p.subject?" · "+p.subject:"") : (p.grade || "Student"))}</div>
         ${g && g.score!==null?`<div class="pb-stat">Genome ${g.score}% · ${earned.size} badge${earned.size===1?"":"s"}</div>`
           : p.role==="student"?`<div class="pb-stat">${earned.size} badge${earned.size===1?"":"s"}</div>`:""}
       </div>
@@ -1208,6 +2010,48 @@ function customiser(){
   const shown = (me.badges_shown||[]);
   const t = (id,label)=>`<button class="${tab===id?"on":""}" data-act="cust-tab" data-t="${id}">${label}</button>`;
   let body = "";
+  if(tab==="name" && isTeacherRole(me)){
+    body = `<div class="ns-grid">${TEACHER_NAME_STYLES.map(n=>{ const on = pick(TEACHER_NAME_STYLES, me.name_style).id===n.id;
+      return `<button class="ns-tile ${on?"on":""}" style="padding-top:12px" data-act="name-style" data-id="${n.id}">
+        <span class="ns-stage t-stage"><span class="pb-name ns-${n.id}">${esc(me.full_name)}</span></span>
+        <span class="ns-meta"><b>${esc(n.name)}</b><span class="note">${on?`<b class="teal-text">Equipped</b>`:""}</span></span></button>`; }).join("")}</div>`;
+  }
+  else if(tab==="name"){
+    const order = { common:0, rare:1, epic:2, legendary:3 };
+    const sorted = [...NAME_STYLES].sort((a,b)=>order[a.rarity]-order[b.rarity]);
+    const openN = NAME_STYLES.filter(n=>bannerUnlocked(n, all)).length;
+    body = `<div class="note" style="margin-bottom:12px">${openN} of ${NAME_STYLES.length} name styles unlocked</div>
+      <div class="ns-grid">${sorted.map(n=>{
+        const locked = !bannerUnlocked(n, all);
+        const on = (me.name_style||"plain")===n.id && !locked;
+        return `<button class="ns-tile ${on?"on":""} ${locked?"locked":""} r-${n.rarity}" data-act="${locked?"name-locked":"name-style"}" data-id="${n.id}">
+          <span class="bn-rar" style="color:${TIERS[n.rarity].a}">${TIERS[n.rarity].label}</span>
+          <span class="ns-stage"><span class="pb-name ns-${n.id}" data-text="${esc(me.full_name)}">${esc(me.full_name)}</span></span>
+          <span class="ns-meta"><b>${esc(n.name)}</b>
+            <span class="note">${locked ? "🔒 "+esc(n.unlock.prog(all)) : on ? `<b class="teal-text">Equipped</b>` : "Unlocked"}</span></span>
+        </button>`; }).join("")}</div>`;
+  }
+  if(tab==="border" && isTeacherRole(me)){
+    body = `<div class="br-grid">${TEACHER_BORDERS.map(b=>{ const on = pick(TEACHER_BORDERS, me.border).id===b.id;
+      return `<button class="br-tile ${on?"on":""}" style="padding-top:18px" data-act="border" data-id="${b.id}">
+        ${framedAvatar(me, 64, b)}<span class="br-name">${esc(b.name)}</span>
+        <span class="note">${on?`<b class="teal-text">Equipped</b>`:"&nbsp;"}</span></button>`; }).join("")}</div>`;
+  }
+  else if(tab==="border"){
+    const order = { common:0, rare:1, epic:2, legendary:3 };
+    const sorted = [...BORDERS].sort((a,b)=>order[a.rarity]-order[b.rarity]);
+    const openN = BORDERS.filter(b=>bannerUnlocked(b, all)).length;
+    body = `<div class="note" style="margin-bottom:12px">${openN} of ${BORDERS.length} borders unlocked</div>
+      <div class="br-grid">${sorted.map(b=>{
+        const locked = !bannerUnlocked(b, all);
+        const on = (me.border||"classic")===b.id && !locked;
+        return `<button class="br-tile ${on?"on":""} ${locked?"locked":""} r-${b.rarity}" data-act="${locked?"border-locked":"border"}" data-id="${b.id}">
+          <span class="bn-rar" style="color:${TIERS[b.rarity].a}">${TIERS[b.rarity].label}</span>
+          ${framedAvatar(me, 64, b)}
+          <span class="br-name">${esc(b.name)}</span>
+          <span class="note">${locked ? "🔒 "+esc(b.unlock.prog(all)) : on ? `<b class="teal-text">Equipped</b>` : "Unlocked"}</span>
+        </button>`; }).join("")}</div>`;
+  }
   if(tab==="photo"){
     body = `<div class="row" style="gap:18px;flex-wrap:wrap">
       ${avatarHtml(me, 96)}
@@ -1218,16 +2062,33 @@ function customiser(){
         <div class="note" style="margin-top:9px">Cropped to a square and shrunk before upload. Visible to your teachers and anyone you share your portfolio with.</div>
       </div></div>`;
   }
-  if(tab==="banner"){
-    body = `<div class="bn-grid">${BANNERS.map(b=>{
-      const locked = b.unlock && earnedCount < b.unlock.badges;
-      const on = (me.banner||"circuit")===b.id;
-      return `<button class="bn-tile ${on?"on":""} ${locked?"locked":""}" data-act="${locked?"banner-locked":"banner"}" data-id="${b.id}"
-          style="background:${esc(b.bg)}">
+  if(tab==="banner" && isTeacherRole(me)){
+    body = `<div class="bn-grid">${TEACHER_BANNERS.map(b=>{ const on = pick(TEACHER_BANNERS, me.banner).id===b.id;
+      return `<button class="bn-tile t-tile ${on?"on":""} ${b.light?"light":""}" data-act="banner" data-id="${b.id}" style="background:${esc(b.bg)}">
         <span class="bn-name">${esc(b.name)}</span>
-        ${locked?`<span class="bn-lock">🔒 ${esc(b.unlock.text)} · ${earnedCount}/${b.unlock.badges}</span>`:""}
+        ${on?`<span class="bn-lock" style="background:var(--teal);color:var(--on-accent)">Equipped</span>`:""}</button>`; }).join("")}</div>`;
+  }
+  else   if(tab==="banner"){
+    const order = { common:0, rare:1, epic:2, legendary:3 };
+    const sorted = [...BANNERS].sort((a,b)=>order[a.rarity]-order[b.rarity]);
+    const unlockedN = BANNERS.filter(b=>bannerUnlocked(b, all)).length;
+    body = `<div class="note" style="margin-bottom:12px">${unlockedN} of ${BANNERS.length} banners unlocked</div>
+      <div class="bn-grid">${sorted.map(b=>{
+      const locked = !bannerUnlocked(b, all);
+      const on = (me.banner||"circuit")===b.id && !locked;
+      return `<button class="bn-tile ${on?"on":""} ${locked?"locked":""} ${b.animated?"shine":""} r-${b.rarity}" data-act="${locked?"banner-locked":"banner"}" data-id="${b.id}"
+          style="background:${esc(b.bg)}">
+        <span class="bn-rar" style="color:${TIERS[b.rarity].a}">${TIERS[b.rarity].label}</span>
+        <span class="bn-name">${esc(b.name)}</span>
+        ${locked?`<span class="bn-lock">🔒 ${esc(b.unlock.prog(all))}</span>`:""}
         ${on?`<span class="bn-lock" style="background:var(--teal);color:var(--on-accent)">Equipped</span>`:""}
-      </button>`; }).join("")}</div>`;
+      </button>`; }).join("")}</div>
+      ${(()=>{ const bo = BANNERS.find(b=>b.id==="borealis");
+        return bannerUnlocked(bo, all) ? "" : `<div class="card flat legend-hint" style="margin-top:14px">
+          <div class="row" style="gap:8px;margin-bottom:8px"><b>Aurora Borealis</b><span class="chip" style="color:${TIERS.legendary.a}">Legendary</span></div>
+          <div class="note" style="margin-bottom:8px">The rarest banner in EduNexus. It needs all four:</div>
+          ${bo.unlock.steps(all).map(([t,ok])=>`<div class="row" style="gap:9px;padding:4px 0"><span class="${ok?"done":"note"}">${ok?"✓":"○"}</span>
+            <span style="font-size:var(--fs-2)">${esc(t)}</span></div>`).join("")}</div>`; })()}`;
   }
   if(tab==="badges"){
     const order = { legendary:0, epic:1, rare:2, common:3 };
@@ -1249,7 +2110,7 @@ function customiser(){
   }
   return `<div class="sec">Customise</div>
     <div class="card">
-      <div class="tabs">${me.role==="student"?t("badges","Badges"):""}${t("banner","Banner")}${t("photo","Photo")}</div>
+      <div class="tabs">${me.role==="student"?t("badges","Badges"):""}${t("banner","Banner")}${t("border","Border")}${t("name","Name")}${t("photo","Photo")}</div>
       ${body}
     </div>`;
 }
@@ -1294,6 +2155,98 @@ document.addEventListener("change", async e=>{
   }
   S.busy.avatar = false; rerender();
 });
+
+function teacherProfileSummary(){
+  const mine = S.courses.filter(c=>c.teacher_id===S.me.id);
+  const ls = S.lessons.filter(l=>mine.some(c=>c.id===l.course_id));
+  const withCp = ls.filter(l=>l.checkpoint && l.checkpoint.question).length;
+  return `<div class="sec">Your teaching</div>
+    <div class="grid g4">
+      <div class="stat"><div class="k">Courses</div><div class="v">${mine.length}</div></div>
+      <div class="stat"><div class="k">Published</div><div class="v">${mine.filter(c=>c.published).length}</div></div>
+      <div class="stat"><div class="k">Lessons</div><div class="v">${ls.length}</div></div>
+      <div class="stat"><div class="k">With checkpoints</div><div class="v">${withCp}</div></div>
+    </div>
+    <div class="row" style="gap:8px;margin-top:14px;flex-wrap:wrap">
+      <a class="btn ghost sm" href="#/courses">Manage courses</a>
+      <a class="btn ghost sm" href="#/assistant">Open the teaching assistant</a></div>`;
+}
+
+/* ================= teaching assistant (teachers) ================= */
+S.ta = { loaded:false, loading:false, msgs:[], memory:[], busy:false };
+async function loadAssistant(){
+  if(S.ta.loaded || S.ta.loading) return;
+  S.ta.loading = true;
+  const [m, mem] = await Promise.all([
+    sb.from("assistant_messages").select("id, role, content, created_at").eq("teacher_id",S.me.id).order("created_at",{ascending:true}).limit(80),
+    sb.from("assistant_memory").select("id, note, source, created_at").eq("teacher_id",S.me.id).order("created_at",{ascending:true})
+  ]);
+  if(m.error && /does not exist|schema cache/i.test(m.error.message)) S.ta.missing = true;
+  S.ta.msgs = m.data||[]; S.ta.memory = mem.data||[]; S.ta.loaded = true; S.ta.loading = false;
+  if((location.hash.split("/")[1]||"")==="assistant") rerender();
+}
+const fmtReply = t => esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/^\s*[-•]\s+/gm,"• ");
+V.assistant = () => {
+  if(!S.ta.loaded){ loadAssistant(); return `<div class="topbar"><div><h1 class="h1">Edu AI</h1><div class="sub">Loading your conversation…</div></div></div>`; }
+  if(S.ta.missing) return empty("The assistant isn't set up yet","Run teacher-assistant.sql in the Supabase SQL Editor, then reload.");
+  const T = S.ta;
+  return `
+  <div class="topbar"><div><h1 class="h1">Edu AI</h1>
+    <div class="sub">Your teaching assistant. It reads your courses and your students' results, and remembers what matters to you.</div></div>
+    ${T.msgs.length?`<button class="btn ghost sm" data-act="ta-clear">New conversation</button>`:""}</div>
+
+  <div class="ta-wrap">
+    <div class="ta-main">
+      <div class="chat" id="taChat">
+        ${T.msgs.length ? T.msgs.map(m=> m.role==="user"
+            ? `<div class="msg me">${esc(m.content)}</div>`
+            : `<div class="msg ai"><div class="prose" style="font-size:var(--fs-2)">${fmtReply(m.content)}</div></div>`).join("")
+          : `<div class="card empty"><div class="empty-ico">${I.ai}</div><b>Ask about your class</b>
+              <p class="note" style="margin:0 auto;max-width:440px">It can spot misconceptions spreading, tell you who needs attention, plan a reteach, or write checkpoint questions. Tell it how you like to work and it will remember.</p></div>`}
+        ${T.busy?`<div class="msg ai typing"><i></i><i></i><i></i></div>`:""}
+      </div>
+      <div class="composer">
+        <input id="taAsk" placeholder="Ask about your class, or tell it something to remember" autocomplete="off">
+        <button class="btn" data-act="ta-send" ${T.busy?"disabled":""}>Send</button>
+      </div>
+      <div class="suggests">
+        ${["Which misconceptions are spreading in my class?","Who needs my attention this week, and why?",
+           "Plan a 20-minute reteach for our weakest topic.","Write three checkpoint questions on our weakest topic."]
+          .map(q=>`<button data-act="ta-ask" data-q="${esc(q)}">${esc(q)}</button>`).join("")}
+      </div>
+    </div>
+
+  </div>
+  <div class="only-narrow" style="margin-top:16px">${memoryCard()}</div>`;
+};
+function memoryCard(){
+  const T = S.ta;
+  return `<div class="ta-mem card">
+      <div class="between"><b style="font-size:var(--fs-3)">Memory</b><span class="chip">${T.memory.length}</span></div>
+      <p class="note" style="margin:6px 0 12px">What Edu AI keeps between conversations. Only you can see it.</p>
+      ${T.memory.length ? `<div class="mem-list">${T.memory.map(m=>`<div class="mem-item">
+          <span class="mem-dot ${m.source==="teacher"?"you":""}" title="${m.source==="teacher"?"Added by you":"Saved by Edu AI"}"></span>
+          <span class="mem-note">${esc(m.note)}</span>
+          <button class="mem-x" data-act="ta-forget" data-id="${m.id}" aria-label="Forget this">✕</button></div>`).join("")}</div>`
+        : `<div class="note" style="padding:10px 0">Nothing yet. Mention your preferences or plans and it will save the useful ones.</div>`}
+      <div class="mem-add">
+        <input id="taNote" placeholder="Add a note, e.g. Year 13 mock exam on 14 Oct" maxlength="400">
+        <button class="btn ghost sm" data-act="ta-remember">Add</button>
+      </div>
+</div>`;
+}
+async function taSend(text){
+  text = (text||"").trim(); if(!text || S.ta.busy) return;
+  S.ta.msgs.push({ role:"user", content:text }); S.ta.busy = true; rerender();
+  try{
+    const out = await ai("teacher_chat", { message:text });
+    S.ta.msgs.push({ role:"assistant", content:out.reply });
+    if(out.memory) S.ta.memory = out.memory;
+    if(out.remembered && out.remembered.length) toast(`Remembered: ${out.remembered[0]}${out.remembered.length>1?` (+${out.remembered.length-1})`:""}`);
+  }catch(e){ S.ta.msgs.push({ role:"assistant", content:"I couldn't reach the AI service. "+e.message }); }
+  S.ta.busy = false; rerender();
+  const c = $("#taChat"); c && c.lastElementChild && c.lastElementChild.scrollIntoView({block:"end"});
+}
 
 /* ================= settings ================= */
 const PREFS_KEY = "edunexus-prefs";
@@ -1486,7 +2439,7 @@ V.class = () => {
     ${avatarHtml(S.me)}</div>
   ${rows.length ? `<div class="grid" style="gap:10px">
       ${rows.map(r=>`<button class="card" style="text-align:left;width:100%" data-act="view-student" data-id="${r.id}">
-        <div class="between">
+        <div class="between wrap-sm">
           <div class="row">${avatarHtml(r)}
             <div><div style="font-weight:700">${esc(r.full_name)}</div>
               <div class="note">${esc(r.grade||"Class not set")}</div></div></div>
@@ -1542,6 +2495,7 @@ function routesFor(role){
   ] : [
     {h:"#/class",t:"My class",i:"school",g:"main"},
     {h:"#/courses",t:"Courses",i:"learn",g:"main"},
+    {h:"#/assistant",t:"Edu AI",i:"ai",g:"main"},
     {h:"#/profile",t:"Profile",i:"user",g:"quick"}
   ];
 }
@@ -1553,10 +2507,25 @@ function buildNav(){
     + rs.filter(r=>r.g==="quick").map(r=>`<a class="${on(r.h)}" href="${r.h}">${I[r.i]}${r.t}</a>`).join("")
     + `<div class="nav-sep" role="separator"></div>`
     + `<a class="${on("#/settings")}" href="#/settings">${I.settings}Settings</a>`;
-  $("#mobilebar").innerHTML = rs.slice(0,5).map(r=>`<a class="${on(r.h)}" href="${r.h}">${I[r.i]}${r.t}</a>`).join("");
+  /* A phone only fits four tabs comfortably. Everything else lives behind More,
+     so no screen is unreachable on mobile. */
+  const tabs = rs.filter(r=>r.g==="main").slice(0,4);
+  const rest = rs.filter(r=>!tabs.includes(r));
+  const moreOn = rest.some(r=>on(r.h)) || here==="settings";
+  $("#mobilebar").innerHTML = tabs.map(r=>`<a class="${on(r.h)}" href="${r.h}">${I[r.i]}<span>${r.t}</span></a>`).join("")
+    + `<a class="${moreOn?"on":""}" href="#" data-act="more" aria-haspopup="true">${I.more}<span>More</span></a>`;
+  S.moreRoutes = rest;
 }
 function aside(view){
   const g = G();
+  if(S.me.role!=="student" && view==="assistant") return memoryCard() + `<div class="card" style="margin-top:14px"><b style="font-size:var(--fs-2)">What Edu AI can see</b>
+    <p class="note" style="margin:7px 0 10px">Every reply is built from your own data:</p>
+    <div class="list">
+      <div class="item"><span class="note">Your courses</span><b>${S.courses.filter(c=>c.teacher_id===S.me.id).length}</b></div>
+      <div class="item"><span class="note">Students</span><b>${(S.students||[]).length}</b></div>
+      <div class="item"><span class="note">Attempts recorded</span><b>${(S.classAttempts||[]).length}</b></div>
+      <div class="item"><span class="note">Memory notes</span><b>${S.ta.memory.length}</b></div></div>
+    <p class="note" style="margin-top:10px">Students' Edu AI conversations stay private to them and are never shown here.</p></div>`;
   if(S.me.role!=="student") return `<div class="card"><b style="font-size:var(--fs-2)">Teaching</b>
     <p class="note" style="margin:7px 0 0">Lessons you publish become the evidence your students' genomes are built from. A lesson without a checkpoint records nothing.</p></div>`;
   if(!g.topics.length) return `<div class="card"><b style="font-size:var(--fs-2)">Nothing recorded yet</b>
@@ -1585,10 +2554,14 @@ function route(){
     view = "class";
   $("#main").innerHTML = `<div class="mobiletop">
       <img class="wordmark" src="branding/EduNexus-wordmark-transparent.png" alt="EduNexus" style="height:24px">
-      <a class="btn ghost sm" href="#/settings">Settings</a></div>
+      <a href="#/profile" aria-label="Your profile">${avatarHtml(S.me, 34)}</a></div>
     <div class="fade">${V[view]()}</div>`;
   $("#aside").innerHTML = aside(view);
   buildNav();
+  if(view==="assistant"){
+    const i = $("#taAsk"); i && i.addEventListener("keydown", e=>{ if(e.key==="Enter"){ const v=i.value; i.value=""; taSend(v); }});
+    const c = $("#taChat"); c && c.lastElementChild && c.lastElementChild.scrollIntoView({block:"end"});
+  }
   if(view==="counsellor"){
     renderChat();
     const i = $("#ask");
@@ -1849,9 +2822,42 @@ const ACT = {
   },
   drill(el){ location.hash = el.dataset.to; },
   pref(el){ setPref(el.dataset.k, el.dataset.v); },
+  "po-kind"(el){
+    $("#poKind").value = el.dataset.k;
+    $$(".seg [data-act=po-kind]").forEach(b=>{ const on = b===el; b.classList.toggle("on",on); b.setAttribute("aria-checked",on); });
+  },
+  more(){ openSheet(); },
+  "close-sheet"(){ closeSheet(); },
+  "sheet-signout"(){ closeSheet(); signOut(); },
   "cust-tab"(el){ S.custTab = el.dataset.t; rerender(); },
   async banner(el){ if(await saveProfile({ banner: el.dataset.id })){ toast("Banner equipped"); rerender(); } },
-  "banner-locked"(el){ const b = bannerOf(el.dataset.id); toast(`${b.name} is locked — ${b.unlock.text.toLowerCase()} to unlock it`); },
+  "ta-send"(){ const i=$("#taAsk"); const v=i.value; i.value=""; taSend(v); },
+  "ta-ask"(el){ taSend(el.dataset.q); },
+  async "ta-forget"(el){
+    const { error } = await sb.from("assistant_memory").delete().eq("id", el.dataset.id);
+    if(error) return toast(error.message);
+    S.ta.memory = S.ta.memory.filter(m=>m.id!==el.dataset.id); toast("Forgotten"); rerender();
+  },
+  async "ta-remember"(el){
+    const inp = el && el.parentElement && el.parentElement.querySelector("input"); const note = ((inp||{}).value||"").trim(); if(!note) return;
+    const { data, error } = await sb.from("assistant_memory").insert({ teacher_id:S.me.id, note, source:"teacher" }).select().single();
+    if(error) return toast(error.message);
+    S.ta.memory.push(data); toast("Saved to memory"); rerender();
+  },
+  async "ta-clear"(){
+    if(!confirm("Start a new conversation? Edu AI keeps its memory notes.")) return;
+    const { error } = await sb.from("assistant_messages").delete().eq("teacher_id", S.me.id);
+    if(error) return toast(error.message);
+    S.ta.msgs = []; rerender();
+  },
+  async "name-style"(el){ if(await saveProfile({ name_style: el.dataset.id })){ toast("Name style equipped"); rerender(); } },
+  "name-locked"(el){ const n = nameStyleOf(el.dataset.id); const l = badgesFor(myBadgeCtx());
+    toast(`${n.name} is locked. ${n.unlock.text} (${n.unlock.prog(l)})`); },
+  async border(el){ if(await saveProfile({ border: el.dataset.id })){ toast("Border equipped"); rerender(); } },
+  "border-locked"(el){ const b = borderOf(el.dataset.id); const l = badgesFor(myBadgeCtx());
+    toast(`${b.name} is locked. ${b.unlock.text} (${b.unlock.prog(l)})`); },
+  "banner-locked"(el){ const b = bannerOf(el.dataset.id); const l = badgesFor(myBadgeCtx());
+    toast(`${b.name} is locked. ${b.unlock.text} (${b.unlock.prog(l)})`); },
   "badge-locked"(el){ const b = badgesFor(myBadgeCtx()).find(x=>x.id===el.dataset.id); if(b) toast(`Locked: ${b.desc}`); },
   async "badge-toggle"(el){
     const id = el.dataset.id, cur = [...(S.me.badges_shown||[])];
@@ -1882,8 +2888,27 @@ document.addEventListener("click", e=>{
   const el = e.target.closest("[data-act]");
   if(!el) return;
   const fn = ACT[el.dataset.act];
-  if(fn){ e.preventDefault(); fn(el); }
+  if(fn){ if(el.dataset.act!=="close-sheet") e.preventDefault(); fn(el); }
 });
+function openSheet(){
+  const here = (location.hash.split("/")[1]||"");
+  const items = [...(S.moreRoutes||[]), {h:"#/settings", t:"Settings", i:"settings"}];
+  $("#sheet").innerHTML = `<div class="sheet-grab"></div>
+    <div class="sheet-who">${avatarHtml(S.me, 40)}<div><b>${esc(S.me.full_name)}</b>
+      <div class="note" style="text-transform:capitalize">${esc(S.me.role)}</div></div></div>
+    ${items.map(r=>`<a class="${r.h.split("/")[1]===here?"on":""}" href="${r.h}" data-act="close-sheet">${I[r.i]}${r.t}</a>`).join("")}
+    <button class="sheet-out" data-act="sheet-signout">Sign out</button>`;
+  $("#sheet").hidden = false; $("#sheetBack").hidden = false;
+  requestAnimationFrame(()=>{ $("#sheet").classList.add("open"); $("#sheetBack").classList.add("open"); });
+}
+function closeSheet(){
+  const sh = $("#sheet"); if(!sh || sh.hidden) return;
+  sh.classList.remove("open"); $("#sheetBack").classList.remove("open");
+  setTimeout(()=>{ sh.hidden = true; $("#sheetBack").hidden = true; }, 180);
+}
+document.addEventListener("click", e=>{ if(e.target.id==="sheetBack") closeSheet(); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSheet(); });
+window.addEventListener("hashchange", closeSheet);
 window.addEventListener("hashchange", route);
 
 /* ================= boot ================= */
@@ -1907,7 +2932,7 @@ async function loadStudent(){
 async function loadTeacher(){
   const [{data:courses},{data:students}] = await Promise.all([
     sb.from("courses").select("*").eq("teacher_id",S.me.id).order("created_at",{ascending:false}),
-    sb.from("profiles").select("id, full_name, grade, created_at, avatar_url, banner, badges_shown").eq("role","student").order("full_name")
+    sb.from("profiles").select("id, full_name, grade, created_at, avatar_url, banner, badges_shown, border, name_style, unlock_all").eq("role","student").order("full_name")
   ]);
   S.courses = courses||[]; S.students = students||[];
   const ids = S.courses.map(c=>c.id);
