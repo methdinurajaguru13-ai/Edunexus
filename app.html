@@ -491,8 +491,23 @@ a{color:inherit;text-decoration:none;}
 @media (min-width:861px){.mobiletop{display:none;}}
 .scroll-x{overflow-x:auto;}
 svg{max-width:100%;height:auto;}
-.fade{animation:fade .18s ease-out;}
-@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.fade{animation:fade .2s cubic-bezier(.22,.8,.3,1);}
+@keyframes fade{from{opacity:0;transform:translateY(6px) scale(.995)}to{opacity:1;transform:none}}
+
+/* ---- gesture feedback: press + ripple, shared by every view ---- */
+.btn,.tabs button,.seg button{position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.btn:active,.tabs button:active,.seg button:active{transform:scale(.95)}
+.tabs button,.seg button{transition:transform .16s cubic-bezier(.34,1.56,.64,1),background .15s,border-color .15s,color .15s}
+.mobilebar a,.nav a{-webkit-tap-highlight-color:transparent;transition:transform .15s cubic-bezier(.34,1.56,.64,1),background .15s,color .15s}
+.mobilebar a:active,.nav a:active{transform:scale(.92)}
+.card,button.card,a.card{-webkit-tap-highlight-color:transparent}
+.card:active,button.card:active,a.card:active{transform:scale(.985)}
+.list .item[data-act]{transition:background .15s,transform .12s cubic-bezier(.34,1.56,.64,1)}
+.list .item[data-act]:active{transform:scale(.98)}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.55);
+  transform:scale(0);opacity:.55;pointer-events:none;animation:rippleOut .55s ease-out forwards}
+.btn.ghost .ripple,.tabs button .ripple,.seg button .ripple{background:rgba(var(--accent-rgb),.4)}
+@keyframes rippleOut{to{transform:scale(2.6);opacity:0}}
 </style><style>
 textarea,input[type=text],input[type=number],select{width:100%;background:var(--panel2);border:1px solid var(--line);
   border-radius:10px;padding:10px 12px;color:var(--ink);font:inherit;font-size:var(--fs-2)}
@@ -529,10 +544,9 @@ label.f{display:block;font-size:12px;color:var(--ink-2);font-weight:600;margin:1
 label.f .note{font-weight:500;margin-left:6px}
 
 /* ---- buttons ---- */
-.btn{transition:transform .08s,filter .15s,background .15s,border-color .15s,box-shadow .15s;
+.btn{transition:transform .16s cubic-bezier(.34,1.56,.64,1),filter .15s,background .15s,border-color .15s,box-shadow .15s;
   box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 6px 16px -8px rgba(var(--accent-rgb),.6)}
 .btn:hover{filter:brightness(1.08)}
-.btn:active{transform:translateY(1px)}
 .btn.ghost{box-shadow:none;background:transparent}
 .btn.ghost:hover{border-color:rgba(var(--accent-rgb),.5);background:var(--teal-ghost);filter:none}
 .btn.big{padding:13px 22px;font-size:var(--fs-3);border-radius:12px}
@@ -652,6 +666,52 @@ a.card:hover,button.card:hover{border-color:rgba(var(--accent-rgb),.45);transfor
   .po-grid{grid-template-columns:1fr}
   .seg button{flex:1 1 calc(50% - 8px);justify-content:center}
 }
+
+/* ---- badge unlock celebration ---- */
+.badge-fx{position:fixed;inset:0;z-index:200;display:grid;place-items:center;
+  background:radial-gradient(120% 100% at 50% 30%,rgba(10,22,20,.92),rgba(2,6,5,.97));
+  opacity:0;pointer-events:none;transition:opacity .3s ease;padding:24px;text-align:center;cursor:pointer}
+.badge-fx.show{opacity:1;pointer-events:all}
+.badge-fx-burst{position:absolute;width:520px;height:520px;max-width:140vw;max-height:140vw;border-radius:50%;
+  background:conic-gradient(from 0deg,var(--bfx-a,#2fe3c0) 0deg,transparent 16deg,transparent 344deg,var(--bfx-a,#2fe3c0) 360deg);
+  opacity:0;filter:blur(1px)}
+.badge-fx.show .badge-fx-burst{animation:bfxSpin 7s linear infinite,bfxBurstIn .6s ease forwards}
+@keyframes bfxBurstIn{from{opacity:0;transform:scale(.6)}to{opacity:.32;transform:scale(1)}}
+@keyframes bfxSpin{to{transform:rotate(360deg)}}
+.badge-fx-rings{position:absolute;inset:0;display:grid;place-items:center}
+.badge-fx-rings .ring{position:absolute;width:120px;height:120px;border-radius:50%;border:2px solid var(--bfx-a,#2fe3c0);opacity:0}
+.badge-fx.show .badge-fx-rings .ring{animation:bfxRing 1.7s ease-out forwards}
+.badge-fx.show .badge-fx-rings .ring.r2{animation-delay:.15s}
+.badge-fx.show .badge-fx-rings .ring.r3{animation-delay:.3s}
+@keyframes bfxRing{0%{width:120px;height:120px;opacity:.8}100%{width:440px;height:440px;opacity:0}}
+.badge-fx-emblem{position:relative;z-index:2;transform:scale(.2) rotate(-50deg);opacity:0}
+.badge-fx.show .badge-fx-emblem{animation:bfxPop .8s cubic-bezier(.2,1.4,.3,1) .1s forwards}
+@keyframes bfxPop{
+  0%{transform:scale(.2) rotate(-50deg);opacity:0}
+  55%{transform:scale(1.18) rotate(6deg);opacity:1}
+  75%{transform:scale(.94) rotate(-2deg)}
+  100%{transform:scale(1) rotate(0deg);opacity:1}
+}
+.badge-fx-emblem svg{filter:drop-shadow(0 0 26px var(--bfx-glow,rgba(47,227,192,.6)))}
+.badge-fx-eyebrow{position:relative;z-index:2;margin-top:24px;font-size:12px;font-weight:800;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--bfx-a,#2fe3c0);opacity:0}
+.badge-fx.show .badge-fx-eyebrow{animation:bfxFadeUp .5s ease .55s forwards}
+.badge-fx-name{position:relative;z-index:2;margin:6px 0 0;font-size:28px;font-weight:800;letter-spacing:-.02em;
+  color:var(--ink);opacity:0}
+.badge-fx.show .badge-fx-name{animation:bfxFadeUp .5s ease .68s forwards}
+.badge-fx-tier{position:relative;z-index:2;display:inline-block;margin-top:10px;padding:4px 12px;border-radius:99px;
+  font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;opacity:0;
+  border:1px solid var(--bfx-a,#2fe3c0);color:var(--bfx-a,#2fe3c0)}
+.badge-fx.show .badge-fx-tier{animation:bfxFadeUp .5s ease .78s forwards}
+.badge-fx-desc{position:relative;z-index:2;margin:14px 0 0;max-width:320px;font-size:13px;line-height:1.6;
+  color:var(--mute);opacity:0}
+.badge-fx.show .badge-fx-desc{animation:bfxFadeUp .5s ease .88s forwards}
+.badge-fx-tap{position:relative;z-index:2;margin-top:26px;font-size:11px;color:var(--mute);opacity:0}
+.badge-fx.show .badge-fx-tap{animation:bfxFadeUp .5s ease 1.1s forwards}
+@keyframes bfxFadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media (max-width:480px){
+  .badge-fx-name{font-size:23px}
+}
 </style>
 </head>
 <body>
@@ -685,10 +745,21 @@ a.card:hover,button.card:hover{border-color:rgba(var(--accent-rgb),.45);transfor
 ================================================================== */
 const CFG = window.EDUNEXUS_CONFIG || {};
 let sb = null, configProblem = null;
+
+/* Mirrors login.html: "Keep me signed in" decides whether the session token
+   lives in localStorage (survives closing the browser) or sessionStorage
+   (cleared when the tab closes, not shared with other tabs). */
+const REMEMBER_KEY = "edunexus_remember";
+const rememberOn = () => localStorage.getItem(REMEMBER_KEY) !== "0";
+const authStorage = {
+  getItem: k => (rememberOn() ? localStorage : sessionStorage).getItem(k),
+  setItem: (k,v) => (rememberOn() ? localStorage : sessionStorage).setItem(k,v),
+  removeItem: k => (rememberOn() ? localStorage : sessionStorage).removeItem(k),
+};
 (function connect(){
   const url = (CFG.SUPABASE_URL||"").trim().replace(/\/+$/,""), key = (CFG.SUPABASE_ANON_KEY||"").trim();
   if(!url || !key || url.includes("PASTE_YOUR") || key.includes("PASTE_YOUR")){ configProblem="Add your Supabase URL and key to config.js."; return; }
-  try{ sb = supabase.createClient(url, key); }catch(e){ configProblem = "Could not connect: "+e.message; }
+  try{ sb = supabase.createClient(url, key, { auth: { storage: authStorage, persistSession: true, autoRefreshToken: true } }); }catch(e){ configProblem = "Could not connect: "+e.message; }
 })();
 
 const $ = (s,r=document)=>r.querySelector(s);
@@ -702,7 +773,8 @@ const ago = d => { const m=(Date.now()-new Date(d))/60000;
 /* ---------- app state ---------- */
 const S = {
   me:null, courses:[], lessons:[], enrolled:[], attempts:[], portfolio:[],
-  students:[], viewing:null, course:null, lesson:null, gSubject:null, gTopic:null, busy:{}, cache:{}, chat:[]
+  students:[], viewing:null, course:null, lesson:null, gSubject:null, gTopic:null, busy:{}, cache:{}, chat:[],
+  chatThreads:[], activeThreadId:null, studentMemory:[]
 };
 
 /* ---------- the genome, computed from real evidence ---------- */
@@ -802,13 +874,40 @@ function fileToCompressedDataURL(file, maxDim = 1600, quality = 0.82) {
 }
 
 /* ---------- writing evidence ---------- */
-function announceUnlocks(before){
-  const now = badgesFor(myBadgeCtx()).filter(b=>b.earned).map(b=>b.id);
-  const fresh = now.filter(id=>!before.includes(id));
-  if(fresh.length){
-    const b = badgesFor(myBadgeCtx()).find(x=>x.id===fresh[0]);
-    setTimeout(()=>toast(`Badge unlocked: ${b.name}${b.sub?" · "+b.sub:""}! Equip it from your profile.`), 900);
-  }
+/* Full-screen "rank up" reveal for a single badge. Resolves once it's dismissed
+   (tap, or an auto-timeout), so callers can show several one after another. */
+function celebrateBadge(b){
+  return new Promise(resolve=>{
+    const t = TIERS[b.tier] || TIERS.common;
+    const el = document.createElement("div");
+    el.className = "badge-fx";
+    el.style.setProperty("--bfx-a", t.a);
+    el.style.setProperty("--bfx-glow", t.a + "99");
+    el.innerHTML = `
+      <div class="badge-fx-burst"></div>
+      <div class="badge-fx-rings"><div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div></div>
+      <div class="badge-fx-emblem">${emblem(b, 168)}</div>
+      <div class="badge-fx-eyebrow">Badge unlocked</div>
+      <h2 class="badge-fx-name">${esc(b.name)}${b.sub ? " · " + esc(b.sub) : ""}</h2>
+      <div class="badge-fx-tier">${t.label}</div>
+      <p class="badge-fx-desc">${esc(b.desc)}</p>
+      <div class="badge-fx-tap">Equip it from your profile · tap to continue</div>`;
+    document.body.appendChild(el);
+    let done = false;
+    const finish = () => {
+      if(done) return; done = true;
+      el.classList.remove("show");
+      setTimeout(() => { el.remove(); resolve(); }, 300);
+    };
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("show")));
+    el.addEventListener("click", finish);
+    setTimeout(finish, 3600);
+  });
+}
+async function announceUnlocks(before){
+  const all = badgesFor(myBadgeCtx());
+  const fresh = all.filter(b => b.earned && !before.includes(b.id));
+  for(const b of fresh) await celebrateBadge(b);
 }
 async function record({kind, subject, topic, score, seconds, lesson_id, meta}){
   const before = S.me.role==="student" ? badgesFor(myBadgeCtx()).filter(b=>b.earned).map(b=>b.id) : [];
@@ -835,7 +934,9 @@ const I = {
   user:icon('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/>'),
   more:icon('<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'),
   settings:icon('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
-  mirage:icon('<path d="M4 18c3-8 13-8 16 0"/><circle cx="12" cy="8" r="2"/>')
+  mirage:icon('<path d="M4 18c3-8 13-8 16 0"/><circle cx="12" cy="8" r="2"/>'),
+  history:icon('<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l4 2"/>'),
+  plus:icon('<path d="M12 5v14M5 12h14"/>')
 };
 function toast(msg){
   const t=document.createElement("div");
@@ -1337,7 +1438,11 @@ V.doctor = () => {
 /* ---------- Edu AI ---------- */
 V.counsellor = () => `
   <div class="topbar"><div><h1 class="h1">Edu AI</h1>
-    <div class="sub">Answers from your own records only. Your conversations stay private to you.</div></div></div>
+    <div class="sub">Answers from your own records only. Your conversations stay private to you.</div></div>
+    <div class="row" style="gap:8px">
+      <button class="btn ghost sm" data-act="open-chat-list" aria-label="Chat history">${I.history}${S.chatThreads.length?`<span class="chip" style="margin-left:2px">${S.chatThreads.length}</span>`:""}</button>
+      <button class="btn ghost sm" data-act="new-chat" aria-label="New chat">${I.plus}</button>
+    </div></div>
   <div class="chat" id="chat"></div>
   <div class="composer">
     <input id="ask" placeholder="Ask anything about your studies" autocomplete="off">
@@ -1348,8 +1453,25 @@ V.counsellor = () => `
     <button data-act="ask" data-q="Where am I losing the most marks?">Where am I losing marks?</button>
     <button data-act="ask" data-q="Build me a revision plan for the next two weeks.">Plan my next two weeks</button>
     <button data-act="ask" data-q="Is my strongest topic actually strong, or just familiar?">Is my best topic really strong?</button>
-  </div>`;
+  </div>
+  <div class="only-narrow" style="margin-top:16px">${studentMemoryCard()}</div>`;
 
+function studentMemoryCard(){
+  const m = S.studentMemory;
+  return `<div class="ta-mem card">
+      <div class="between"><b style="font-size:var(--fs-3)">Memory</b><span class="chip">${m.length}</span></div>
+      <p class="note" style="margin:6px 0 12px">What Edu AI remembers about you, across every chat. Only you can see it.</p>
+      ${m.length ? `<div class="mem-list">${m.map(x=>`<div class="mem-item">
+          <span class="mem-dot ${x.source==="student"?"you":""}" title="${x.source==="student"?"Added by you":"Saved by Edu AI"}"></span>
+          <span class="mem-note">${esc(x.note)}</span>
+          <button class="mem-x" data-act="sm-forget" data-id="${x.id}" aria-label="Forget this">✕</button></div>`).join("")}</div>`
+        : `<div class="note" style="padding:10px 0">Nothing yet. Mention a goal or preference and it will save the useful ones.</div>`}
+      <div class="mem-add">
+        <input id="smNote" placeholder="Add a note, e.g. Aiming for mechanical engineering" maxlength="400">
+        <button class="btn ghost sm" data-act="sm-remember">Add</button>
+      </div>
+</div>`;
+}
 function renderChat(){
   const c = $("#chat"); if(!c) return;
   if(!S.chat.length){
@@ -1366,14 +1488,48 @@ function renderChat(){
   }).join("");
   c.lastElementChild && c.lastElementChild.scrollIntoView({block:"end"});
 }
+/* Chats are created lazily — clicking "New chat" just clears the pane; the
+   chat_threads row only gets written once there's actually a first message,
+   so browsing away from an unused draft never leaves an empty thread behind. */
+async function ensureThread(firstMessage){
+  if(S.activeThreadId) return S.activeThreadId;
+  const fallback = firstMessage.trim().slice(0,40) + (firstMessage.trim().length>40 ? "…" : "");
+  const { data, error } = await sb.from("chat_threads").insert({ student_id:S.me.id, title:fallback }).select().single();
+  if(error){ console.warn("Could not create chat thread:", error.message); return null; }
+  S.activeThreadId = data.id;
+  S.chatThreads.unshift(data);
+  /* Upgrade the fallback title to an AI-written one in the background —
+     never blocks sending, and a failure here just keeps the fallback. */
+  ai("title_chat", { message:firstMessage }).then(out=>{
+    const clean = String(out.title||"").trim().slice(0,60);
+    if(!clean) return;
+    sb.from("chat_threads").update({ title:clean }).eq("id", data.id).then(({error})=>{
+      if(error) console.warn("Could not save chat title:", error.message);
+    });
+    const t = S.chatThreads.find(x=>x.id===data.id); if(t) t.title = clean;
+  }).catch(()=>{});
+  return data.id;
+}
 async function send(text){
   if(!text || !text.trim()) return;
   S.chat.push({role:"user", content:text}); S.chat.push({role:"typing"}); renderChat();
   try{
+    const threadId = await ensureThread(text);
     const history = S.chat.filter(m=>m.role==="user"||m.role==="assistant").slice(-6)
       .map(m=>({role:m.role, content:m.content}));
     const out = await ai("chat",{ message:text, history: history.slice(0,-1) });
     S.chat.pop(); S.chat.push({role:"assistant", content:out.reply, topics:out.topics});
+    if(out.memory) S.studentMemory = out.memory;
+    if(out.remembered && out.remembered.length) toast(`Remembered: ${out.remembered[0]}${out.remembered.length>1?` (+${out.remembered.length-1})`:""}`);
+    /* Saved so it survives logging out and back in — failures here are silent,
+       the conversation still works this session even if a save drops. */
+    if(threadId){
+      sb.from("chat_messages").insert([
+        { student_id:S.me.id, thread_id:threadId, role:"user", content:text },
+        { student_id:S.me.id, thread_id:threadId, role:"assistant", content:out.reply },
+      ]).then(({error})=>{ if(error) console.warn("Could not save chat message:", error.message); });
+      sb.from("chat_threads").update({ updated_at:new Date().toISOString() }).eq("id",threadId).then(()=>{});
+    }
   }catch(e){
     S.chat.pop(); S.chat.push({role:"assistant", content:"I couldn't reach the AI service. "+e.message});
   }
@@ -2522,6 +2678,7 @@ function aside(view){
     <p class="note" style="margin-top:10px">Students' Edu AI conversations stay private to them and are never shown here.</p></div>`;
   if(S.me.role!=="student") return `<div class="card"><b style="font-size:var(--fs-2)">Teaching</b>
     <p class="note" style="margin:7px 0 0">Lessons you publish become the evidence your students' genomes are built from. A lesson without a checkpoint records nothing.</p></div>`;
+  if(view==="counsellor") return studentMemoryCard();
   if(!g.topics.length) return `<div class="card"><b style="font-size:var(--fs-2)">Nothing recorded yet</b>
     <p class="note" style="margin:7px 0 0">Your genome, your advisor and Edu AI all read the same rows. Complete a checkpoint and every screen here changes.</p></div>`;
   return `<div class="ai" style="margin-bottom:14px"><div class="who">${I.ai} Edu AI</div>
@@ -2876,13 +3033,64 @@ const ACT = {
     S.me.role==="student" ? await loadStudent() : await loadTeacher();
     toast("Up to date");
   });},
-  "view-student"(el){ S.viewing = el.dataset.id; location.hash = "#/student"; }
+  "view-student"(el){ S.viewing = el.dataset.id; location.hash = "#/student"; },
+  "new-chat"(){ closeSheet(); S.activeThreadId = null; S.chat = []; rerender(); },
+  "open-chat-list"(){ openChatList(); },
+  "open-thread"(el){
+    closeSheet();
+    (async ()=>{
+      S.activeThreadId = el.dataset.id;
+      S.chat = await loadThreadMessages(S.activeThreadId);
+      rerender();
+    })();
+  },
+  "delete-thread"(el){
+    const id = el.dataset.id;
+    (async ()=>{
+      const { error } = await sb.from("chat_threads").delete().eq("id", id);
+      if(error){ toast("Could not delete: "+error.message); return; }
+      S.chatThreads = S.chatThreads.filter(t=>t.id!==id);
+      if(S.activeThreadId===id){
+        S.activeThreadId = S.chatThreads[0]?.id || null;
+        S.chat = S.activeThreadId ? await loadThreadMessages(S.activeThreadId) : [];
+      }
+      openChatList(); // refresh the sheet in place, keep it open
+    })();
+  },
+  async "sm-forget"(el){
+    const { error } = await sb.from("student_memory").delete().eq("id", el.dataset.id);
+    if(error) return toast(error.message);
+    S.studentMemory = S.studentMemory.filter(m=>m.id!==el.dataset.id); toast("Forgotten"); rerender();
+  },
+  async "sm-remember"(el){
+    const inp = el && el.parentElement && el.parentElement.querySelector("input"); const note = ((inp||{}).value||"").trim(); if(!note) return;
+    const { data, error } = await sb.from("student_memory").insert({ student_id:S.me.id, note, source:"student" }).select().single();
+    if(error) return toast(error.message);
+    S.studentMemory.push(data); toast("Saved to memory"); rerender();
+  }
 };
 document.addEventListener("click", e=>{
   const el = e.target.closest("[data-act]");
   if(!el) return;
   const fn = ACT[el.dataset.act];
   if(fn){ if(el.dataset.act!=="close-sheet") e.preventDefault(); fn(el); }
+});
+/* Tap/click ripple on buttons and tabs, everywhere in the app. Skipped
+   entirely when "Reduced motion" is on, since animationend never fires
+   for a killed animation and the ripple span would just sit there. */
+document.addEventListener("pointerdown", e=>{
+  if(document.documentElement.dataset.motion==="reduced") return;
+  const el = e.target.closest(".btn,.tabs button,.seg button");
+  if(!el || el.disabled) return;
+  const r = el.getBoundingClientRect();
+  const size = Math.max(r.width, r.height) * 1.15;
+  const span = document.createElement("span");
+  span.className = "ripple";
+  span.style.width = span.style.height = size + "px";
+  span.style.left = (e.clientX - r.left - size/2) + "px";
+  span.style.top = (e.clientY - r.top - size/2) + "px";
+  el.appendChild(span);
+  span.addEventListener("animationend", () => span.remove());
 });
 function openSheet(){
   const here = (location.hash.split("/")[1]||"");
@@ -2900,6 +3108,27 @@ function closeSheet(){
   sh.classList.remove("open"); $("#sheetBack").classList.remove("open");
   setTimeout(()=>{ sh.hidden = true; $("#sheetBack").hidden = true; }, 180);
 }
+/* Reuses the same sheet as "More" — only one can be open at a time anyway. */
+function openChatList(){
+  const rows = S.chatThreads.map(t=>`
+    <div class="mem-item">
+      <span class="mem-dot ${t.id===S.activeThreadId?"":"you"}"></span>
+      <button class="mem-note" style="text-align:left;background:none;border:none;color:inherit;font:inherit;cursor:pointer"
+        data-act="open-thread" data-id="${t.id}">
+        <b style="display:block;font-weight:${t.id===S.activeThreadId?"700":"500"}">${esc(t.title||"New chat")}</b>
+        <span class="note">${ago(t.updated_at)}</span>
+      </button>
+      <button class="mem-x" data-act="delete-thread" data-id="${t.id}" aria-label="Delete chat">✕</button>
+    </div>`).join("");
+  $("#sheet").innerHTML = `<div class="sheet-grab"></div>
+    <div class="between" style="padding:6px 8px 14px;border-bottom:1px solid var(--line-soft);margin-bottom:10px">
+      <b style="font-size:var(--fs-3)">Your chats</b>
+      <button class="btn ghost sm" data-act="new-chat">${I.plus} New chat</button>
+    </div>
+    ${rows || `<p class="note" style="padding:0 8px 8px">No chats yet — send a message to start one.</p>`}`;
+  $("#sheet").hidden = false; $("#sheetBack").hidden = false;
+  requestAnimationFrame(()=>{ $("#sheet").classList.add("open"); $("#sheetBack").classList.add("open"); });
+}
 document.addEventListener("click", e=>{ if(e.target.id==="sheetBack") closeSheet(); });
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSheet(); });
 window.addEventListener("hashchange", closeSheet);
@@ -2907,19 +3136,30 @@ window.addEventListener("hashchange", route);
 
 /* ================= boot ================= */
 async function loadStudent(){
-  const [{data:courses},{data:enrol},{data:attempts},{data:port}] = await Promise.all([
+  const [{data:courses},{data:enrol},{data:attempts},{data:port},{data:threads},{data:memory}] = await Promise.all([
     sb.from("courses").select("*").eq("published",true).order("created_at",{ascending:false}),
     sb.from("enrollments").select("course_id").eq("student_id",S.me.id),
     sb.from("attempts").select("*").eq("student_id",S.me.id).order("created_at",{ascending:false}).limit(300),
-    sb.from("portfolio_items").select("*").eq("student_id",S.me.id).order("created_at",{ascending:false})
+    sb.from("portfolio_items").select("*").eq("student_id",S.me.id).order("created_at",{ascending:false}),
+    sb.from("chat_threads").select("*").eq("student_id",S.me.id).order("updated_at",{ascending:false}),
+    sb.from("student_memory").select("id, note, source, created_at").eq("student_id",S.me.id).order("created_at",{ascending:true})
   ]);
   S.courses = courses||[]; S.enrolled = (enrol||[]).map(e=>e.course_id);
   S.attempts = attempts||[]; S.portfolio = port||[];
+  S.chatThreads = threads||[];
+  S.studentMemory = memory||[];
+  S.activeThreadId = S.chatThreads[0]?.id || null;
+  S.chat = S.activeThreadId ? await loadThreadMessages(S.activeThreadId) : [];
   const ids = S.courses.map(c=>c.id);
   if(ids.length){
     const { data:lessons } = await sb.from("lessons").select("*").in("course_id",ids).eq("published",true);
     S.lessons = lessons||[];
   }
+}
+async function loadThreadMessages(threadId){
+  const { data } = await sb.from("chat_messages").select("role, content")
+    .eq("thread_id", threadId).order("created_at",{ascending:true}).limit(200);
+  return (data||[]).map(m=>({role:m.role, content:m.content}));
 }
 async function loadTeacher(){
   const [{data:courses},{data:students}] = await Promise.all([
@@ -2992,7 +3232,15 @@ async function boot(){
   if(!location.hash) location.hash = S.me.role==="student" ? "#/home" : "#/class";
   route();
 }
-async function signOut(){ await sb.auth.signOut(); location.replace("login.html"); }
+async function signOut(){
+  await sb.auth.signOut();
+  // belt-and-braces: clear any stray Supabase auth keys in either store, so a
+  // switched "keep me signed in" choice can't leave a stale session behind.
+  [localStorage, sessionStorage].forEach(store => {
+    Object.keys(store).filter(k => k.startsWith("sb-")).forEach(k => store.removeItem(k));
+  });
+  location.replace("login.html");
+}
 boot();
 </script>
 </body>

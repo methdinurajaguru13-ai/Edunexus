@@ -40,6 +40,17 @@ input:focus,select:focus{outline:2px solid var(--teal);outline-offset:1px}
 .btn{width:100%;margin-top:18px;padding:12px;border-radius:10px;border:none;background:var(--teal);
  color:#032019;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
 .btn[disabled]{opacity:.6;cursor:default}
+
+/* ---- gesture feedback: press + ripple ---- */
+.btn,.tabs button,.roles button{position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;
+ transition:transform .16s cubic-bezier(.34,1.56,.64,1),background .15s,border-color .15s,color .15s,filter .15s}
+.btn:active,.tabs button:active,.roles button:active{transform:scale(.96)}
+.eye{transition:transform .15s cubic-bezier(.34,1.56,.64,1),color .15s}
+.eye:active{transform:translateY(-50%) scale(.85)}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.5);
+ transform:scale(0);opacity:.55;pointer-events:none;animation:rippleOut .55s ease-out forwards}
+.tabs button .ripple,.roles button .ripple{background:rgba(47,227,192,.35)}
+@keyframes rippleOut{to{transform:scale(2.6);opacity:0}}
 .msg{margin-top:14px;padding:11px 13px;border-radius:10px;font-size:12.5px;display:none}
 .msg.err{display:block;background:var(--warn-soft);border:1px solid var(--warn-line);color:var(--warn)}
 .msg.ok{display:block;background:var(--teal-ghost);border:1px solid rgba(47,227,192,.4);color:var(--teal)}
@@ -51,6 +62,56 @@ input:focus,select:focus{outline:2px solid var(--teal);outline-offset:1px}
  cursor:pointer;padding:8px;display:flex;align-items:center;justify-content:center;border-radius:8px}
 .eye:hover{color:var(--ink)}
 .eye:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+.remember{display:flex;align-items:center;gap:9px;margin-top:16px;cursor:pointer;user-select:none}
+.remember input{width:16px;height:16px;accent-color:var(--teal);cursor:pointer;margin:0}
+.remember span{font-size:12.5px;color:var(--ink-2)}
+
+/* brand mark entrance + idle pulse */
+@keyframes brandIn{
+  0%{opacity:0;transform:scale(.35) rotate(-18deg)}
+  55%{opacity:1;transform:scale(1.12) rotate(4deg)}
+  100%{opacity:1;transform:scale(1) rotate(0deg)}
+}
+@keyframes brandGlow{
+  0%,100%{filter:drop-shadow(0 0 0 rgba(47,227,192,0))}
+  50%{filter:drop-shadow(0 0 9px rgba(47,227,192,.5))}
+}
+.brand img{animation:brandIn .7s cubic-bezier(.22,.9,.25,1.3) both,
+  brandGlow 3.4s ease-in-out 1s infinite}
+
+/* full-screen sign-in transition */
+.signin-fx{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:999}
+.signin-fx.show{opacity:1;pointer-events:all}
+.signin-fx .ring{position:absolute;width:64px;height:64px;border:1px solid rgba(47,227,192,.4);border-radius:50%;
+  opacity:0}
+.signin-fx.show .ring{animation:fxRing 1.15s ease-out forwards}
+.signin-fx.show .ring.r2{animation-delay:.18s}
+.signin-fx.show .ring.r3{animation-delay:.36s}
+@keyframes fxRing{
+  0%{width:64px;height:64px;opacity:.85}
+  100%{width:300px;height:300px;opacity:0}
+}
+.signin-fx img{width:60px;height:60px;position:relative;z-index:2;opacity:0}
+.signin-fx.show img{animation:fxPop .6s cubic-bezier(.22,.9,.25,1.4) forwards}
+@keyframes fxPop{
+  0%{transform:scale(.3);opacity:0}
+  55%{transform:scale(1.18);opacity:1}
+  100%{transform:scale(1);opacity:1}
+}
+.signin-fx .label{position:absolute;bottom:calc(50% - 110px);color:var(--mute);font-size:12.5px;
+  letter-spacing:.02em;opacity:0}
+.signin-fx.show .label{animation:fxLabel .5s ease .35s forwards}
+@keyframes fxLabel{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion: reduce){
+  .brand img{animation:none}
+  .signin-fx .ring{animation:none!important;display:none}
+  .signin-fx img{animation:none!important;opacity:1}
+  .btn,.tabs button,.roles button,.eye{transition:none!important}
+  .btn:active,.tabs button:active,.roles button:active{transform:none}
+  .eye:active{transform:translateY(-50%)}
+  .ripple{display:none}
+}
 </style>
 </head>
 <body>
@@ -101,6 +162,11 @@ input:focus,select:focus{outline:2px solid var(--teal);outline-offset:1px}
       </button>
     </div>
 
+    <label class="remember" id="rememberWrap">
+      <input type="checkbox" id="remember" checked>
+      <span>Keep me signed in on this device</span>
+    </label>
+
     <button class="btn" id="go">Sign in</button>
     <div class="msg" id="msg"></div>
   </div>
@@ -111,11 +177,49 @@ input:focus,select:focus{outline:2px solid var(--teal);outline-offset:1px}
   </div>
 </div>
 
+<div class="signin-fx" id="fx" aria-hidden="true">
+  <div class="ring"></div>
+  <div class="ring r2"></div>
+  <div class="ring r3"></div>
+  <img src="branding/EduNexus-icon-transparent.png" alt="">
+  <div class="label">Loading your genome…</div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
 const $ = s => document.querySelector(s);
 let mode = "in", role = "student", db = null, configProblem = null;
+
+/* Tap/click ripple on the sign-in buttons, mirrors app.html. */
+document.addEventListener("pointerdown", e=>{
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const el = e.target.closest(".btn,.tabs button,.roles button");
+  if(!el || el.disabled) return;
+  const r = el.getBoundingClientRect();
+  const size = Math.max(r.width, r.height) * 1.15;
+  const span = document.createElement("span");
+  span.className = "ripple";
+  span.style.width = span.style.height = size + "px";
+  span.style.left = (e.clientX - r.left - size/2) + "px";
+  span.style.top = (e.clientY - r.top - size/2) + "px";
+  el.appendChild(span);
+  span.addEventListener("animationend", () => span.remove());
+});
+
+/* "Keep me signed in" controls WHERE the session token lives: localStorage
+   survives closing the browser, sessionStorage clears the moment the tab
+   closes (and isn't shared with other tabs). Both login.html and app.html
+   read this same flag so the choice made here sticks for the whole session. */
+const REMEMBER_KEY = "edunexus_remember";
+const rememberOn = () => localStorage.getItem(REMEMBER_KEY) !== "0";
+const authStorage = {
+  getItem: k => (rememberOn() ? localStorage : sessionStorage).getItem(k),
+  setItem: (k,v) => (rememberOn() ? localStorage : sessionStorage).setItem(k,v),
+  removeItem: k => (rememberOn() ? localStorage : sessionStorage).removeItem(k),
+};
+$("#remember").checked = rememberOn();
+$("#remember").onchange = () => localStorage.setItem(REMEMBER_KEY, $("#remember").checked ? "1" : "0");
 
 $("#togglePw").onclick = ()=>{
   const showing = $("#password").type === "text";
@@ -137,11 +241,19 @@ $("#togglePw").onclick = ()=>{
   if(!/^https:\/\/.+/.test(url)){ configProblem = "The project URL must start with https:// — check config.js."; return; }
   if(url.includes("supabase.com/dashboard")){ configProblem = "That's the dashboard address, not the project URL. Use the one ending in .supabase.co."; return; }
   if(key.length < 20){ configProblem = "That API key looks too short. Copy the whole key."; return; }
-  try{ db = supabase.createClient(url, key); }
+  try{ db = supabase.createClient(url, key, { auth: { storage: authStorage, persistSession: true, autoRefreshToken: true } }); }
   catch(err){ configProblem = "Could not connect: " + err.message; }
 })();
 
 function say(text, kind){ const m=$("#msg"); m.className = "msg " + kind; m.textContent = text; }
+
+function goApp(){
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    location.replace("app.html"); return;
+  }
+  $("#fx").classList.add("show");
+  setTimeout(()=> location.replace("app.html"), 850);
+}
 
 const SCHOOL = (window.EDUNEXUS_CONFIG || {}).SCHOOL_NAME;
 if (SCHOOL) $("#school").textContent = SCHOOL;
@@ -176,12 +288,13 @@ async function submit(){
   if(!db){ say(configProblem || "Not connected. Check config.js.", "err"); return; }
   const email = $("#email").value.trim(), password = $("#password").value;
   if(!email || !password){ say("Enter your email and password.", "err"); return; }
+  localStorage.setItem(REMEMBER_KEY, $("#remember").checked ? "1" : "0");
   $("#go").disabled = true;
   try{
     if(mode==="in"){
       const { error } = await db.auth.signInWithPassword({ email, password });
       if(error) throw error;
-      location.replace("app.html");
+      goApp();
     } else {
       const full_name = $("#name").value.trim();
       if(!full_name){ say("Enter your full name.", "err"); $("#go").disabled=false; return; }
@@ -194,7 +307,7 @@ async function submit(){
           emailRedirectTo: location.origin + "/app.html" }
       });
       if(error) throw error;
-      if(data.session) location.replace("app.html");
+      if(data.session) goApp();
       else say("Account created. Check your email to confirm, then sign in.", "ok");
     }
   } catch(err){
