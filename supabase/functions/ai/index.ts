@@ -97,8 +97,12 @@ Deno.serve(async (req) => {
           ? topics.map(t => `${t.topic} (${t.subject || "—"}): ${t.score}% from ${t.evidence} pieces of evidence`).join("\n")
           : "No graded work recorded yet.";
         const last = recent.slice(0, 8).map(a => `${a.kind} on ${a.topic}: ${a.score}%`).join("; ") || "none";
+        const isFirstTurn = !(payload.history ?? []).length;
         const messages = [
-          { role: "system", content: `${rules}\n\nStudent: ${profile?.full_name}. Class: ${profile?.grade ?? "unknown"}. Stated goal: ${profile?.goal ?? "none given"}.\nTopic scores (weakest first):\n${ctx}\nMost recent work: ${last}` },
+          { role: "system", content: `${rules}\n\nStudent: ${profile?.full_name}. Class: ${profile?.grade ?? "unknown"}. Stated goal: ${profile?.goal ?? "none given"}.\nTopic scores (weakest first):\n${ctx}\nMost recent work: ${last}\n\n` +
+            (isFirstTurn
+              ? `This is the first message of the conversation — a natural "Hi ${profile?.full_name?.split(" ")[0] || "there"}" is fine here.`
+              : `This conversation is already underway — you can see the earlier turns below. Do not open with their name or a greeting again; reply like someone mid-conversation, not someone meeting them for the first time. Only use their name again if it's genuinely natural, not as a habit.`) },
           ...(payload.history ?? []).slice(-6),
           { role: "user", content: String(payload.message ?? "") },
         ];
@@ -158,7 +162,11 @@ Deno.serve(async (req) => {
           { role: "system", content: "You are an exact transcription tool for photographed exam pages. Return JSON only: {\"question\":string,\"answer\":string,\"expected\":string,\"subject_guess\":string,\"topic_guess\":string}. Use an empty string for anything not visible in the photo(s). Never invent working the student didn't write." },
           { role: "user", content },
         ];
-        out = asJson(await groq(messages, true, MODEL_VISION));
+        // Groq reserves the full max_tokens against this org's per-minute output
+        // budget for this model before generating anything — the default 1200
+        // alone exceeds a 1000 OTPM cap, so every call failed regardless of
+        // actual output size. The real output here is a small JSON blob.
+        out = asJson(await groq(messages, true, MODEL_VISION, 700));
         break;
       }
       case "mirage_generate": {
