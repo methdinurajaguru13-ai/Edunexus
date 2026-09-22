@@ -652,6 +652,52 @@ a.card:hover,button.card:hover{border-color:rgba(var(--accent-rgb),.45);transfor
   .po-grid{grid-template-columns:1fr}
   .seg button{flex:1 1 calc(50% - 8px);justify-content:center}
 }
+
+/* ---- badge unlock celebration ---- */
+.badge-fx{position:fixed;inset:0;z-index:200;display:grid;place-items:center;
+  background:radial-gradient(120% 100% at 50% 30%,rgba(10,22,20,.92),rgba(2,6,5,.97));
+  opacity:0;pointer-events:none;transition:opacity .3s ease;padding:24px;text-align:center;cursor:pointer}
+.badge-fx.show{opacity:1;pointer-events:all}
+.badge-fx-burst{position:absolute;width:520px;height:520px;max-width:140vw;max-height:140vw;border-radius:50%;
+  background:conic-gradient(from 0deg,var(--bfx-a,#2fe3c0) 0deg,transparent 16deg,transparent 344deg,var(--bfx-a,#2fe3c0) 360deg);
+  opacity:0;filter:blur(1px)}
+.badge-fx.show .badge-fx-burst{animation:bfxSpin 7s linear infinite,bfxBurstIn .6s ease forwards}
+@keyframes bfxBurstIn{from{opacity:0;transform:scale(.6)}to{opacity:.32;transform:scale(1)}}
+@keyframes bfxSpin{to{transform:rotate(360deg)}}
+.badge-fx-rings{position:absolute;inset:0;display:grid;place-items:center}
+.badge-fx-rings .ring{position:absolute;width:120px;height:120px;border-radius:50%;border:2px solid var(--bfx-a,#2fe3c0);opacity:0}
+.badge-fx.show .badge-fx-rings .ring{animation:bfxRing 1.7s ease-out forwards}
+.badge-fx.show .badge-fx-rings .ring.r2{animation-delay:.15s}
+.badge-fx.show .badge-fx-rings .ring.r3{animation-delay:.3s}
+@keyframes bfxRing{0%{width:120px;height:120px;opacity:.8}100%{width:440px;height:440px;opacity:0}}
+.badge-fx-emblem{position:relative;z-index:2;transform:scale(.2) rotate(-50deg);opacity:0}
+.badge-fx.show .badge-fx-emblem{animation:bfxPop .8s cubic-bezier(.2,1.4,.3,1) .1s forwards}
+@keyframes bfxPop{
+  0%{transform:scale(.2) rotate(-50deg);opacity:0}
+  55%{transform:scale(1.18) rotate(6deg);opacity:1}
+  75%{transform:scale(.94) rotate(-2deg)}
+  100%{transform:scale(1) rotate(0deg);opacity:1}
+}
+.badge-fx-emblem svg{filter:drop-shadow(0 0 26px var(--bfx-glow,rgba(47,227,192,.6)))}
+.badge-fx-eyebrow{position:relative;z-index:2;margin-top:24px;font-size:12px;font-weight:800;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--bfx-a,#2fe3c0);opacity:0}
+.badge-fx.show .badge-fx-eyebrow{animation:bfxFadeUp .5s ease .55s forwards}
+.badge-fx-name{position:relative;z-index:2;margin:6px 0 0;font-size:28px;font-weight:800;letter-spacing:-.02em;
+  color:var(--ink);opacity:0}
+.badge-fx.show .badge-fx-name{animation:bfxFadeUp .5s ease .68s forwards}
+.badge-fx-tier{position:relative;z-index:2;display:inline-block;margin-top:10px;padding:4px 12px;border-radius:99px;
+  font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;opacity:0;
+  border:1px solid var(--bfx-a,#2fe3c0);color:var(--bfx-a,#2fe3c0)}
+.badge-fx.show .badge-fx-tier{animation:bfxFadeUp .5s ease .78s forwards}
+.badge-fx-desc{position:relative;z-index:2;margin:14px 0 0;max-width:320px;font-size:13px;line-height:1.6;
+  color:var(--mute);opacity:0}
+.badge-fx.show .badge-fx-desc{animation:bfxFadeUp .5s ease .88s forwards}
+.badge-fx-tap{position:relative;z-index:2;margin-top:26px;font-size:11px;color:var(--mute);opacity:0}
+.badge-fx.show .badge-fx-tap{animation:bfxFadeUp .5s ease 1.1s forwards}
+@keyframes bfxFadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media (max-width:480px){
+  .badge-fx-name{font-size:23px}
+}
 </style>
 </head>
 <body>
@@ -685,10 +731,21 @@ a.card:hover,button.card:hover{border-color:rgba(var(--accent-rgb),.45);transfor
 ================================================================== */
 const CFG = window.EDUNEXUS_CONFIG || {};
 let sb = null, configProblem = null;
+
+/* Mirrors login.html: "Keep me signed in" decides whether the session token
+   lives in localStorage (survives closing the browser) or sessionStorage
+   (cleared when the tab closes, not shared with other tabs). */
+const REMEMBER_KEY = "edunexus_remember";
+const rememberOn = () => localStorage.getItem(REMEMBER_KEY) !== "0";
+const authStorage = {
+  getItem: k => (rememberOn() ? localStorage : sessionStorage).getItem(k),
+  setItem: (k,v) => (rememberOn() ? localStorage : sessionStorage).setItem(k,v),
+  removeItem: k => (rememberOn() ? localStorage : sessionStorage).removeItem(k),
+};
 (function connect(){
   const url = (CFG.SUPABASE_URL||"").trim().replace(/\/+$/,""), key = (CFG.SUPABASE_ANON_KEY||"").trim();
   if(!url || !key || url.includes("PASTE_YOUR") || key.includes("PASTE_YOUR")){ configProblem="Add your Supabase URL and key to config.js."; return; }
-  try{ sb = supabase.createClient(url, key); }catch(e){ configProblem = "Could not connect: "+e.message; }
+  try{ sb = supabase.createClient(url, key, { auth: { storage: authStorage, persistSession: true, autoRefreshToken: true } }); }catch(e){ configProblem = "Could not connect: "+e.message; }
 })();
 
 const $ = (s,r=document)=>r.querySelector(s);
@@ -802,13 +859,40 @@ function fileToCompressedDataURL(file, maxDim = 1600, quality = 0.82) {
 }
 
 /* ---------- writing evidence ---------- */
-function announceUnlocks(before){
-  const now = badgesFor(myBadgeCtx()).filter(b=>b.earned).map(b=>b.id);
-  const fresh = now.filter(id=>!before.includes(id));
-  if(fresh.length){
-    const b = badgesFor(myBadgeCtx()).find(x=>x.id===fresh[0]);
-    setTimeout(()=>toast(`Badge unlocked: ${b.name}${b.sub?" · "+b.sub:""}! Equip it from your profile.`), 900);
-  }
+/* Full-screen "rank up" reveal for a single badge. Resolves once it's dismissed
+   (tap, or an auto-timeout), so callers can show several one after another. */
+function celebrateBadge(b){
+  return new Promise(resolve=>{
+    const t = TIERS[b.tier] || TIERS.common;
+    const el = document.createElement("div");
+    el.className = "badge-fx";
+    el.style.setProperty("--bfx-a", t.a);
+    el.style.setProperty("--bfx-glow", t.a + "99");
+    el.innerHTML = `
+      <div class="badge-fx-burst"></div>
+      <div class="badge-fx-rings"><div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div></div>
+      <div class="badge-fx-emblem">${emblem(b, 168)}</div>
+      <div class="badge-fx-eyebrow">Badge unlocked</div>
+      <h2 class="badge-fx-name">${esc(b.name)}${b.sub ? " · " + esc(b.sub) : ""}</h2>
+      <div class="badge-fx-tier">${t.label}</div>
+      <p class="badge-fx-desc">${esc(b.desc)}</p>
+      <div class="badge-fx-tap">Equip it from your profile · tap to continue</div>`;
+    document.body.appendChild(el);
+    let done = false;
+    const finish = () => {
+      if(done) return; done = true;
+      el.classList.remove("show");
+      setTimeout(() => { el.remove(); resolve(); }, 300);
+    };
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("show")));
+    el.addEventListener("click", finish);
+    setTimeout(finish, 3600);
+  });
+}
+async function announceUnlocks(before){
+  const all = badgesFor(myBadgeCtx());
+  const fresh = all.filter(b => b.earned && !before.includes(b.id));
+  for(const b of fresh) await celebrateBadge(b);
 }
 async function record({kind, subject, topic, score, seconds, lesson_id, meta}){
   const before = S.me.role==="student" ? badgesFor(myBadgeCtx()).filter(b=>b.earned).map(b=>b.id) : [];
@@ -3000,7 +3084,15 @@ async function boot(){
   if(!location.hash) location.hash = S.me.role==="student" ? "#/home" : "#/class";
   route();
 }
-async function signOut(){ await sb.auth.signOut(); location.replace("login.html"); }
+async function signOut(){
+  await sb.auth.signOut();
+  // belt-and-braces: clear any stray Supabase auth keys in either store, so a
+  // switched "keep me signed in" choice can't leave a stale session behind.
+  [localStorage, sessionStorage].forEach(store => {
+    Object.keys(store).filter(k => k.startsWith("sb-")).forEach(k => store.removeItem(k));
+  });
+  location.replace("login.html");
+}
 boot();
 </script>
 </body>
