@@ -498,6 +498,8 @@ a{color:inherit;text-decoration:none;}
   .mobilebar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--mute);font-weight:600;}
   .mobilebar a.on{color:var(--teal);}
   .mobiletop{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  /* Fixed bottom bar covers the toast's default position on phones. */
+  .toast{bottom:calc(78px + env(safe-area-inset-bottom))!important;}
 }
 @media (min-width:861px){.mobiletop{display:none;}}
 .scroll-x{overflow-x:auto;}
@@ -951,6 +953,7 @@ const I = {
 };
 function toast(msg){
   const t=document.createElement("div");
+  t.className="toast";
   t.style.cssText="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:80;background:var(--teal);color:var(--on-accent);font-weight:700;font-size:12.5px;padding:10px 16px;border-radius:99px;max-width:86vw;text-align:center";
   t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2600);
 }
