@@ -8,7 +8,7 @@ Files:
 - `schema.sql` — the database
 - `supabase/functions/ai/index.ts` — the AI service, where the Groq key lives
 
-Nothing in the app is mock data. A new account starts empty and fills up as work is done.
+Nothing in the app is mock data any more. A new account starts empty and fills up as work is done.
 
 ---
 
@@ -16,7 +16,7 @@ Nothing in the app is mock data. A new account starts empty and fills up as work
 
 **1. Create a Supabase project.** Sign up at supabase.com, create a project, choose the Singapore region, and save the database password.
 
-**2. Run the schema.** Open SQL Editor, click New query, paste all of `schema.sql`, click Run. It creates `profiles`, `courses`, `lessons`, `enrollments`, `attempts`, `portfolio_items`, `chat_threads`, `chat_messages`, `student_memory`, `assistant_messages` and `assistant_memory`, and switches on the access rules. Safe to run more than once — later runs pick up wherever an earlier version of this file left off, including backfilling any pre-existing chat history into a thread so nothing is orphaned.
+**2. Run the schema.** Open SQL Editor, click New query, paste all of `schema.sql`, click Run. It creates `profiles`, `courses`, `lessons`, `enrollments`, `attempts` and `portfolio_items`, and switches on the access rules. Safe to run more than once. If you ran the older version of this file before, running this one updates it.
 
 **3. Turn off email confirmation while testing.** Authentication → Sign In / Providers → Email → turn off Confirm email. Turn it back on before real students use it.
 
@@ -49,34 +49,29 @@ The Groq key must never sit in the browser, so it lives in a Supabase Edge Funct
 
 No terminal? In the dashboard, open Edge Functions, create one named exactly `ai`, paste the contents of `supabase/functions/ai/index.ts`, and deploy. Add `GROQ_API_KEY` under Edge Functions → Secrets.
 
-**Whenever `index.ts` changes, it has to be redeployed separately** — editing the file or pushing it to git does nothing to the live function on its own. This has bitten us before: a feature can look "done" in the repo while the deployed function is still running the old version.
-
 ---
 
 ## How to demo it
 
-Do this in order, with two accounts. About six minutes end to end.
+Do this in order, with two accounts.
 
 **As a teacher:**
 1. Register, choosing Teacher.
 2. Courses → create one, for example Physics 9702 with subject Physics.
 3. Add a lesson: type a title and topic, click "Draft notes with AI", then "Write the checkpoint with AI". Edit whatever it gives you, then click Add lesson.
 4. Publish the course.
-5. Open Edu AI (the teaching assistant) and ask "Who needs my attention this week?" — it reads real class data, and tell it something to remember (e.g. a plan or a preference); that note will still be there in a future conversation, not just this one.
 
 **As a student, in another browser or a private window:**
-6. Register as Student — watch for the "First Day" badge to unlock full-screen on first sign-in.
-7. Open Learn, join the course — "Enrolled" unlocks the same way.
-8. Open the lesson, answer the checkpoint. The AI explains your reasoning and the result is written to your genome. This is also usually the first graded work, so "First Steps" unlocks too.
-9. Open ExamLens. Either type a wrong answer on purpose, or use "Read photo with AI" to OCR a handwritten/photographed answer straight from a camera or photo library — either way it marks it, names the cause of the lost marks, and records it.
-10. Open Mirage, pick a topic — it writes five questions at increasing distance from the taught form. Answer them and it separates apparent mastery from genuine mastery.
-11. Open Study doctor and diagnose the fortnight — it reasons about prerequisite topics, not just weak scores.
-12. Open Edu AI. Mention a goal or preference ("I'm aiming for mechanical engineering"), then click **+ New chat** to start a completely separate conversation and ask what it remembers about you — it should recall the goal even though that's a different thread with no shared history. This is the ChatGPT-style cross-chat memory, distinct from any single conversation's own context.
+5. Register as Student, open Learn, join the course.
+6. Open the lesson, answer the checkpoint. The AI explains your reasoning and the result is written to your genome.
+7. Open ExamLens, paste a real exam question and a wrong answer on purpose. It marks it, names the cause, and records it.
+8. Open Mirage, pick a topic, and it writes five questions at increasing distance from the taught form. Answer them and it separates apparent mastery from genuine mastery.
+9. Open Study doctor and diagnose the fortnight, then open Edu AI and ask what to work on. Every answer is built from the rows you just created.
 
 **Back as the teacher:**
-13. My class shows that student, their genome score and their weakest topic. Click them to see the topic breakdown, read only.
+10. My class shows that student, their genome score and their weakest topic. Click them to see the topic breakdown, read only.
 
-That sequence is the whole product, with no invented data anywhere in it.
+That sequence is the whole product in about four minutes, with no invented data anywhere in it.
 
 ---
 
@@ -84,24 +79,19 @@ That sequence is the whole product, with no invented data anywhere in it.
 
 **The genome** is computed in the browser from the `attempts` table: score = sum of (result × source weight × decay) ÷ sum of (source weight × decay), per topic. Weights are test 30, practice paper 22, ExamLens 18, Mirage 18, quiz 14, Study Doctor 10, lesson checkpoint 6, and every result fades with a 60-day half-life. The scoring page inside the app shows this to the user.
 
-**The AI** runs on `gpt-oss-120b` through Groq for text, and `qwen/qwen3.8-27b` — the only vision-capable model Groq currently hosts — for reading photographed or handwritten answers in ExamLens. Every call goes only through the Edge Function, which verifies the caller's JWT, loads that student's own profile and attempts, builds the prompt, and instructs the model to use only that evidence. Tasks: chat, chat title generation, checkpoint feedback, lesson drafting, checkpoint writing, video-transcript summarising, ExamLens marking (text and photo), Mirage generation and marking, Study Doctor diagnosis, pathway advice, and the teaching assistant.
+**The AI** runs on gpt-oss-120b through Groq, called only from the Edge Function. The function verifies the caller's JWT, loads that student's own profile and attempts, builds the prompt, and instructs the model to use only that evidence. Tasks: chat, checkpoint feedback, lesson drafting, checkpoint writing, ExamLens marking, Mirage generation and marking, Study Doctor diagnosis, and pathway advice.
 
-**Edu AI's memory** works the same way for students and teachers: durable notes (goals, preferences, plans — never grades, those are live data) that persist across every conversation, not just the one they were mentioned in. Students additionally get separate chat threads, like a normal chat app, with AI-written titles; the memory is shared across all of a student's threads, while each thread's own conversation stays isolated to itself.
-
-**Badges** are computed the same way as the genome — read live from `attempts`, `login_days`, `portfolio_items` and enrollments, never stored as a flag. Unlocking one triggers a full-screen reveal using the real badge artwork and its rarity tier's colour.
-
-**Access rules** are enforced by PostgreSQL, not by the interface. Students can only read and write their own rows. Teachers can read student academic records but never write to them, and can never read a student's Edu AI conversations or memory — there's no staff-read policy on those tables at all, so it isn't a hidden UI restriction, it's enforced at the database level regardless of what the interface shows.
+**Access rules** are enforced by PostgreSQL, not by the interface. Students can only read and write their own rows. Teachers can read student records but never write to them. Nobody can read another student's portfolio drafts or Edu AI conversations.
 
 ---
 
 ## Honest limits, worth knowing before judges ask
 
-- ExamLens photo reading depends on Groq's vision model being available and within its rate limit; if it's briefly unavailable, typing the answer in still works as a fallback.
+- ExamLens takes typed text. Handwritten or scanned papers need OCR first, which isn't built.
 - Mirage marks short written answers with the model, so its marking is as good as the model is. Expect the occasional generous mark.
 - There's no timetable, attendance or school news yet. Those slides are still future work.
 - Lesson checkpoints are multiple choice.
 - Anyone with a school email can register as a teacher. A real deployment needs the school to approve staff accounts.
-- The confirmation email is sent through a personal Gmail account's SMTP relay rather than a dedicated transactional provider, so it can land in spam, especially on a first send to a given recipient. If a judge signs up live and doesn't see it, check spam.
 
 ---
 
@@ -115,10 +105,6 @@ That sequence is the whole product, with no invented data anywhere in it.
 
 **AI features say they can't reach the service** — the function isn't deployed, or `GROQ_API_KEY` isn't set. Check Edge Functions → Logs in the dashboard for the real error.
 
-**A feature works in the code but not in the app** — the edge function almost certainly needs redeploying; see the note at the end of Part 2.
-
 **Student sees no courses** — the teacher hasn't clicked Publish on the course.
 
 **Checkpoint doesn't record anything** — the lesson was added without a checkpoint. Lessons without one teach, but don't measure.
-
-**Edu AI has no memory of an earlier conversation** — check whether it was in a *different* chat thread than expected; per-thread history and cross-thread memory are two different things (see "What each part actually does" above).

@@ -163,6 +163,17 @@
 .pb-name.ns-t-mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-weight:700;letter-spacing:0;font-size:calc(var(--fs-5) * .88)}
 .ns-stage.t-stage{background:linear-gradient(135deg,#1b242e,#232f3b)}
 .ns-stage.t-stage .pb-name{color:#f2f4f6;text-shadow:none}
+/* ---- test builder and papers, laid out like a form ---- */
+.form-head{border-top:4px solid var(--teal);padding:24px}
+.q-card{padding:24px}
+.q-num{font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--mute)}
+.opt-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+.opt-radio{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);background:transparent;cursor:pointer}
+.opt-radio.on{border-color:var(--teal);box-shadow:inset 0 0 0 4px var(--teal)}
+.opt-pick{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 16px;margin-top:8px;
+  border:1px solid var(--line);border-radius:12px;background:var(--bg2);font-size:var(--fs-3);color:var(--ink);transition:all .15s}
+.opt-pick:hover{border-color:rgba(var(--accent-rgb),.45)}
+.opt-pick.on{border-color:var(--teal);background:var(--teal-ghost)}
 /* ---- teaching assistant ---- */
 .ta-wrap{display:block}
 .only-narrow{display:none}
@@ -487,8 +498,6 @@ a{color:inherit;text-decoration:none;}
   .mobilebar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--mute);font-weight:600;}
   .mobilebar a.on{color:var(--teal);}
   .mobiletop{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-  /* Fixed bottom bar covers the toast's default position on phones. */
-  .toast{bottom:calc(78px + env(safe-area-inset-bottom))!important;}
 }
 @media (min-width:861px){.mobiletop{display:none;}}
 .scroll-x{overflow-x:auto;}
@@ -942,7 +951,6 @@ const I = {
 };
 function toast(msg){
   const t=document.createElement("div");
-  t.className="toast";
   t.style.cssText="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:80;background:var(--teal);color:var(--on-accent);font-weight:700;font-size:12.5px;padding:10px 16px;border-radius:99px;max-width:86vw;text-align:center";
   t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2600);
 }
@@ -2401,6 +2409,471 @@ async function taSend(text){
   const c = $("#taChat"); c && c.lastElementChild && c.lastElementChild.scrollIntoView({block:"end"});
 }
 
+
+/* ================= tests and test papers =================
+   Teachers build a paper, students sit it, the AI marks it, the teacher
+   checks every mark, and only then are results released. Answer keys and
+   unreleased marks are kept from students by the database itself. */
+const QKINDS = [
+  { id:"mcq",     name:"Multiple choice", hint:"One correct option. Marked exactly, without the AI." },
+  { id:"theory",  name:"Written answer",  hint:"Marked against your mark scheme, with partial credit." },
+  { id:"drawing", name:"Drawing or photo", hint:"The student uploads a photo; a vision model reads it." }
+];
+const uuid = () => (crypto.randomUUID ? crypto.randomUUID()
+  : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c=>{const r=Math.random()*16|0;return (c=="x"?r:(r&3|8)).toString(16);}));
+const blankQ = kind => ({ id:uuid(), kind, prompt:"", options:kind==="mcq"?["",""]:null, answer_index:kind==="mcq"?0:null, expected:"", marks: kind==="mcq"?1:4 });
+const confChip = c => `<span class="chip ${c==="low"?"warn":c==="high"?"teal":""}">${c==="low"?"Check this":c==="high"?"Confident":"Fairly sure"}</span>`;
+S.tests = { list:null, builder:null, marking:null, take:null, result:null, busy:false };
+
+async function loadTests(){
+  if(S.me.role==="student"){
+    const [t, subs] = await Promise.all([
+      sb.from("tests").select("*").eq("status","published").order("created_at",{ascending:false}),
+      sb.from("test_submissions").select("*").eq("student_id",S.me.id)
+    ]);
+    if(t.error && /does not exist|schema cache/i.test(t.error.message)) S.tests.missing = true;
+    S.tests.list = t.data||[]; S.tests.subs = subs.data||[];
+  } else {
+    const t = await sb.from("tests").select("*").eq("teacher_id",S.me.id).order("created_at",{ascending:false});
+    if(t.error && /does not exist|schema cache/i.test(t.error.message)) S.tests.missing = true;
+    S.tests.list = t.data||[];
+    const ids = (S.tests.list||[]).map(x=>x.id);
+    S.tests.subs = ids.length ? ((await sb.from("test_submissions").select("*").in("test_id",ids)).data||[]) : [];
+  }
+  rerender();
+}
+
+/* ---------------- teacher: the list ---------------- */
+V.tests = () => {
+  if(S.tests.list===null){ loadTests(); return `<div class="topbar"><div><h1 class="h1">Tests</h1><div class="sub">Loading…</div></div></div>`; }
+  if(S.tests.missing) return empty("Tests aren't set up yet","Run tests.sql in the Supabase SQL Editor, then reload.");
+  if(S.me.role!=="student") return V.testsTeacher();
+  return V.testsStudent();
+};
+V.testsTeacher = () => {
+  const list = S.tests.list, subs = S.tests.subs||[];
+  return `
+  <div class="topbar"><div><h1 class="h1">Tests</h1>
+    <div class="sub">Build a paper, let Edu AI mark it, check every mark, then release the results.</div></div></div>
+  <div class="card lens-card">
+    <div class="lens-head"><span class="lens-badge">+</span><div><b>New test</b><div class="note">You add the questions on the next screen</div></div></div>
+    <div class="grid g3">
+      <div><label class="f" for="ntTitle">Title</label><input id="ntTitle" placeholder="Waves — end of unit test"></div>
+      <div><label class="f" for="ntSubject">Subject</label><input id="ntSubject" placeholder="Physics"></div>
+      <div><label class="f" for="ntTopic">Topic</label><input id="ntTopic" placeholder="Waves and superposition"></div>
+    </div>
+    <label class="f" for="ntInstructions">Instructions for students</label>
+    <input id="ntInstructions" placeholder="Answer all questions. Show your working.">
+    <button class="btn big" style="margin-top:16px" data-act="test-create">Create test</button>
+  </div>
+  ${list.length ? `<div class="sec">Your tests</div>
+    <div class="grid" style="gap:12px">
+      ${list.map(t=>{
+        const mine = subs.filter(s=>s.test_id===t.id);
+        const toMark = mine.filter(s=>s.status==="submitted").length, released = mine.filter(s=>s.status==="released").length;
+        return `<div class="card">
+          <div class="between wrap-sm">
+            <div style="min-width:0"><b style="font-size:var(--fs-4)">${esc(t.title)}</b>
+              <div class="note">${esc(t.subject)} · ${esc(t.topic)}</div></div>
+            <div class="row" style="gap:8px;flex-wrap:wrap">
+              <span class="chip ${t.status==="published"?"teal":""}">${t.status==="published"?"Open to students":t.status==="closed"?"Closed":"Draft"}</span>
+              ${mine.length?`<span class="chip">${mine.length} submitted</span>`:""}
+              ${toMark?`<span class="chip warn">${toMark} to mark</span>`:""}
+              ${released?`<span class="chip teal">${released} released</span>`:""}
+            </div></div>
+          <div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap">
+            <a class="btn sm" href="#/build/${t.id}">Edit paper</a>
+            <a class="btn ghost sm" href="#/marking/${t.id}">Submissions${mine.length?` (${mine.length})`:""}</a>
+            <button class="btn ghost sm" data-act="test-status" data-id="${t.id}" data-s="${t.status==="published"?"closed":"published"}">${t.status==="published"?"Close":"Publish to students"}</button>
+          </div></div>`;
+      }).join("")}</div>`
+   : empty("No tests yet","Create one above. Nothing is visible to students until you publish it.")}`;
+};
+
+/* ---------------- teacher: the builder (Google-Forms style) ---------------- */
+async function openBuilder(id){
+  const [t, q, k] = await Promise.all([
+    sb.from("tests").select("*").eq("id",id).single(),
+    sb.from("test_questions").select("*").eq("test_id",id).order("position"),
+    sb.from("question_key").select("*").eq("test_id",id)
+  ]);
+  S.tests.builder = { test:t.data, dirty:false,
+    questions:(q.data||[]).map(x=>{ const key=(k.data||[]).find(y=>y.question_id===x.id)||{};
+      return { id:x.id, kind:x.kind, prompt:x.prompt, options:x.options, marks:x.marks,
+               answer_index:key.answer_index, expected:key.expected||"" }; }) };
+  rerender();
+}
+function captureBuilder(){
+  const B = S.tests.builder; if(!B || !$("#bTitle")) return;
+  B.test.title = $("#bTitle").value; B.test.subject = $("#bSubject").value;
+  B.test.topic = $("#bTopic").value; B.test.instructions = $("#bInstructions").value;
+  B.questions.forEach((q,i)=>{
+    const g = id => $("#"+id+i);
+    if(g("qPrompt")) q.prompt = g("qPrompt").value;
+    if(g("qMarks"))  q.marks = Math.max(1, Number(g("qMarks").value)||1);
+    if(g("qExpected")) q.expected = g("qExpected").value;
+    if(q.kind==="mcq") q.options = (q.options||[]).map((o,j)=> $(`#qOpt${i}_${j}`) ? $(`#qOpt${i}_${j}`).value : o);
+  });
+}
+V.build = () => {
+  const B = S.tests.builder;
+  if(B && !B.test) return empty("Test not found","It may have been deleted.");
+  if(!B){ openBuilder(S.tests.openId); return `<div class="topbar"><div><h1 class="h1">Loading the paper…</h1></div></div>`; }
+  const t = B.test, total = B.questions.reduce((s,q)=>s+(q.marks||0),0);
+  return `
+  <div class="crumb"><a href="#/tests">Tests</a> · ${esc(t.subject)}</div>
+  <div class="topbar"><div><h1 class="h1" style="font-size:var(--fs-6)">Edit paper</h1>
+    <div class="sub">${B.questions.length} question${B.questions.length===1?"":"s"} · ${total} mark${total===1?"":"s"} in total${B.dirty?" · <span style=\"color:var(--warn)\">unsaved changes</span>":""}</div></div>
+    <div class="row" style="gap:8px"><a class="btn ghost sm" href="#/marking/${t.id}">Submissions</a>
+      <button class="btn sm" data-act="test-save">${busy("testSave","Save paper")}</button></div></div>
+
+  <div class="card form-head">
+    <label class="f" for="bTitle">Test title</label><input id="bTitle" value="${esc(t.title)}">
+    <div class="grid g2">
+      <div><label class="f" for="bSubject">Subject</label><input id="bSubject" value="${esc(t.subject)}"></div>
+      <div><label class="f" for="bTopic">Topic</label><input id="bTopic" value="${esc(t.topic)}"></div>
+    </div>
+    <label class="f" for="bInstructions">Instructions for students</label>
+    <input id="bInstructions" value="${esc(t.instructions||"")}" placeholder="Answer all questions. Show your working.">
+  </div>
+
+  ${B.questions.map((q,i)=>`
+    <div class="card q-card">
+      <div class="between" style="margin-bottom:12px">
+        <span class="q-num">Question ${i+1}</span>
+        <div class="row" style="gap:8px">
+          <button class="btn ghost sm" data-act="q-move" data-i="${i}" data-d="-1" ${i===0?"disabled":""}>↑</button>
+          <button class="btn ghost sm" data-act="q-move" data-i="${i}" data-d="1" ${i===B.questions.length-1?"disabled":""}>↓</button>
+          <button class="btn ghost sm" data-act="q-del" data-i="${i}">Remove</button>
+        </div>
+      </div>
+      <div class="seg" style="margin-bottom:12px">
+        ${QKINDS.map(k=>`<button class="${q.kind===k.id?"on":""}" data-act="q-kind" data-i="${i}" data-k="${k.id}">${esc(k.name)}</button>`).join("")}
+      </div>
+      <label class="f" for="qPrompt${i}">Question</label>
+      <textarea id="qPrompt${i}" style="min-height:80px" placeholder="Explain why the induced current opposes the change producing it.">${esc(q.prompt)}</textarea>
+      ${q.kind==="mcq" ? `
+        <label class="f">Options — tap the circle to mark the correct one</label>
+        ${(q.options||[]).map((o,j)=>`<div class="opt-row">
+            <button class="opt-radio ${q.answer_index===j?"on":""}" data-act="q-answer" data-i="${i}" data-j="${j}" aria-label="Mark option ${j+1} correct"></button>
+            <input id="qOpt${i}_${j}" value="${esc(o)}" placeholder="Option ${j+1}">
+            ${(q.options||[]).length>2?`<button class="mem-x" data-act="q-opt-del" data-i="${i}" data-j="${j}">✕</button>`:""}
+          </div>`).join("")}
+        <button class="btn ghost sm" style="margin-top:10px" data-act="q-opt-add" data-i="${i}">Add option</button>`
+      : `<label class="f" for="qExpected${i}">Mark scheme ${q.kind==="drawing"?"— what the drawing must show":"— what earns the marks"}</label>
+         <textarea id="qExpected${i}" style="min-height:70px" placeholder="1 mark for stating Lenz's law, 2 for applying it to the direction, 1 for the sign.">${esc(q.expected||"")}</textarea>`}
+      <div class="row" style="gap:12px;align-items:flex-end;margin-top:12px">
+        <div style="width:150px"><label class="f" for="qMarks${i}">Marks</label><input id="qMarks${i}" type="number" min="1" value="${q.marks}"></div>
+        <div class="note" style="padding-bottom:12px">${esc((QKINDS.find(k=>k.id===q.kind)||{}).hint||"")}</div>
+      </div>
+    </div>`).join("")}
+
+  <div class="card" style="margin-top:14px">
+    <div class="note" style="margin-bottom:10px">Add a question</div>
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+      ${QKINDS.map(k=>`<button class="btn ghost sm" data-act="q-add" data-k="${k.id}">${esc(k.name)}</button>`).join("")}
+    </div>
+  </div>
+  <div class="row" style="gap:8px;margin-top:16px;flex-wrap:wrap">
+    <button class="btn big" data-act="test-save">${busy("testSave","Save paper")}</button>
+    <button class="btn ghost" data-act="test-status" data-id="${t.id}" data-s="${t.status==="published"?"closed":"published"}">
+      ${t.status==="published"?"Close to students":"Publish to students"}</button>
+  </div>`;
+};
+
+/* ---------------- teacher: submissions and marking ---------------- */
+async function openMarking(testId){
+  const [t, q, subs] = await Promise.all([
+    sb.from("tests").select("*").eq("id",testId).single(),
+    sb.from("test_questions").select("*").eq("test_id",testId).order("position"),
+    sb.from("test_submissions").select("*").eq("test_id",testId).order("submitted_at")
+  ]);
+  const ids = (subs.data||[]).map(s=>s.student_id);
+  const names = ids.length ? ((await sb.from("profiles").select("id, full_name, grade").in("id",ids)).data||[]) : [];
+  S.tests.marking = { test:t.data, questions:q.data||[], subs:(subs.data||[]).map(s=>({ ...s,
+    student:(names.find(n=>n.id===s.student_id)||{}).full_name || "Student" })), open:null };
+  rerender();
+}
+async function openSubmission(subId){
+  const M = S.tests.marking;
+  const [a, m] = await Promise.all([
+    sb.from("test_answers").select("*").eq("submission_id",subId),
+    sb.from("test_marks").select("*").eq("submission_id",subId)
+  ]);
+  M.open = { sub: M.subs.find(s=>s.id===subId), answers:a.data||[], marks:m.data||[] };
+  rerender();
+}
+V.marking = () => {
+  const M = S.tests.marking;
+  if(M && !M.test) return empty("Test not found","It may have been deleted.");
+  if(!M){ openMarking(S.tests.openId); return `<div class="topbar"><div><h1 class="h1">Loading submissions…</h1></div></div>`; }
+  if(M.open) return V.markOne();
+  const t = M.test;
+  return `
+  <div class="crumb"><a href="#/tests">Tests</a> · <a href="#/build/${t.id}">${esc(t.title)}</a></div>
+  <div class="topbar"><div><h1 class="h1" style="font-size:var(--fs-6)">Submissions</h1>
+    <div class="sub">${esc(t.title)} · ${M.subs.length} submitted</div></div></div>
+  ${M.subs.length ? `<div class="card list">
+      ${M.subs.map(s=>`<div class="item wrap-sm">
+        <div style="min-width:0"><div style="font-size:var(--fs-3);font-weight:700">${esc(s.student)}</div>
+          <div class="note">Submitted ${ago(s.submitted_at)}</div></div>
+        <div class="row" style="gap:10px;flex-wrap:wrap">
+          ${s.total_score!==null && s.total_score!==undefined?`<b class="pct">${Math.round(s.total_score)}/${s.total_marks}</b>`:""}
+          <span class="chip ${s.status==="released"?"teal":s.status==="marked"?"":"warn"}">
+            ${s.status==="released"?"Released":s.status==="marked"?"Marked, not released":"Needs marking"}</span>
+          <button class="btn sm" data-act="mark-open" data-id="${s.id}">${s.status==="submitted"?"Mark":"Review"}</button>
+        </div></div>`).join("")}</div>`
+   : empty("Nothing submitted yet","Students see this paper once it's published. Their submissions appear here.")}`;
+};
+V.markOne = () => {
+  const M = S.tests.marking, O = M.open, s = O.sub;
+  const ansOf = id => O.answers.find(a=>a.question_id===id)||{};
+  const markOf = id => O.marks.find(m=>m.question_id===id)||{};
+  const total = M.questions.reduce((t,q)=>t+(Number((markOf(q.id).score)||0)),0);
+  const outOf = M.questions.reduce((t,q)=>t+q.marks,0);
+  const marked = O.marks.length>0;
+  return `
+  <div class="crumb"><a href="#/tests">Tests</a> · <span data-act="mark-back" style="cursor:pointer">Submissions</span> · ${esc(s.student)}</div>
+  <div class="topbar"><div><h1 class="h1" style="font-size:var(--fs-6)">${esc(s.student)}</h1>
+    <div class="sub">${esc(M.test.title)} · submitted ${ago(s.submitted_at)}</div></div>
+    <div class="row" style="gap:8px">
+      <button class="btn ghost sm" data-act="mark-back">Back</button>
+      <button class="btn sm" data-act="mark-ai" data-id="${s.id}">${busy("markAI", marked?"Re-mark with AI":"Mark with AI")}</button>
+    </div></div>
+
+  ${marked ? `<div class="grid g3">
+      <div class="stat"><div class="k">Marked so far</div><div class="v">${Math.round(total)}/${outOf}</div></div>
+      <div class="stat"><div class="k">Percentage</div><div class="v">${outOf?Math.round(total/outOf*100):0}%</div></div>
+      <div class="stat ${O.marks.filter(m=>m.confidence==="low").length?"warn":""}"><div class="k">Flagged for you</div>
+        <div class="v">${O.marks.filter(m=>m.confidence==="low").length}</div></div>
+    </div>
+    <div class="card flat" style="margin-top:12px"><div class="note">Every mark below is editable. The student sees nothing until you press Release.</div></div>`
+   : `<div class="card"><div class="note">Not marked yet. Press <b>Mark with AI</b>, then check each mark before releasing.</div></div>`}
+
+  ${M.questions.length ? "" : `<div class="card" style="margin-top:14px;border-color:var(--warn-line);background:var(--warn-soft)">
+      <b class="warn-text">This paper has no saved questions</b>
+      <p class="note" style="margin:7px 0 0">Open <a href="#/build/${M.test.id}">Edit paper</a>, add the questions and press Save paper. Anything typed but not saved stays in the browser only.</p></div>`}
+  ${M.questions.map((q,i)=>{
+    const a = ansOf(q.id), m = markOf(q.id);
+    const opts = Array.isArray(q.options)?q.options:[];
+    return `<div class="card q-card" style="margin-top:14px">
+      <div class="between" style="margin-bottom:10px">
+        <span class="q-num">Question ${i+1} · ${esc((QKINDS.find(k=>k.id===q.kind)||{}).name||q.kind)}</span>
+        <div class="row" style="gap:8px">${m.confidence?confChip(m.confidence):""}<span class="chip">${q.marks} mark${q.marks===1?"":"s"}</span></div>
+      </div>
+      <p style="font-size:var(--fs-3);font-weight:600;margin:0 0 12px">${esc(q.prompt)}</p>
+      <div class="card flat" style="margin-bottom:12px">
+        <div class="note">Student's answer</div>
+        ${q.kind==="mcq"
+          ? `<div style="font-size:var(--fs-2);margin-top:6px">${a.chosen_index===null||a.chosen_index===undefined?"<i>No option chosen</i>":esc(opts[a.chosen_index]||"?")}</div>`
+          : `${a.image_url?`<img src="${esc(a.image_url)}" alt="Student's work" style="max-width:100%;max-height:340px;object-fit:contain;border-radius:10px;margin-top:8px;background:#fff">`:""}
+             <div class="prose" style="font-size:var(--fs-2);margin-top:8px">${esc(a.response||"(blank)")}</div>`}
+      </div>
+      ${m.correct?`<div class="note" style="margin-bottom:10px">Expected: ${esc(m.correct)}</div>`:""}
+      <div class="row" style="gap:12px;align-items:flex-end;flex-wrap:wrap">
+        <div style="width:170px"><label class="f" for="mScore${i}">Marks awarded</label>
+          <input id="mScore${i}" type="number" min="0" max="${q.marks}" step="0.5" value="${m.score!==undefined?m.score:0}"></div>
+        <div style="flex:1;min-width:240px"><label class="f" for="mFb${i}">Feedback to the student</label>
+          <input id="mFb${i}" value="${esc(m.feedback||"")}" placeholder="What earned the marks, and what was missing"></div>
+      </div>
+      ${m.ai_score!==null&&m.ai_score!==undefined?`<div class="note" style="margin-top:8px">Edu AI gave ${m.ai_score} of ${q.marks}.</div>`:""}
+    </div>`; }).join("")}
+
+  ${marked?`<div class="row" style="gap:8px;margin-top:16px;flex-wrap:wrap">
+    <button class="btn" data-act="mark-save" data-id="${s.id}">${busy("markSave","Save my changes")}</button>
+    <button class="btn big" data-act="mark-release" data-id="${s.id}">${busy("markRelease","Release results to this student")}</button>
+  </div>
+  <div class="note" style="margin-top:10px">Releasing saves the result to the student's genome as a test, the heaviest evidence there is.</div>`:""}`;
+};
+
+/* ---------------- student: sitting a test and seeing results ---------------- */
+V.testsStudent = () => {
+  const subs = S.tests.subs||[], list = S.tests.list;
+  const open = list.filter(t=>!subs.some(s=>s.test_id===t.id));
+  const waiting = subs.filter(s=>s.status!=="released");
+  const done = subs.filter(s=>s.status==="released");
+  const tOf = id => list.find(t=>t.id===id)||{};
+  return `
+  <div class="topbar"><div><h1 class="h1">Tests</h1>
+    <div class="sub">Papers set by your teachers, and your results once they're released.</div></div>
+    <button class="btn ghost sm" data-act="tests-refresh">${busy("testsRefresh","Refresh")}</button></div>
+  ${open.length?`<div class="sec">To sit</div>
+    <div class="grid" style="gap:12px">${open.map(t=>`<div class="card">
+      <div class="between wrap-sm"><div style="min-width:0"><b style="font-size:var(--fs-4)">${esc(t.title)}</b>
+        <div class="note">${esc(t.subject)} · ${esc(t.topic)}</div></div>
+        <a class="btn sm" href="#/sit/${t.id}">Start</a></div></div>`).join("")}</div>`:""}
+  ${waiting.length?`<div class="sec">Waiting on your teacher</div>
+    <div class="card list">${waiting.map(s=>`<div class="item">
+      <div><div style="font-size:var(--fs-2);font-weight:600">${esc(tOf(s.test_id).title||"Test")}</div>
+        <div class="note">Submitted ${ago(s.submitted_at)}</div></div>
+      <span class="chip">Being marked</span></div>`).join("")}</div>`:""}
+  ${done.length?`<div class="sec">Your results</div>
+    <div class="grid" style="gap:12px">${done.map(s=>{
+      const pct = s.total_marks?Math.round(s.total_score/s.total_marks*100):0;
+      return `<div class="card"><div class="between wrap-sm">
+        <div style="min-width:0"><b style="font-size:var(--fs-4)">${esc(tOf(s.test_id).title||"Test")}</b>
+          <div class="note">${esc(tOf(s.test_id).subject||"")} · released ${ago(s.released_at||s.submitted_at)}</div></div>
+        <div class="row" style="gap:12px"><b class="pct ${pct<60?"warn":""}">${Math.round(s.total_score)}/${s.total_marks} · ${pct}%</b>
+          <a class="btn sm" href="#/result/${s.id}">See the marking</a></div></div></div>`; }).join("")}</div>`:""}
+  ${!open.length && !waiting.length && !done.length ? empty("No tests yet","When a teacher publishes a paper it appears here, and your results follow once they're released.") : ""}`;
+};
+async function openTake(testId){
+  const [t, q] = await Promise.all([
+    sb.from("tests").select("*").eq("id",testId).single(),
+    sb.from("test_questions").select("id, position, kind, prompt, options, marks").eq("test_id",testId).order("position")
+  ]);
+  S.tests.take = { test:t.data, questions:q.data||[], answers:{}, images:{} };
+  rerender();
+}
+function captureTake(){
+  const T = S.tests.take; if(!T) return;
+  T.questions.forEach((q,i)=>{ const el = $("#aResp"+i); if(el) T.answers[q.id] = { ...(T.answers[q.id]||{}), response: el.value }; });
+}
+V.sit = () => {
+  const T = S.tests.take;
+  if(T && !T.test) return empty("Test not available","It may have been closed by your teacher.");
+  if(!T){ openTake(S.tests.openId); return `<div class="topbar"><div><h1 class="h1">Opening the paper…</h1></div></div>`; }
+  const t = T.test, total = T.questions.reduce((s,q)=>s+q.marks,0);
+  return `
+  <div class="crumb"><a href="#/tests">Tests</a> · ${esc(t.subject)}</div>
+  <div class="card form-head" style="border-top:4px solid var(--teal)">
+    <h1 class="h1" style="font-size:var(--fs-6);margin:0 0 6px">${esc(t.title)}</h1>
+    <div class="note">${esc(t.subject)} · ${esc(t.topic)} · ${T.questions.length} questions · ${total} marks</div>
+    ${t.instructions?`<p class="prose" style="font-size:var(--fs-2);margin:12px 0 0">${esc(t.instructions)}</p>`:""}
+  </div>
+  ${T.questions.length ? "" : `<div class="card" style="margin-top:14px;border-color:var(--warn-line);background:var(--warn-soft)">
+      <b class="warn-text">This paper has no questions yet</b>
+      <p class="note" style="margin:7px 0 0">Your teacher is still building it. Check back shortly.</p></div>`}
+  ${T.questions.map((q,i)=>{
+    const a = T.answers[q.id]||{}, opts = Array.isArray(q.options)?q.options:[];
+    return `<div class="card q-card" style="margin-top:14px">
+      <div class="between" style="margin-bottom:10px">
+        <span class="q-num">Question ${i+1}</span><span class="chip">${q.marks} mark${q.marks===1?"":"s"}</span></div>
+      <p style="font-size:var(--fs-3);font-weight:600;margin:0 0 14px">${esc(q.prompt)}</p>
+      ${q.kind==="mcq" ? opts.map((o,j)=>`
+          <button class="opt-pick ${a.chosen_index===j?"on":""}" data-act="a-pick" data-q="${q.id}" data-j="${j}">
+            <span class="opt-radio ${a.chosen_index===j?"on":""}"></span><span>${esc(o)}</span></button>`).join("")
+        : q.kind==="drawing" ? `
+          <label class="drop" for="aImg${i}">
+            <input type="file" accept="image/*" capture="environment" id="aImg${i}" data-q="${q.id}">
+            <span class="drop-main">${a.image_url?"Photo attached — tap to replace":"Take or choose a photo of your work"}</span>
+            <span class="note">Drawings, graphs or handwritten working</span>
+            ${a.image_url?`<img src="${esc(a.image_url)}" alt="Your work" style="max-height:200px;border-radius:10px;margin-top:10px">`:""}
+          </label>
+          <label class="f" for="aResp${i}">Anything you want to add (optional)</label>
+          <textarea id="aResp${i}" style="min-height:70px">${esc(a.response||"")}</textarea>`
+        : `<div class="paper"><textarea id="aResp${i}" spellcheck="false" placeholder="Write your answer">${esc(a.response||"")}</textarea></div>`}
+    </div>`; }).join("")}
+  <div class="card" style="margin-top:16px">
+    <div class="note" style="margin-bottom:12px">Once you submit, your teacher marks it with Edu AI's help and releases the result.</div>
+    <button class="btn big" data-act="test-submit">${busy("testSubmit","Submit my answers")}</button>
+  </div>`;
+};
+async function openResult(subId){
+  const sub = (await sb.from("test_submissions").select("*").eq("id",subId).single()).data;
+  if(!sub){ S.tests.result = { missing:true }; rerender(); return; }
+  const [t, q, a, m] = await Promise.all([
+    sb.from("tests").select("*").eq("id",sub.test_id).single(),
+    sb.from("test_questions").select("*").eq("test_id",sub.test_id).order("position"),
+    sb.from("test_answers").select("*").eq("submission_id",subId),
+    sb.from("test_marks").select("*").eq("submission_id",subId)
+  ]);
+  S.tests.result = { sub, test:t.data, questions:q.data||[], answers:a.data||[], marks:m.data||[] };
+  rerender();
+}
+V.result = () => {
+  const R = S.tests.result;
+  if(R && R.missing) return empty("Result not available","It may not have been released yet.");
+  if(!R){ openResult(S.tests.openId); return `<div class="topbar"><div><h1 class="h1">Loading your result…</h1></div></div>`; }
+  const pct = R.sub.total_marks?Math.round(R.sub.total_score/R.sub.total_marks*100):0;
+  const markOf = id => R.marks.find(m=>m.question_id===id)||{};
+  const ansOf = id => R.answers.find(a=>a.question_id===id)||{};
+  return `
+  <div class="crumb"><a href="#/tests">Tests</a> · ${esc(R.test.subject)}</div>
+  <div class="topbar"><div><h1 class="h1" style="font-size:var(--fs-6)">${esc(R.test.title)}</h1>
+    <div class="sub">${esc(R.test.topic)} · marked by ${esc(R.test.subject)} teacher</div></div></div>
+  <div class="card report ${pct<60?"weak":""}">
+    <div class="report-top">${ring(pct)}
+      <div><div class="report-verdict">${Math.round(R.sub.total_score)} out of ${R.sub.total_marks}</div>
+        <p class="note" style="margin:8px 0 0">Every mark below was checked by your teacher before release.</p></div></div>
+  </div>
+  ${R.questions.map((q,i)=>{
+    const m = markOf(q.id), a = ansOf(q.id), opts = Array.isArray(q.options)?q.options:[];
+    const full = Number(m.score)>=q.marks, none = Number(m.score)===0;
+    return `<div class="card q-card" style="margin-top:14px;${none?"border-color:var(--warn-line)":""}">
+      <div class="between" style="margin-bottom:10px">
+        <span class="q-num">Question ${i+1}</span>
+        <b class="pct ${none?"warn":""}">${m.score||0}/${q.marks}</b></div>
+      <p style="font-size:var(--fs-3);font-weight:600;margin:0 0 12px">${esc(q.prompt)}</p>
+      <div class="cmp">
+        <div class="box ${full?"right":"yours"}"><div class="lbl">Your answer</div>
+          <div class="mono-ans">${q.kind==="mcq"?esc(opts[a.chosen_index]||"(nothing chosen)"):esc(a.response||"(blank)")}</div>
+          ${a.image_url?`<img src="${esc(a.image_url)}" alt="Your work" style="max-width:100%;border-radius:8px;margin-top:8px">`:""}</div>
+        ${m.correct?`<div class="box right"><div class="lbl">Expected</div><div class="mono-ans">${esc(m.correct)}</div></div>`:""}
+      </div>
+      ${m.feedback?`<p class="prose note" style="margin:12px 0 0">${esc(m.feedback)}</p>`:""}
+    </div>`; }).join("")}`;
+};
+
+/* Writes the paper the teacher is editing. Called by Save, by Publish, and
+   when they navigate away, so questions can never be left only in the browser. */
+async function savePaper(){
+
+    const B = S.tests.builder, t = B.test;
+    if(B.questions.some(q=>!q.prompt.trim())) throw new Error("Every question needs its text");
+    if(B.questions.some(q=>q.kind==="mcq" && (q.options||[]).some(o=>!o.trim()))) throw new Error("Every option needs text");
+    const up = await sb.from("tests").update({ title:t.title, subject:t.subject, topic:t.topic, instructions:t.instructions }).eq("id",t.id);
+    if(up.error) throw up.error;
+    const existing = (await sb.from("test_questions").select("id").eq("test_id",t.id)).data||[];
+    const keep = new Set(B.questions.map(q=>q.id));
+    const gone = existing.filter(e=>!keep.has(e.id)).map(e=>e.id);
+    if(gone.length) await sb.from("test_questions").delete().in("id",gone);
+    const rows = B.questions.map((q,i)=>({ id:q.id, test_id:t.id, position:i+1, kind:q.kind, prompt:q.prompt.trim(),
+      options: q.kind==="mcq" ? q.options : null, marks:q.marks }));
+    if(rows.length){
+      const qe = await sb.from("test_questions").upsert(rows).select("id"); if(qe.error) throw qe.error;
+      const keys = B.questions.map(q=>({ question_id:q.id, test_id:t.id,
+        answer_index: q.kind==="mcq" ? (q.answer_index??0) : null, expected: q.kind==="mcq" ? null : (q.expected||"") }));
+      const ke = await sb.from("question_key").upsert(keys); if(ke.error) throw ke.error;
+    }
+      S.tests.builder.dirty = false;
+  toast("Paper saved");
+}
+async function saveMarks(subId){
+  const M = S.tests.marking;
+  const rows = M.questions.map((q,i)=>{
+    const prev = (M.open.marks.find(m=>m.question_id===q.id)||{});
+    const score = Math.max(0, Math.min(q.marks, Number(($("#mScore"+i)||{}).value ?? prev.score ?? 0)));
+    const feedback = ($("#mFb"+i)||{}).value ?? prev.feedback ?? "";
+    const changed = prev.ai_score!==undefined && prev.ai_score!==null && Number(prev.ai_score)!==score;
+    return { submission_id:subId, question_id:q.id, score, max_marks:q.marks, feedback,
+             correct:prev.correct??null, ai_score:prev.ai_score??null, confidence:prev.confidence??null,
+             marked_by: changed ? "teacher" : (prev.marked_by||"ai") };
+  });
+  const { error } = await sb.from("test_marks").upsert(rows, { onConflict:"submission_id,question_id" });
+  if(error) throw error;
+  M.open.marks = rows;
+  const total = rows.reduce((t,r)=>t+r.score,0), outOf = M.questions.reduce((t,q)=>t+q.marks,0);
+  await sb.from("test_submissions").update({ total_score: total, total_marks: outOf }).eq("id", subId);
+  return { total, outOf };
+}
+/* a photo of drawn or handwritten work, uploaded as the student answers */
+document.addEventListener("change", async e=>{
+  if(!e.target.id || !e.target.id.startsWith("aImg") || !e.target.files[0]) return;
+  const qid = e.target.dataset.q, T = S.tests.take;
+  captureTake(); toast("Uploading your photo…");
+  try{
+    const dataUrl = await fileToCompressedDataURL(e.target.files[0], 1600, 0.82);
+    const blob = await (await fetch(dataUrl)).blob();
+    const path = `${S.me.id}/${T.test.id}-${qid}-${Date.now()}.jpg`;
+    const up = await sb.storage.from("test-uploads").upload(path, blob, { contentType:"image/jpeg", upsert:true });
+    if(up.error) throw up.error;
+    const { data } = sb.storage.from("test-uploads").getPublicUrl(path);
+    T.answers[qid] = { ...(T.answers[qid]||{}), image_url: data.publicUrl };
+    toast("Photo attached"); rerender();
+  }catch(err){ toast(/bucket|not found/i.test(err.message) ? "Photo storage isn't set up — run tests.sql" : err.message); }
+});
+
 /* ================= settings ================= */
 const PREFS_KEY = "edunexus-prefs";
 const PREF_DEFAULTS = { theme:"dark", accent:"teal", size:"normal", motion:"full" };
@@ -2643,12 +3116,14 @@ function routesFor(role){
     {h:"#/examlens",t:"ExamLens",i:"lens",g:"quick"},
     {h:"#/mirage",t:"Mirage",i:"mirage",g:"quick"},
     {h:"#/doctor",t:"Study doctor",i:"doctor",g:"quick"},
+    {h:"#/tests",t:"Tests",i:"lens",g:"quick"},
     {h:"#/portfolio",t:"Portfolio",i:"folder",g:"quick"},
     {h:"#/profile",t:"Profile",i:"user",g:"quick"}
   ] : [
     {h:"#/class",t:"My class",i:"school",g:"main"},
     {h:"#/courses",t:"Courses",i:"learn",g:"main"},
     {h:"#/assistant",t:"Edu AI",i:"ai",g:"main"},
+    {h:"#/tests",t:"Tests",i:"doctor",g:"main"},
     {h:"#/profile",t:"Profile",i:"user",g:"quick"}
   ];
 }
@@ -2700,11 +3175,16 @@ function route(){
   let view = parts[0] || (S.me.role==="student" ? "home" : "class");
   S.course = null; S.lesson = null;
   if(view==="course" || view==="edit") S.course = parts[1];
+  if(["build","marking","sit","result"].includes(view)){
+    const id = parts[1];
+    if(S.tests.openId !== id){ S.tests.openId = id; S.tests.builder = S.tests.marking = S.tests.take = S.tests.result = null; }
+  }
   S.gSubject = view==="genome" && parts[1] ? decodeURIComponent(parts[1]) : null;
   S.gTopic   = view==="genome" && parts[2] ? decodeURIComponent(parts[2]) : null;
   if(view==="lesson") S.lesson = parts[1];
   if(!V[view]) view = S.me.role==="student" ? "home" : "class";
-  if(S.me.role!=="student" && ["home","learn","genome","examlens","mirage","doctor","portfolio","course","lesson"].includes(view))
+  if(S.me.role==="student" && ["class","courses","edit","student","assistant","build","marking"].includes(view)) view = "home";
+  if(S.me.role!=="student" && ["home","learn","genome","examlens","mirage","doctor","portfolio","course","lesson","sit","result"].includes(view))
     view = "class";
   $("#main").innerHTML = `<div class="mobiletop">
       <img class="wordmark" src="branding/EduNexus-wordmark-transparent.png" alt="EduNexus" style="height:24px">
@@ -2985,6 +3465,89 @@ const ACT = {
   "sheet-signout"(){ closeSheet(); signOut(); },
   "cust-tab"(el){ S.custTab = el.dataset.t; rerender(); },
   async banner(el){ if(await saveProfile({ banner: el.dataset.id })){ toast("Banner equipped"); rerender(); } },
+  /* ---------------- tests ---------------- */
+  async "test-create"(){
+    const title=$("#ntTitle").value.trim(), subject=$("#ntSubject").value.trim(), topic=$("#ntTopic").value.trim();
+    if(!title||!subject||!topic) return toast("Title, subject and topic are needed");
+    const { data, error } = await sb.from("tests").insert({ teacher_id:S.me.id, title, subject, topic,
+      instructions:$("#ntInstructions").value.trim()||null }).select().single();
+    if(error) return toast(/does not exist|schema cache/i.test(error.message) ? "Run tests.sql in Supabase first" : error.message);
+    S.tests.list.unshift(data); toast("Test created — now add the questions"); location.hash = "#/build/"+data.id;
+  },
+  async "test-status"(el){
+    const B = S.tests.builder;
+    if(el.dataset.s === "published" && B && B.test.id === el.dataset.id){
+      captureBuilder();
+      if(!B.questions.length) return toast("Add at least one question before publishing");
+      try{ await savePaper(); }catch(e){ return toast("Could not save the paper: "+e.message); }
+    }
+    if(el.dataset.s === "published"){
+      const { count } = await sb.from("test_questions").select("id",{count:"exact",head:true}).eq("test_id", el.dataset.id);
+      if(!count) return toast("This paper has no saved questions yet. Open it, add questions and press Save paper.");
+    }
+    const { error } = await sb.from("tests").update({ status: el.dataset.s }).eq("id", el.dataset.id);
+    if(error) return toast(error.message);
+    const t = (S.tests.list||[]).find(x=>x.id===el.dataset.id); if(t) t.status = el.dataset.s;
+    if(S.tests.builder && S.tests.builder.test.id===el.dataset.id) S.tests.builder.test.status = el.dataset.s;
+    toast(el.dataset.s==="published" ? "Published — students can sit it now" : "Closed to students"); rerender();
+  },
+  "q-add"(el){ captureBuilder(); S.tests.builder.dirty = true; S.tests.builder.questions.push(blankQ(el.dataset.k)); rerender(); },
+  "q-del"(el){ captureBuilder(); S.tests.builder.dirty = true; S.tests.builder.questions.splice(Number(el.dataset.i),1); rerender(); },
+  "q-move"(el){ captureBuilder(); S.tests.builder.dirty = true; const B=S.tests.builder, i=Number(el.dataset.i), j=i+Number(el.dataset.d);
+    if(j<0||j>=B.questions.length) return; const q=B.questions[i]; B.questions[i]=B.questions[j]; B.questions[j]=q; rerender(); },
+  "q-kind"(el){ captureBuilder(); S.tests.builder.dirty = true; const q = S.tests.builder.questions[Number(el.dataset.i)], k = el.dataset.k;
+    if(q.kind===k) return; q.kind=k;
+    if(k==="mcq"){ q.options = q.options||["",""]; q.answer_index = q.answer_index??0; q.marks = q.marks||1; }
+    else { q.options=null; q.answer_index=null; }
+    rerender(); },
+  "q-answer"(el){ captureBuilder(); S.tests.builder.dirty = true; S.tests.builder.questions[Number(el.dataset.i)].answer_index = Number(el.dataset.j); rerender(); },
+  "q-opt-add"(el){ captureBuilder(); S.tests.builder.dirty = true; const q=S.tests.builder.questions[Number(el.dataset.i)]; (q.options=q.options||[]).push(""); rerender(); },
+  "q-opt-del"(el){ captureBuilder(); S.tests.builder.dirty = true; const q=S.tests.builder.questions[Number(el.dataset.i)], j=Number(el.dataset.j);
+    q.options.splice(j,1); if(q.answer_index>=q.options.length) q.answer_index=0; rerender(); },
+  "test-save"(){ captureBuilder(); withBusy("testSave", async ()=>{ await savePaper(); }); },
+
+  "mark-open"(el){ openSubmission(el.dataset.id); },
+  "mark-back"(){ S.tests.marking.open = null; rerender(); },
+  "mark-ai"(el){ withBusy("markAI", async ()=>{
+    const out = await ai("mark_test", { submission_id: el.dataset.id });
+    await openSubmission(el.dataset.id);
+    const M = S.tests.marking; const s = M.subs.find(x=>x.id===el.dataset.id);
+    if(s){ s.status = "marked"; s.total_score = out.total; s.total_marks = out.outOf; }
+    toast(out.lowConfidence ? `Marked — ${out.lowConfidence} answer${out.lowConfidence===1?"":"s"} flagged for you to check` : "Marked — please check before releasing");
+  }); },
+  "mark-save"(el){ withBusy("markSave", async ()=>{ await saveMarks(el.dataset.id); toast("Your changes are saved"); }); },
+  "mark-release"(el){ withBusy("markRelease", async ()=>{
+    const M = S.tests.marking, subId = el.dataset.id;
+    const { total, outOf } = await saveMarks(subId);
+    const s = M.subs.find(x=>x.id===subId);
+    const up = await sb.from("test_submissions").update({ status:"released", released_at:new Date().toISOString(),
+      total_score: total, total_marks: outOf }).eq("id", subId);
+    if(up.error) throw up.error;
+    const pct = outOf ? Math.round(total/outOf*100) : 0;
+    const att = await sb.from("attempts").insert({ student_id: s.student_id, kind:"test", subject:M.test.subject,
+      topic:M.test.topic, score:pct, meta:{ test:M.test.title, submission:subId, marks:`${total}/${outOf}` } });
+    if(att.error) toast("Released, but the genome update failed: "+att.error.message);
+    s.status = "released"; s.total_score = total; s.total_marks = outOf;
+    M.open = null; toast(`Released — ${pct}% is now in their genome`);
+  }); },
+  "tests-refresh"(){ withBusy("testsRefresh", async ()=>{ await loadTests(); }); },
+  "a-pick"(el){ captureTake(); const T = S.tests.take, q = el.dataset.q;
+    T.answers[q] = { ...(T.answers[q]||{}), chosen_index: Number(el.dataset.j) }; rerender(); },
+  "test-submit"(){ captureTake(); withBusy("testSubmit", async ()=>{
+    const T = S.tests.take;
+    const unanswered = T.questions.filter(q=>{ const a=T.answers[q.id]||{};
+      return q.kind==="mcq" ? a.chosen_index===undefined : !(a.response||"").trim() && !a.image_url; });
+    if(unanswered.length && !confirm(`${unanswered.length} question${unanswered.length===1?" is":"s are"} unanswered. Submit anyway?`)) return;
+    const { data:sub, error } = await sb.from("test_submissions").insert({ test_id:T.test.id, student_id:S.me.id }).select().single();
+    if(error) throw new Error(/duplicate|unique/i.test(error.message) ? "You have already submitted this test" : error.message);
+    const rows = T.questions.map(q=>{ const a = T.answers[q.id]||{};
+      return { submission_id:sub.id, question_id:q.id, response:a.response||null,
+               chosen_index: a.chosen_index===undefined?null:a.chosen_index, image_url:a.image_url||null }; });
+    const ae = await sb.from("test_answers").insert(rows); if(ae.error) throw ae.error;
+    S.tests.list = null; S.tests.take = null;
+    toast("Submitted. Your teacher will release the result once it's marked.");
+    location.hash = "#/tests";
+  }); },
   "ta-send"(){ const i=$("#taAsk"); const v=i.value; i.value=""; taSend(v); },
   "ta-ask"(el){ taSend(el.dataset.q); },
   async "ta-forget"(el){
@@ -3134,6 +3697,12 @@ function openChatList(){
 }
 document.addEventListener("click", e=>{ if(e.target.id==="sheetBack") closeSheet(); });
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSheet(); });
+window.addEventListener("hashchange", ()=>{
+  const B = S.tests && S.tests.builder;
+  if(B && B.dirty && !location.hash.startsWith("#/build/")){
+    savePaper().catch(e=>toast("Your last change could not be saved: "+e.message));
+  }
+});
 window.addEventListener("hashchange", closeSheet);
 window.addEventListener("hashchange", route);
 
