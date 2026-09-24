@@ -85,34 +85,8 @@ input:focus,select:focus{outline:2px solid var(--teal);outline-offset:1px}
 .brand img{animation:brandIn .7s cubic-bezier(.22,.9,.25,1.3) both,
   brandGlow 3.4s ease-in-out 1s infinite}
 
-/* full-screen sign-in transition */
-.signin-fx{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:999}
-.signin-fx.show{opacity:1;pointer-events:all}
-.signin-fx .ring{position:absolute;width:64px;height:64px;border:1px solid rgba(47,227,192,.4);border-radius:50%;
-  opacity:0}
-.signin-fx.show .ring{animation:fxRing 1.15s ease-out forwards}
-.signin-fx.show .ring.r2{animation-delay:.18s}
-.signin-fx.show .ring.r3{animation-delay:.36s}
-@keyframes fxRing{
-  0%{width:64px;height:64px;opacity:.85}
-  100%{width:300px;height:300px;opacity:0}
-}
-.signin-fx img{width:60px;height:60px;position:relative;z-index:2;opacity:0}
-.signin-fx.show img{animation:fxPop .6s cubic-bezier(.22,.9,.25,1.4) forwards}
-@keyframes fxPop{
-  0%{transform:scale(.3);opacity:0}
-  55%{transform:scale(1.18);opacity:1}
-  100%{transform:scale(1);opacity:1}
-}
-.signin-fx .label{position:absolute;bottom:calc(50% - 110px);color:var(--mute);font-size:12.5px;
-  letter-spacing:.02em;opacity:0}
-.signin-fx.show .label{animation:fxLabel .5s ease .35s forwards}
-@keyframes fxLabel{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @media (prefers-reduced-motion: reduce){
   .brand img{animation:none}
-  .signin-fx .ring{animation:none!important;display:none}
-  .signin-fx img{animation:none!important;opacity:1}
   .btn,.tabs button,.roles button,.eye{transition:none!important}
   .btn:active,.tabs button:active,.roles button:active{transform:none}
   .eye:active{transform:translateY(-50%)}
@@ -123,8 +97,19 @@ input:focus,select:focus{outline:2px solid var(--teal);outline-offset:1px}
 .no-splash .splash{display:none}
 .splash{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;text-align:center;
   background:radial-gradient(720px 520px at 50% 44%,rgba(47,227,192,.11),transparent 66%),var(--bg);
-  transition:opacity .7s ease,visibility 0s linear .7s}
-.splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+  transition:opacity .7s ease}
+.splash.hide{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .7s ease,visibility 0s linear .7s}
+.splash.done{display:none}
+.splash.fadein{animation:splashFade .35s ease both}
+/* shown again as the loading screen after sign-in: no staggered intro, just the loops */
+.splash.settled::before,.splash.settled .splash-kicker,.splash.settled .splash-title,.splash.settled .splash-tag,
+.splash.settled .splash-bar,.splash.settled .splash-status{animation:none}
+.splash.settled .splash-logo{animation:splashGlow 3s ease-in-out infinite}
+.splash.settled .orbit{animation:splashSpin var(--d) linear infinite}
+.splash.settled .o2{animation-direction:reverse}
+.splash.settled .splash-pulse{animation-delay:0s}
+.splash.settled .splash-bar i{animation:splashBarLoop 1.5s ease-in-out infinite}
+@keyframes splashBarLoop{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 .splash::before{content:"";position:absolute;inset:0;pointer-events:none;
   background-image:radial-gradient(rgba(47,227,192,.10) 1px,transparent 1.6px);background-size:26px 26px;
   -webkit-mask-image:radial-gradient(circle at 50% 44%,#000 0%,transparent 62%);
@@ -132,7 +117,6 @@ input:focus,select:focus{outline:2px solid var(--teal);outline-offset:1px}
   animation:splashFade 1.4s ease .1s both}
 .splash-inner{position:relative;z-index:1;padding:24px;transition:transform .7s ease,opacity .35s ease}
 .splash.hide .splash-inner{transform:scale(1.06)}
-.splash.leaving .splash-inner{opacity:0;transform:scale(1.04)}
 .splash-orbits{position:relative;width:min(320px,84vw);height:min(320px,84vw);margin:0 auto;display:grid;place-items:center}
 .orbit{position:absolute;inset:0;margin:auto;border-radius:50%;border:1px solid rgba(47,227,192,.16);
   animation:splashSpin var(--d) linear infinite,splashFade 1.2s ease .3s both}
@@ -264,14 +248,6 @@ input:focus,select:focus{outline:2px solid var(--teal);outline-offset:1px}
   </div>
 </div>
 
-<div class="signin-fx" id="fx" aria-hidden="true">
-  <div class="ring"></div>
-  <div class="ring r2"></div>
-  <div class="ring r3"></div>
-  <img src="branding/EduNexus-icon-transparent.png" alt="">
-  <div class="label">Loading your genome…</div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
@@ -334,12 +310,16 @@ $("#togglePw").onclick = ()=>{
 
 function say(text, kind){ const m=$("#msg"); m.className = "msg " + kind; m.textContent = text; }
 
+/* After a successful sign-in the splash comes back as the loading screen, and the app's own
+   loading screen (the same splash) carries on from here until the dashboard is ready. */
 function goApp(){
-  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    location.replace("app.html"); return;
-  }
-  $("#fx").classList.add("show");
-  setTimeout(()=> location.replace("app.html"), 850);
+  const s = $("#splash");
+  document.documentElement.classList.remove("no-splash");
+  s.classList.remove("hide","done");
+  s.classList.add("settled","fadein");
+  $("#splashStatus").textContent = "Loading your dashboard…";
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  setTimeout(()=> location.replace("app.html"), reduce ? 150 : 500);
 }
 
 const SCHOOL = (window.EDUNEXUS_CONFIG || {}).SCHOOL_NAME;
@@ -424,8 +404,9 @@ document.addEventListener("keydown", e=>{
   }
 
   const m = /[?&]splash=(\d+)/.exec(location.search);
+  const forced = !!(m && +m[1] > 0);
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const minMs = m && +m[1] > 0 ? +m[1] : (reduce ? 900 : 2300);
+  const minMs = forced ? +m[1] : (reduce ? 900 : 2300);
   try{ sessionStorage.setItem("edunexus_splash", "1"); }catch(e){}
 
   wrap.inert = true;
@@ -434,15 +415,18 @@ document.addEventListener("keydown", e=>{
     if(revealed) return; revealed = true;
     wrap.inert = false; wrap.classList.add("reveal");
     splash.classList.add("hide");
-    setTimeout(()=>splash.remove(), 900);
+    setTimeout(()=>splash.classList.add("done"), 900);   // kept in the DOM: sign-in brings it back as the loading screen
   };
-  const goDashboard = ()=>{ splash.classList.add("leaving"); setTimeout(()=>location.replace("app.html"), 350); };
+  // The app's own loading screen is this same splash, so it simply carries on from here.
+  const goDashboard = ()=> location.replace("app.html");
 
   const failsafe = setTimeout(reveal, minMs + 5000);   // the splash can never get stuck over the page
   const started = Date.now();
   await check;
   if(session) $("#splashStatus").textContent = "Loading your dashboard…";
-  await new Promise(r=>setTimeout(r, Math.max(0, minMs - (Date.now() - started))));
+  // Signed in: the app's loading screen continues the splash, so only hold as long as the intro needs.
+  const holdMs = session && !forced ? Math.min(minMs, 1900) : minMs;
+  await new Promise(r=>setTimeout(r, Math.max(0, holdMs - (Date.now() - started))));
   clearTimeout(failsafe);
   if(session) goDashboard(); else reveal();
 })();
