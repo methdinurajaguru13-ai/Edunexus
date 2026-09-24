@@ -968,19 +968,32 @@ function celebrateBadge(b){
     setTimeout(finish, 3600);
   });
 }
-async function announceUnlocks(before){
-  const all = badgesFor(myBadgeCtx());
-  const fresh = all.filter(b => b.earned && !before.includes(b.id));
-  for(const b of fresh) await celebrateBadge(b);
+/* Celebrate anything newly earned since this browser last looked. "Seen" is kept per
+   account in localStorage, so it fires for every source (sign-in, enrolling, portfolio,
+   graded work). A device with no history and a long list is treated as a returning
+   user and baselined silently rather than replaying every badge. */
+let unlockBusy = false;
+async function checkUnlocks(){
+  if(unlockBusy || !S.me || S.me.role!=="student" || S.me.unlock_all) return;
+  unlockBusy = true;
+  try{
+    const key = "edunexus_badges_seen_" + S.me.id;
+    const earned = badgesFor(myBadgeCtx()).filter(b=>b.earned);
+    let seen = null;
+    try{ seen = JSON.parse(localStorage.getItem(key)); }catch(e){}
+    if(!Array.isArray(seen)) seen = earned.length > 3 ? earned.map(b=>b.id) : [];
+    const fresh = earned.filter(b=>!seen.includes(b.id));
+    try{ localStorage.setItem(key, JSON.stringify(earned.map(b=>b.id))); }catch(e){}
+    for(const b of fresh) await celebrateBadge(b);
+  } finally { unlockBusy = false; }
 }
 async function record({kind, subject, topic, score, seconds, lesson_id, meta}){
-  const before = S.me.role==="student" ? badgesFor(myBadgeCtx()).filter(b=>b.earned).map(b=>b.id) : [];
   const row = { student_id:S.me.id, kind, subject:subject||null, topic, score,
                 seconds:seconds||null, lesson_id:lesson_id||null, meta:meta||{} };
   const { data, error } = await sb.from("attempts").insert(row).select().single();
   if(error) { toast("Could not save: "+error.message); return null; }
   S.attempts.unshift(data);
-  if(S.me.role==="student") announceUnlocks(before);
+  checkUnlocks();
   return data;
 }
 
@@ -1677,7 +1690,8 @@ V.portfolio = () => {
   const kinds = Object.keys(PO_KINDS);
   return `
   <div class="topbar"><div><h1 class="h1">Portfolio</h1>
-    <div class="sub">What you'd want a university or scholarship panel to see.</div></div></div>
+    <div class="sub">What you'd want a university or scholarship panel to see.</div></div>
+    <button class="btn ghost sm" data-act="export-portfolio">${icon('<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/>')} Export as PDF</button></div>
 
   <div class="grid g3">
     <div class="stat"><div class="k">Items</div><div class="v">${items.length}</div></div>
@@ -1729,6 +1743,64 @@ V.portfolio = () => {
        <b>Nothing here yet</b>
        <p class="note" style="margin:0 auto;max-width:420px">Add the projects, certificates and coursework you'd want a university to see. Nothing is added for you.</p></div>`}`;
 };
+
+
+/* Portfolio -> PDF. No library: build a clean A4 document in a hidden frame and open the
+   browser's print dialog, where "Save as PDF" produces the file. Hidden items are left out. */
+function exportPortfolioPDF(){
+  const me = S.me, items = S.portfolio.filter(i=>i.visible);
+  if(!items.length) return toast("Make at least one item visible to export");
+  const g = G();
+  const bySubj = {};
+  g.topics.forEach(t=>{ const k=t.subject||"General"; (bySubj[k] ||= []).push(t.score); });
+  const subjects = Object.entries(bySubj).map(([k,v])=>[k, Math.round(v.reduce((a,b)=>a+b,0)/v.length)]).sort((a,b)=>b[1]-a[1]);
+  const earned = badgesFor(myBadgeCtx()).filter(b=>b.earned);
+  const date = new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+  const meta = [me.grade, "Miracle International School"].filter(Boolean).map(esc).join(" · ");
+  const interests = Array.isArray(me.interests) ? me.interests : String(me.interests||"").split(",").map(x=>x.trim()).filter(Boolean);
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(me.full_name)} - Portfolio</title>
+  <style>
+  @page{size:A4;margin:16mm}
+  *{box-sizing:border-box}
+  body{font:13px/1.5 "Segoe UI",Helvetica,Arial,sans-serif;color:#16201d;margin:0}
+  header{border-bottom:3px solid #14a98a;padding-bottom:12px;margin-bottom:18px}
+  h1{font-size:28px;margin:0 0 2px}
+  .meta{color:#5b6a66}
+  .goal{margin-top:10px;font-size:14px}
+  h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#14a98a;margin:22px 0 8px}
+  .chips span{display:inline-block;border:1px solid #cfd9d6;border-radius:99px;padding:2px 10px;margin:0 6px 6px 0;font-size:12px}
+  .item{border:1px solid #dbe3e1;border-radius:8px;padding:10px 14px;margin-bottom:10px;break-inside:avoid}
+  .kind{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5b6a66}
+  .ver{color:#14a98a;font-weight:600}
+  .item h3{margin:2px 0 4px;font-size:15px}
+  .item p{margin:0 0 4px}
+  .item a{color:#0b7d67;word-break:break-all;font-size:12px}
+  .bars div{display:flex;align-items:center;gap:10px;margin-bottom:5px}
+  .bars b{width:130px;font-weight:600}
+  .bars i{flex:1;height:8px;background:#e6eeec;border-radius:9px;overflow:hidden}
+  .bars i u{display:block;height:100%;background:#14a98a}
+  .bars span{width:36px;text-align:right}
+  footer{margin-top:24px;color:#7a8783;font-size:11px;border-top:1px solid #dbe3e1;padding-top:8px}
+  </style></head><body>
+  <header><h1>${esc(me.full_name)}</h1><div class="meta">${meta}</div>
+  ${me.goal?`<div class="goal"><b>Goal:</b> ${esc(me.goal)}</div>`:""}
+  ${interests.length?`<div class="chips" style="margin-top:8px">${interests.map(i=>`<span>${esc(i)}</span>`).join("")}</div>`:""}</header>
+  <h2>Projects &amp; achievements</h2>
+  ${items.map(p=>`<div class="item"><div class="kind">${esc(p.kind)}${p.verified?` · <span class="ver">Verified by school</span>`:""}</div>
+    <h3>${esc(p.title)}</h3>${p.description?`<p>${esc(p.description)}</p>`:""}${p.link?`<a href="${esc(p.link)}">${esc(p.link)}</a>`:""}</div>`).join("")}
+  ${subjects.length?`<h2>Learning Genome (evidence-based)</h2><div class="bars">${subjects.map(([k,v])=>`<div><b>${esc(k)}</b><i><u style="width:${v}%"></u></i><span>${v}%</span></div>`).join("")}</div>`:""}
+  ${earned.length?`<h2>Badges earned</h2><div class="chips">${earned.map(b=>`<span>${esc(b.name)}${b.sub?" · "+esc(b.sub):""}</span>`).join("")}</div>`:""}
+  <footer>Generated by EduNexus on ${date}. Scores are computed from supervised tests, papers and coursework, not self-reported.</footer>
+  </body></html>`;
+  const f = document.createElement("iframe");
+  f.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0";
+  document.body.appendChild(f);
+  f.srcdoc = html;
+  f.onload = () => {
+    try{ f.contentWindow.focus(); f.contentWindow.print(); }catch(e){ toast("Could not open the print dialog"); }
+    setTimeout(()=>f.remove(), 60000);
+  };
+}
 
 /* ================= identity: photo, banner, badges ================= */
 
@@ -3290,7 +3362,7 @@ const ACT = {
   async join(el){
     const { error } = await sb.from("enrollments").insert({student_id:S.me.id, course_id:el.dataset.id});
     if(error) return toast(error.message);
-    S.enrolled.push(el.dataset.id); toast("Joined"); rerender();
+    S.enrolled.push(el.dataset.id); toast("Joined"); rerender(); checkUnlocks();
   },
   async "answer-cp"(el){
     const l = S.lessons.find(x=>x.id===S.lesson), cp = l.checkpoint;
@@ -3414,8 +3486,9 @@ const ACT = {
       description:$("#poDesc").value.trim(), link:$("#poLink").value.trim()||null };
     const { data, error } = await sb.from("portfolio_items").insert(row).select().single();
     if(error) return toast(error.message);
-    S.portfolio.unshift(data); toast("Added"); rerender();
+    S.portfolio.unshift(data); toast("Added"); rerender(); checkUnlocks();
   },
+  "export-portfolio"(){ exportPortfolioPDF(); },
   async "toggle-portfolio"(el){
     const p = S.portfolio.find(x=>x.id===el.dataset.id);
     const { error } = await sb.from("portfolio_items").update({visible:!p.visible}).eq("id",p.id);
@@ -3858,6 +3931,7 @@ async function boot(){
   $("#shell").style.visibility = "visible";
   if(!location.hash) location.hash = S.me.role==="student" ? "#/home" : "#/class";
   route();
+  setTimeout(checkUnlocks, 900);   // after the loading screen has faded
 }
 async function signOut(){
   await sb.auth.signOut();
