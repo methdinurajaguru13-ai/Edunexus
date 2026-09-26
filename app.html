@@ -163,6 +163,17 @@
 .pb-name.ns-t-mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-weight:700;letter-spacing:0;font-size:calc(var(--fs-5) * .88)}
 .ns-stage.t-stage{background:linear-gradient(135deg,#1b242e,#232f3b)}
 .ns-stage.t-stage .pb-name{color:#f2f4f6;text-shadow:none}
+/* ---- test builder and papers, laid out like a form ---- */
+.form-head{border-top:4px solid var(--teal);padding:24px}
+.q-card{padding:24px}
+.q-num{font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--mute)}
+.opt-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+.opt-radio{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);background:transparent;cursor:pointer}
+.opt-radio.on{border-color:var(--teal);box-shadow:inset 0 0 0 4px var(--teal)}
+.opt-pick{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 16px;margin-top:8px;
+  border:1px solid var(--line);border-radius:12px;background:var(--bg2);font-size:var(--fs-3);color:var(--ink);transition:all .15s}
+.opt-pick:hover{border-color:rgba(var(--accent-rgb),.45)}
+.opt-pick.on{border-color:var(--teal);background:var(--teal-ghost)}
 /* ---- teaching assistant ---- */
 .ta-wrap{display:block}
 .only-narrow{display:none}
@@ -310,6 +321,71 @@ input[type=file]::file-selector-button{font:inherit;font-weight:700;font-size:va
   .pb-slot{padding:6px 2px}
 }
 
+/* ---- calendar ---- */
+.cal-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}
+.cal-day{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;min-height:150px;display:flex;flex-direction:column;gap:7px}
+.cal-day.today{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal) inset}
+.cal-dayhead{display:flex;align-items:baseline;justify-content:space-between;gap:6px;padding-bottom:6px;border-bottom:1px solid var(--line-soft)}
+.cal-dayhead b{font-size:var(--fs-2);letter-spacing:.06em;text-transform:uppercase}
+.cal-dayhead span{font-size:var(--fs-4);font-weight:800;color:var(--mute)}
+.cal-slot{font-size:var(--fs-1);color:var(--ink-2);background:var(--bg2);border-radius:8px;padding:6px 8px;line-height:1.35}
+.cal-slot b{color:var(--ink)}
+.cal-ev{display:block;width:100%;text-align:left;font-size:var(--fs-1);line-height:1.35;padding:7px 9px;border-radius:8px;
+  border:1px solid var(--line);background:var(--teal-ghost);color:var(--ink)}
+.cal-ev:hover{border-color:var(--teal)}
+.cal-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.cal-dow{font-size:var(--fs-1);color:var(--mute);font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 2px}
+.cal-cell{min-height:104px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px;display:flex;flex-direction:column;gap:4px}
+.cal-cell.out{opacity:.4}
+.cal-cell.today{border-color:var(--teal)}
+.cal-date{font-size:var(--fs-2);font-weight:700;color:var(--mute)}
+.cal-dot{display:block;width:100%;text-align:left;font-size:10.5px;line-height:1.3;padding:4px 6px;border-radius:6px;
+  background:var(--teal-ghost);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.k-exam,.k-deadline{background:var(--warn-soft);border-color:var(--warn-line);color:var(--warn)}
+.k-study{background:rgba(var(--accent-rgb),.16)}
+.k-holiday{background:var(--panel2);color:var(--ink-2)}
+@media (max-width:860px){
+  .cal-week{grid-template-columns:1fr}
+  .cal-day{min-height:0}
+  .cal-month{gap:4px}
+  .cal-cell{min-height:74px;padding:5px}
+  .cal-dot{font-size:9.5px}
+}
+/* ---- settings ---- */
+.set-wrap{display:grid;grid-template-columns:232px minmax(0,1fr);gap:22px;align-items:start}
+.set-nav{display:flex;flex-direction:column;gap:2px;position:sticky;top:16px}
+.set-nav button{text-align:left;padding:11px 14px;border-radius:10px;color:var(--ink-2);font-weight:600;font-size:var(--fs-3)}
+.set-nav button:hover{background:var(--panel)}
+.set-nav button.on{background:var(--teal-ghost);color:var(--teal)}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0}
+.set-row + .set-row{border-top:1px solid var(--line-soft)}
+.set-title{font-size:var(--fs-3);font-weight:600}
+.sw{flex:none;width:50px;height:28px;border-radius:99px;background:var(--line);position:relative;transition:background .15s}
+.sw span{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--ink-2);transition:transform .15s,background .15s}
+.sw.on{background:var(--teal)}
+.sw.on span{transform:translateX(22px);background:var(--on-accent)}
+.card.danger{border-color:var(--warn-line);background:var(--warn-soft)}
+@media (max-width:860px){
+  .set-wrap{grid-template-columns:1fr;gap:14px}
+  .set-nav{flex-direction:row;overflow-x:auto;position:static;gap:8px;padding-bottom:4px;scrollbar-width:none}
+  .set-nav::-webkit-scrollbar{display:none}
+  .set-nav button{flex:none;border:1px solid var(--line);border-radius:99px;padding:9px 15px;font-size:var(--fs-2)}
+  .set-row{flex-wrap:wrap}
+}
+/* ---- accessibility preferences ---- */
+:root[data-contrast="high"]{--ink:#ffffff;--ink-2:#dcefea;--mute:#b6cfc9;--line:#3a6f65;--line-soft:#27524a}
+:root[data-contrast="high"][data-theme="light"]{--ink:#000;--ink-2:#1d3a34;--mute:#2f4f49;--line:#7fa79f;--line-soft:#9dbdb6}
+:root[data-contrast="high"] .note{color:var(--ink-2)}
+:root[data-contrast="high"] .card,:root[data-contrast="high"] .stat{border-width:2px}
+:root[data-font="reading"] body,:root[data-font="reading"] input,:root[data-font="reading"] textarea,
+:root[data-font="reading"] select,:root[data-font="reading"] button{font-family:Verdana,Tahoma,"DejaVu Sans",sans-serif;letter-spacing:.01em}
+:root[data-font="reading"] .prose{line-height:1.85;word-spacing:.08em}
+:root[data-density="compact"] .card{padding:12px}
+:root[data-density="compact"] .lens-card,:root[data-density="compact"] .q-card{padding:14px}
+:root[data-density="compact"] .sec{margin:18px 0 9px}
+:root[data-density="compact"] .list .item{padding:8px 10px}
+:root[data-density="compact"] .set-row{padding:10px 0}
+:root[data-density="compact"] .grid{gap:10px}
 .swatches{display:flex;gap:10px;flex-wrap:wrap}
 .swatch{display:flex;align-items:center;gap:9px;padding:9px 13px;border:1px solid var(--line);border-radius:var(--r-sm);
   background:var(--bg2);font-size:var(--fs-2);font-weight:600;color:var(--ink-2)}
@@ -487,6 +563,8 @@ a{color:inherit;text-decoration:none;}
   .mobilebar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--mute);font-weight:600;}
   .mobilebar a.on{color:var(--teal);}
   .mobiletop{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  /* Fixed bottom bar covers the toast's default position on phones. */
+  .toast{bottom:calc(78px + env(safe-area-inset-bottom))!important;}
 }
 @media (min-width:861px){.mobiletop{display:none;}}
 .scroll-x{overflow-x:auto;}
@@ -712,11 +790,62 @@ a.card:hover,button.card:hover{border-color:rgba(var(--accent-rgb),.45);transfor
 @media (max-width:480px){
   .badge-fx-name{font-size:23px}
 }
+
+/* ---- loading screen: the same splash as the sign-in page, held until the app is ready ---- */
+#gate{position:fixed;inset:0;z-index:99;display:flex;align-items:center;justify-content:center;text-align:center;
+  background:radial-gradient(720px 520px at 50% 44%,rgba(var(--accent-rgb),.11),transparent 66%),var(--bg);
+  color:var(--mute);font-size:13px;transition:opacity .5s ease}
+#gate.hide{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .5s ease,visibility 0s linear .5s}
+#gate::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(rgba(var(--accent-rgb),.10) 1px,transparent 1.6px);background-size:26px 26px;
+  -webkit-mask-image:radial-gradient(circle at 50% 44%,#000 0%,transparent 62%);
+  mask-image:radial-gradient(circle at 50% 44%,#000 0%,transparent 62%)}
+.g-inner{position:relative;z-index:1;padding:24px;transition:transform .5s ease}
+#gate.hide .g-inner{transform:scale(1.05)}
+.g-orbits{position:relative;width:min(320px,84vw);height:min(320px,84vw);margin:0 auto;display:grid;place-items:center}
+.g-orbit{position:absolute;inset:0;margin:auto;border-radius:50%;border:1px solid rgba(var(--accent-rgb),.16);
+  animation:gateSpin var(--d) linear infinite}
+.g-orbit::after{content:"";position:absolute;top:-4px;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;
+  background:var(--teal);box-shadow:0 0 12px 2px rgba(var(--accent-rgb),.65)}
+.g1{width:56%;height:56%;--d:7s}
+.g2{width:78%;height:78%;--d:12s;animation-direction:reverse}
+.g3{width:100%;height:100%;--d:18s}
+.g2::after{width:6px;height:6px;top:-3px;margin-left:-3px;opacity:.75}
+.g3::after{width:5px;height:5px;top:-2.5px;margin-left:-2.5px;opacity:.55}
+.g-pulse{position:absolute;top:50%;left:50%;width:92px;height:92px;margin:-46px 0 0 -46px;border-radius:50%;
+  border:1px solid rgba(var(--accent-rgb),.5);opacity:0;animation:gatePulse 2.6s ease-out infinite}
+.g-pulse.p2{animation-delay:1.3s}
+.g-logo{position:relative;z-index:2;width:clamp(72px,22vw,92px);height:auto;display:block;animation:gateGlow 3s ease-in-out infinite}
+.g-kicker{margin:26px 0 0;padding-left:.32em;font-size:11.5px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:var(--teal)}
+.g-title{margin:6px 0 0;font-size:clamp(34px,9.5vw,48px);font-weight:800;letter-spacing:-.03em;line-height:1.1;color:var(--ink)}
+.g-tag{margin:10px 0 0;font-size:14px;color:var(--ink-2)}
+.g-bar{width:min(220px,60vw);height:2px;border-radius:2px;background:rgba(var(--accent-rgb),.14);overflow:hidden;margin:26px auto 12px}
+.g-bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,transparent,var(--teal));animation:gateBar 1.5s ease-in-out infinite}
+.g-status{min-height:18px;font-size:12px;color:var(--mute);letter-spacing:.02em}
+@keyframes gateSpin{to{transform:rotate(360deg)}}
+@keyframes gatePulse{0%{transform:scale(.8);opacity:.75}100%{transform:scale(2.5);opacity:0}}
+@keyframes gateGlow{0%,100%{filter:drop-shadow(0 0 4px rgba(var(--accent-rgb),.25))}50%{filter:drop-shadow(0 0 16px rgba(var(--accent-rgb),.65))}}
+@keyframes gateBar{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@media (max-height:640px){
+  .g-orbits{width:min(230px,70vw);height:min(230px,70vw)}
+  .g-kicker{margin-top:14px}.g-bar{margin-top:16px}
+}
 </style>
 </head>
 <body>
-<div id="gate" style="position:fixed;inset:0;z-index:99;display:grid;place-items:center;background:var(--bg);color:var(--mute);font-size:13px">
-  <span><span class="spin"></span>Loading your record…</span>
+<div id="gate">
+  <div class="g-inner">
+    <div class="g-orbits" aria-hidden="true">
+      <span class="g-orbit g3"></span><span class="g-orbit g2"></span><span class="g-orbit g1"></span>
+      <span class="g-pulse"></span><span class="g-pulse p2"></span>
+      <img class="g-logo" src="branding/EduNexus-icon-transparent.png" alt="">
+    </div>
+    <p class="g-kicker">Welcome to</p>
+    <div class="g-title">EduNexus</div>
+    <p class="g-tag">Every mark has a reason.</p>
+    <div class="g-bar" aria-hidden="true"><i></i></div>
+    <div class="g-status" role="status" aria-live="polite">Loading your dashboard…</div>
+  </div>
 </div>
 <div class="app" id="shell" style="visibility:hidden">
   <nav class="side">
@@ -904,19 +1033,34 @@ function celebrateBadge(b){
     setTimeout(finish, 3600);
   });
 }
-async function announceUnlocks(before){
-  const all = badgesFor(myBadgeCtx());
-  const fresh = all.filter(b => b.earned && !before.includes(b.id));
-  for(const b of fresh) await celebrateBadge(b);
+/* Celebrate anything newly earned since this browser last looked. "Seen" is kept per
+   account in localStorage, so it fires for every source (sign-in, enrolling, portfolio,
+   graded work). A device with no history and a long list is treated as a returning
+   user and baselined silently rather than replaying every badge. */
+let unlockBusy = false;
+function ask(msg){ return prefOn("confirm") ? confirm(msg) : true; }
+async function checkUnlocks(){
+  if(!prefOn("celebrate")) return;
+  if(unlockBusy || !S.me || S.me.role!=="student" || S.me.unlock_all) return;
+  unlockBusy = true;
+  try{
+    const key = "edunexus_badges_seen_" + S.me.id;
+    const earned = badgesFor(myBadgeCtx()).filter(b=>b.earned);
+    let seen = null;
+    try{ seen = JSON.parse(localStorage.getItem(key)); }catch(e){}
+    if(!Array.isArray(seen)) seen = earned.length > 3 ? earned.map(b=>b.id) : [];
+    const fresh = earned.filter(b=>!seen.includes(b.id));
+    try{ localStorage.setItem(key, JSON.stringify(earned.map(b=>b.id))); }catch(e){}
+    for(const b of fresh) await celebrateBadge(b);
+  } finally { unlockBusy = false; }
 }
 async function record({kind, subject, topic, score, seconds, lesson_id, meta}){
-  const before = S.me.role==="student" ? badgesFor(myBadgeCtx()).filter(b=>b.earned).map(b=>b.id) : [];
   const row = { student_id:S.me.id, kind, subject:subject||null, topic, score,
                 seconds:seconds||null, lesson_id:lesson_id||null, meta:meta||{} };
   const { data, error } = await sb.from("attempts").insert(row).select().single();
   if(error) { toast("Could not save: "+error.message); return null; }
   S.attempts.unshift(data);
-  if(S.me.role==="student") announceUnlocks(before);
+  checkUnlocks();
   return data;
 }
 
@@ -933,6 +1077,7 @@ const I = {
   ai:icon('<path d="M12 3v18M5 8l14 8M19 8L5 16"/>'),
   user:icon('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/>'),
   more:icon('<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'),
+  cal:icon('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/>'),
   settings:icon('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
   mirage:icon('<path d="M4 18c3-8 13-8 16 0"/><circle cx="12" cy="8" r="2"/>'),
   history:icon('<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l4 2"/>'),
@@ -940,6 +1085,7 @@ const I = {
 };
 function toast(msg){
   const t=document.createElement("div");
+  t.className="toast";
   t.style.cssText="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:80;background:var(--teal);color:var(--on-accent);font-weight:700;font-size:12.5px;padding:10px 16px;border-radius:99px;max-width:86vw;text-align:center";
   t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2600);
 }
@@ -1612,7 +1758,8 @@ V.portfolio = () => {
   const kinds = Object.keys(PO_KINDS);
   return `
   <div class="topbar"><div><h1 class="h1">Portfolio</h1>
-    <div class="sub">What you'd want a university or scholarship panel to see.</div></div></div>
+    <div class="sub">What you'd want a university or scholarship panel to see.</div></div>
+    <button class="btn ghost sm" data-act="export-portfolio">${icon('<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/>')} Export as PDF</button></div>
 
   <div class="grid g3">
     <div class="stat"><div class="k">Items</div><div class="v">${items.length}</div></div>
@@ -1664,6 +1811,64 @@ V.portfolio = () => {
        <b>Nothing here yet</b>
        <p class="note" style="margin:0 auto;max-width:420px">Add the projects, certificates and coursework you'd want a university to see. Nothing is added for you.</p></div>`}`;
 };
+
+
+/* Portfolio -> PDF. No library: build a clean A4 document in a hidden frame and open the
+   browser's print dialog, where "Save as PDF" produces the file. Hidden items are left out. */
+function exportPortfolioPDF(){
+  const me = S.me, items = S.portfolio.filter(i=>i.visible);
+  if(!items.length) return toast("Make at least one item visible to export");
+  const g = G();
+  const bySubj = {};
+  g.topics.forEach(t=>{ const k=t.subject||"General"; (bySubj[k] ||= []).push(t.score); });
+  const subjects = Object.entries(bySubj).map(([k,v])=>[k, Math.round(v.reduce((a,b)=>a+b,0)/v.length)]).sort((a,b)=>b[1]-a[1]);
+  const earned = badgesFor(myBadgeCtx()).filter(b=>b.earned);
+  const date = new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+  const meta = [me.grade, "Miracle International School"].filter(Boolean).map(esc).join(" · ");
+  const interests = Array.isArray(me.interests) ? me.interests : String(me.interests||"").split(",").map(x=>x.trim()).filter(Boolean);
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(me.full_name)} - Portfolio</title>
+  <style>
+  @page{size:A4;margin:16mm}
+  *{box-sizing:border-box}
+  body{font:13px/1.5 "Segoe UI",Helvetica,Arial,sans-serif;color:#16201d;margin:0}
+  header{border-bottom:3px solid #14a98a;padding-bottom:12px;margin-bottom:18px}
+  h1{font-size:28px;margin:0 0 2px}
+  .meta{color:#5b6a66}
+  .goal{margin-top:10px;font-size:14px}
+  h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#14a98a;margin:22px 0 8px}
+  .chips span{display:inline-block;border:1px solid #cfd9d6;border-radius:99px;padding:2px 10px;margin:0 6px 6px 0;font-size:12px}
+  .item{border:1px solid #dbe3e1;border-radius:8px;padding:10px 14px;margin-bottom:10px;break-inside:avoid}
+  .kind{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5b6a66}
+  .ver{color:#14a98a;font-weight:600}
+  .item h3{margin:2px 0 4px;font-size:15px}
+  .item p{margin:0 0 4px}
+  .item a{color:#0b7d67;word-break:break-all;font-size:12px}
+  .bars div{display:flex;align-items:center;gap:10px;margin-bottom:5px}
+  .bars b{width:130px;font-weight:600}
+  .bars i{flex:1;height:8px;background:#e6eeec;border-radius:9px;overflow:hidden}
+  .bars i u{display:block;height:100%;background:#14a98a}
+  .bars span{width:36px;text-align:right}
+  footer{margin-top:24px;color:#7a8783;font-size:11px;border-top:1px solid #dbe3e1;padding-top:8px}
+  </style></head><body>
+  <header><h1>${esc(me.full_name)}</h1><div class="meta">${meta}</div>
+  ${me.goal?`<div class="goal"><b>Goal:</b> ${esc(me.goal)}</div>`:""}
+  ${interests.length?`<div class="chips" style="margin-top:8px">${interests.map(i=>`<span>${esc(i)}</span>`).join("")}</div>`:""}</header>
+  <h2>Projects &amp; achievements</h2>
+  ${items.map(p=>`<div class="item"><div class="kind">${esc(p.kind)}${p.verified?` · <span class="ver">Verified by school</span>`:""}</div>
+    <h3>${esc(p.title)}</h3>${p.description?`<p>${esc(p.description)}</p>`:""}${p.link?`<a href="${esc(p.link)}">${esc(p.link)}</a>`:""}</div>`).join("")}
+  ${subjects.length?`<h2>Learning Genome (evidence-based)</h2><div class="bars">${subjects.map(([k,v])=>`<div><b>${esc(k)}</b><i><u style="width:${v}%"></u></i><span>${v}%</span></div>`).join("")}</div>`:""}
+  ${earned.length?`<h2>Badges earned</h2><div class="chips">${earned.map(b=>`<span>${esc(b.name)}${b.sub?" · "+esc(b.sub):""}</span>`).join("")}</div>`:""}
+  <footer>Generated by EduNexus on ${date}. Scores are computed from supervised tests, papers and coursework, not self-reported.</footer>
+  </body></html>`;
+  const f = document.createElement("iframe");
+  f.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0";
+  document.body.appendChild(f);
+  f.srcdoc = html;
+  f.onload = () => {
+    try{ f.contentWindow.focus(); f.contentWindow.print(); }catch(e){ toast("Could not open the print dialog"); }
+    setTimeout(()=>f.remove(), 60000);
+  };
+}
 
 /* ================= identity: photo, banner, badges ================= */
 
@@ -2398,9 +2603,477 @@ async function taSend(text){
   const c = $("#taChat"); c && c.lastElementChild && c.lastElementChild.scrollIntoView({block:"end"});
 }
 
+
+/* ================= tests and test papers =================
+   Teachers build a paper, students sit it, the AI marks it, the teacher
+   checks every mark, and only then are results released. Answer keys and
+   unreleased marks are kept from students by the database itself. */
+const QKINDS = [
+  { id:"mcq",     name:"Multiple choice", hint:"One correct option. Marked exactly, without the AI." },
+  { id:"theory",  name:"Written answer",  hint:"Marked against your mark scheme, with partial credit." },
+  { id:"drawing", name:"Drawing or photo", hint:"The student uploads a photo; a vision model reads it." }
+];
+const uuid = () => (crypto.randomUUID ? crypto.randomUUID()
+  : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c=>{const r=Math.random()*16|0;return (c=="x"?r:(r&3|8)).toString(16);}));
+const blankQ = kind => ({ id:uuid(), kind, prompt:"", options:kind==="mcq"?["",""]:null, answer_index:kind==="mcq"?0:null, expected:"", marks: kind==="mcq"?1:4 });
+const confChip = c => `<span class="chip ${c==="low"?"warn":c==="high"?"teal":""}">${c==="low"?"Check this":c==="high"?"Confident":"Fairly sure"}</span>`;
+S.tests = { list:null, builder:null, marking:null, take:null, result:null, busy:false };
+
+async function loadTests(){
+  if(S.me.role==="student"){
+    const [t, subs] = await Promise.all([
+      sb.from("tests").select("*").eq("status","published").order("created_at",{ascending:false}),
+      sb.from("test_submissions").select("*").eq("student_id",S.me.id)
+    ]);
+    if(t.error && /does not exist|schema cache/i.test(t.error.message)) S.tests.missing = true;
+    S.tests.list = t.data||[]; S.tests.subs = subs.data||[];
+  } else {
+    const t = await sb.from("tests").select("*").eq("teacher_id",S.me.id).order("created_at",{ascending:false});
+    if(t.error && /does not exist|schema cache/i.test(t.error.message)) S.tests.missing = true;
+    S.tests.list = t.data||[];
+    const ids = (S.tests.list||[]).map(x=>x.id);
+    S.tests.subs = ids.length ? ((await sb.from("test_submissions").select("*").in("test_id",ids)).data||[]) : [];
+  }
+  rerender();
+}
+
+/* ---------------- teacher: the list ---------------- */
+V.tests = () => {
+  if(S.tests.list===null){ loadTests(); return `<div class="topbar"><div><h1 class="h1">Tests</h1><div class="sub">Loading…</div></div></div>`; }
+  if(S.tests.missing) return empty("Tests aren't set up yet","Run tests.sql in the Supabase SQL Editor, then reload.");
+  if(S.me.role!=="student") return V.testsTeacher();
+  return V.testsStudent();
+};
+V.testsTeacher = () => {
+  const list = S.tests.list, subs = S.tests.subs||[];
+  return `
+  <div class="topbar"><div><h1 class="h1">Tests</h1>
+    <div class="sub">Build a paper, let Edu AI mark it, check every mark, then release the results.</div></div></div>
+  <div class="card lens-card">
+    <div class="lens-head"><span class="lens-badge">+</span><div><b>New test</b><div class="note">You add the questions on the next screen</div></div></div>
+    <div class="grid g3">
+      <div><label class="f" for="ntTitle">Title</label><input id="ntTitle" placeholder="Waves — end of unit test"></div>
+      <div><label class="f" for="ntSubject">Subject</label><input id="ntSubject" placeholder="Physics"></div>
+      <div><label class="f" for="ntTopic">Topic</label><input id="ntTopic" placeholder="Waves and superposition"></div>
+    </div>
+    <label class="f" for="ntInstructions">Instructions for students</label>
+    <input id="ntInstructions" placeholder="Answer all questions. Show your working.">
+    <button class="btn big" style="margin-top:16px" data-act="test-create">Create test</button>
+  </div>
+  ${list.length ? `<div class="sec">Your tests</div>
+    <div class="grid" style="gap:12px">
+      ${list.map(t=>{
+        const mine = subs.filter(s=>s.test_id===t.id);
+        const toMark = mine.filter(s=>s.status==="submitted").length, released = mine.filter(s=>s.status==="released").length;
+        return `<div class="card">
+          <div class="between wrap-sm">
+            <div style="min-width:0"><b style="font-size:var(--fs-4)">${esc(t.title)}</b>
+              <div class="note">${esc(t.subject)} · ${esc(t.topic)}</div></div>
+            <div class="row" style="gap:8px;flex-wrap:wrap">
+              <span class="chip ${t.status==="published"?"teal":""}">${t.status==="published"?"Open to students":t.status==="closed"?"Closed":"Draft"}</span>
+              ${mine.length?`<span class="chip">${mine.length} submitted</span>`:""}
+              ${toMark?`<span class="chip warn">${toMark} to mark</span>`:""}
+              ${released?`<span class="chip teal">${released} released</span>`:""}
+            </div></div>
+          <div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap">
+            <a class="btn sm" href="#/build/${t.id}">Edit paper</a>
+            <a class="btn ghost sm" href="#/marking/${t.id}">Submissions${mine.length?` (${mine.length})`:""}</a>
+            <button class="btn ghost sm" data-act="test-status" data-id="${t.id}" data-s="${t.status==="published"?"closed":"published"}">${t.status==="published"?"Close":"Publish to students"}</button>
+          </div></div>`;
+      }).join("")}</div>`
+   : empty("No tests yet","Create one above. Nothing is visible to students until you publish it.")}`;
+};
+
+/* ---------------- teacher: the builder (Google-Forms style) ---------------- */
+async function openBuilder(id){
+  const [t, q, k] = await Promise.all([
+    sb.from("tests").select("*").eq("id",id).single(),
+    sb.from("test_questions").select("*").eq("test_id",id).order("position"),
+    sb.from("question_key").select("*").eq("test_id",id)
+  ]);
+  S.tests.builder = { test:t.data, dirty:false,
+    questions:(q.data||[]).map(x=>{ const key=(k.data||[]).find(y=>y.question_id===x.id)||{};
+      return { id:x.id, kind:x.kind, prompt:x.prompt, options:x.options, marks:x.marks,
+               answer_index:key.answer_index, expected:key.expected||"" }; }) };
+  rerender();
+}
+function captureBuilder(){
+  const B = S.tests.builder; if(!B || !$("#bTitle")) return;
+  B.test.title = $("#bTitle").value; B.test.subject = $("#bSubject").value;
+  B.test.topic = $("#bTopic").value; B.test.instructions = $("#bInstructions").value;
+  B.questions.forEach((q,i)=>{
+    const g = id => $("#"+id+i);
+    if(g("qPrompt")) q.prompt = g("qPrompt").value;
+    if(g("qMarks"))  q.marks = Math.max(1, Number(g("qMarks").value)||1);
+    if(g("qExpected")) q.expected = g("qExpected").value;
+    if(q.kind==="mcq") q.options = (q.options||[]).map((o,j)=> $(`#qOpt${i}_${j}`) ? $(`#qOpt${i}_${j}`).value : o);
+  });
+}
+V.build = () => {
+  const B = S.tests.builder;
+  if(B && !B.test) return empty("Test not found","It may have been deleted.");
+  if(!B){ openBuilder(S.tests.openId); return `<div class="topbar"><div><h1 class="h1">Loading the paper…</h1></div></div>`; }
+  const t = B.test, total = B.questions.reduce((s,q)=>s+(q.marks||0),0);
+  return `
+  <div class="crumb"><a href="#/tests">Tests</a> · ${esc(t.subject)}</div>
+  <div class="topbar"><div><h1 class="h1" style="font-size:var(--fs-6)">Edit paper</h1>
+    <div class="sub">${B.questions.length} question${B.questions.length===1?"":"s"} · ${total} mark${total===1?"":"s"} in total${B.dirty?" · <span style=\"color:var(--warn)\">unsaved changes</span>":""}</div></div>
+    <div class="row" style="gap:8px"><a class="btn ghost sm" href="#/marking/${t.id}">Submissions</a>
+      <button class="btn sm" data-act="test-save">${busy("testSave","Save paper")}</button></div></div>
+
+  <div class="card form-head">
+    <label class="f" for="bTitle">Test title</label><input id="bTitle" value="${esc(t.title)}">
+    <div class="grid g2">
+      <div><label class="f" for="bSubject">Subject</label><input id="bSubject" value="${esc(t.subject)}"></div>
+      <div><label class="f" for="bTopic">Topic</label><input id="bTopic" value="${esc(t.topic)}"></div>
+    </div>
+    <label class="f" for="bInstructions">Instructions for students</label>
+    <input id="bInstructions" value="${esc(t.instructions||"")}" placeholder="Answer all questions. Show your working.">
+  </div>
+
+  ${B.questions.map((q,i)=>`
+    <div class="card q-card">
+      <div class="between" style="margin-bottom:12px">
+        <span class="q-num">Question ${i+1}</span>
+        <div class="row" style="gap:8px">
+          <button class="btn ghost sm" data-act="q-move" data-i="${i}" data-d="-1" ${i===0?"disabled":""}>↑</button>
+          <button class="btn ghost sm" data-act="q-move" data-i="${i}" data-d="1" ${i===B.questions.length-1?"disabled":""}>↓</button>
+          <button class="btn ghost sm" data-act="q-del" data-i="${i}">Remove</button>
+        </div>
+      </div>
+      <div class="seg" style="margin-bottom:12px">
+        ${QKINDS.map(k=>`<button class="${q.kind===k.id?"on":""}" data-act="q-kind" data-i="${i}" data-k="${k.id}">${esc(k.name)}</button>`).join("")}
+      </div>
+      <label class="f" for="qPrompt${i}">Question</label>
+      <textarea id="qPrompt${i}" style="min-height:80px" placeholder="Explain why the induced current opposes the change producing it.">${esc(q.prompt)}</textarea>
+      ${q.kind==="mcq" ? `
+        <label class="f">Options — tap the circle to mark the correct one</label>
+        ${(q.options||[]).map((o,j)=>`<div class="opt-row">
+            <button class="opt-radio ${q.answer_index===j?"on":""}" data-act="q-answer" data-i="${i}" data-j="${j}" aria-label="Mark option ${j+1} correct"></button>
+            <input id="qOpt${i}_${j}" value="${esc(o)}" placeholder="Option ${j+1}">
+            ${(q.options||[]).length>2?`<button class="mem-x" data-act="q-opt-del" data-i="${i}" data-j="${j}">✕</button>`:""}
+          </div>`).join("")}
+        <button class="btn ghost sm" style="margin-top:10px" data-act="q-opt-add" data-i="${i}">Add option</button>`
+      : `<label class="f" for="qExpected${i}">Mark scheme ${q.kind==="drawing"?"— what the drawing must show":"— what earns the marks"}</label>
+         <textarea id="qExpected${i}" style="min-height:70px" placeholder="1 mark for stating Lenz's law, 2 for applying it to the direction, 1 for the sign.">${esc(q.expected||"")}</textarea>`}
+      <div class="row" style="gap:12px;align-items:flex-end;margin-top:12px">
+        <div style="width:150px"><label class="f" for="qMarks${i}">Marks</label><input id="qMarks${i}" type="number" min="1" value="${q.marks}"></div>
+        <div class="note" style="padding-bottom:12px">${esc((QKINDS.find(k=>k.id===q.kind)||{}).hint||"")}</div>
+      </div>
+    </div>`).join("")}
+
+  <div class="card" style="margin-top:14px">
+    <div class="note" style="margin-bottom:10px">Add a question</div>
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+      ${QKINDS.map(k=>`<button class="btn ghost sm" data-act="q-add" data-k="${k.id}">${esc(k.name)}</button>`).join("")}
+    </div>
+  </div>
+  <div class="row" style="gap:8px;margin-top:16px;flex-wrap:wrap">
+    <button class="btn big" data-act="test-save">${busy("testSave","Save paper")}</button>
+    <button class="btn ghost" data-act="test-status" data-id="${t.id}" data-s="${t.status==="published"?"closed":"published"}">
+      ${t.status==="published"?"Close to students":"Publish to students"}</button>
+  </div>`;
+};
+
+/* ---------------- teacher: submissions and marking ---------------- */
+async function openMarking(testId){
+  const [t, q, subs] = await Promise.all([
+    sb.from("tests").select("*").eq("id",testId).single(),
+    sb.from("test_questions").select("*").eq("test_id",testId).order("position"),
+    sb.from("test_submissions").select("*").eq("test_id",testId).order("submitted_at")
+  ]);
+  const ids = (subs.data||[]).map(s=>s.student_id);
+  const names = ids.length ? ((await sb.from("profiles").select("id, full_name, grade").in("id",ids)).data||[]) : [];
+  S.tests.marking = { test:t.data, questions:q.data||[], subs:(subs.data||[]).map(s=>({ ...s,
+    student:(names.find(n=>n.id===s.student_id)||{}).full_name || "Student" })), open:null };
+  rerender();
+}
+async function openSubmission(subId){
+  const M = S.tests.marking;
+  const [a, m] = await Promise.all([
+    sb.from("test_answers").select("*").eq("submission_id",subId),
+    sb.from("test_marks").select("*").eq("submission_id",subId)
+  ]);
+  M.open = { sub: M.subs.find(s=>s.id===subId), answers:a.data||[], marks:m.data||[] };
+  rerender();
+}
+V.marking = () => {
+  const M = S.tests.marking;
+  if(M && !M.test) return empty("Test not found","It may have been deleted.");
+  if(!M){ openMarking(S.tests.openId); return `<div class="topbar"><div><h1 class="h1">Loading submissions…</h1></div></div>`; }
+  if(M.open) return V.markOne();
+  const t = M.test;
+  return `
+  <div class="crumb"><a href="#/tests">Tests</a> · <a href="#/build/${t.id}">${esc(t.title)}</a></div>
+  <div class="topbar"><div><h1 class="h1" style="font-size:var(--fs-6)">Submissions</h1>
+    <div class="sub">${esc(t.title)} · ${M.subs.length} submitted</div></div></div>
+  ${M.subs.length ? `<div class="card list">
+      ${M.subs.map(s=>`<div class="item wrap-sm">
+        <div style="min-width:0"><div style="font-size:var(--fs-3);font-weight:700">${esc(s.student)}</div>
+          <div class="note">Submitted ${ago(s.submitted_at)}</div></div>
+        <div class="row" style="gap:10px;flex-wrap:wrap">
+          ${s.total_score!==null && s.total_score!==undefined?`<b class="pct">${Math.round(s.total_score)}/${s.total_marks}</b>`:""}
+          <span class="chip ${s.status==="released"?"teal":s.status==="marked"?"":"warn"}">
+            ${s.status==="released"?"Released":s.status==="marked"?"Marked, not released":"Needs marking"}</span>
+          <button class="btn sm" data-act="mark-open" data-id="${s.id}">${s.status==="submitted"?"Mark":"Review"}</button>
+        </div></div>`).join("")}</div>`
+   : empty("Nothing submitted yet","Students see this paper once it's published. Their submissions appear here.")}`;
+};
+V.markOne = () => {
+  const M = S.tests.marking, O = M.open, s = O.sub;
+  const ansOf = id => O.answers.find(a=>a.question_id===id)||{};
+  const markOf = id => O.marks.find(m=>m.question_id===id)||{};
+  const total = M.questions.reduce((t,q)=>t+(Number((markOf(q.id).score)||0)),0);
+  const outOf = M.questions.reduce((t,q)=>t+q.marks,0);
+  const marked = O.marks.length>0;
+  return `
+  <div class="crumb"><a href="#/tests">Tests</a> · <span data-act="mark-back" style="cursor:pointer">Submissions</span> · ${esc(s.student)}</div>
+  <div class="topbar"><div><h1 class="h1" style="font-size:var(--fs-6)">${esc(s.student)}</h1>
+    <div class="sub">${esc(M.test.title)} · submitted ${ago(s.submitted_at)}</div></div>
+    <div class="row" style="gap:8px">
+      <button class="btn ghost sm" data-act="mark-back">Back</button>
+      <button class="btn sm" data-act="mark-ai" data-id="${s.id}">${busy("markAI", marked?"Re-mark with AI":"Mark with AI")}</button>
+    </div></div>
+
+  ${marked ? `<div class="grid g3">
+      <div class="stat"><div class="k">Marked so far</div><div class="v">${Math.round(total)}/${outOf}</div></div>
+      <div class="stat"><div class="k">Percentage</div><div class="v">${outOf?Math.round(total/outOf*100):0}%</div></div>
+      <div class="stat ${O.marks.filter(m=>m.confidence==="low").length?"warn":""}"><div class="k">Flagged for you</div>
+        <div class="v">${O.marks.filter(m=>m.confidence==="low").length}</div></div>
+    </div>
+    <div class="card flat" style="margin-top:12px"><div class="note">Every mark below is editable. The student sees nothing until you press Release.</div></div>`
+   : `<div class="card"><div class="note">Not marked yet. Press <b>Mark with AI</b>, then check each mark before releasing.</div></div>`}
+
+  ${M.questions.length ? "" : `<div class="card" style="margin-top:14px;border-color:var(--warn-line);background:var(--warn-soft)">
+      <b class="warn-text">This paper has no saved questions</b>
+      <p class="note" style="margin:7px 0 0">Open <a href="#/build/${M.test.id}">Edit paper</a>, add the questions and press Save paper. Anything typed but not saved stays in the browser only.</p></div>`}
+  ${M.questions.map((q,i)=>{
+    const a = ansOf(q.id), m = markOf(q.id);
+    const opts = Array.isArray(q.options)?q.options:[];
+    return `<div class="card q-card" style="margin-top:14px">
+      <div class="between" style="margin-bottom:10px">
+        <span class="q-num">Question ${i+1} · ${esc((QKINDS.find(k=>k.id===q.kind)||{}).name||q.kind)}</span>
+        <div class="row" style="gap:8px">${m.confidence?confChip(m.confidence):""}<span class="chip">${q.marks} mark${q.marks===1?"":"s"}</span></div>
+      </div>
+      <p style="font-size:var(--fs-3);font-weight:600;margin:0 0 12px">${esc(q.prompt)}</p>
+      <div class="card flat" style="margin-bottom:12px">
+        <div class="note">Student's answer</div>
+        ${q.kind==="mcq"
+          ? `<div style="font-size:var(--fs-2);margin-top:6px">${a.chosen_index===null||a.chosen_index===undefined?"<i>No option chosen</i>":esc(opts[a.chosen_index]||"?")}</div>`
+          : `${a.image_url?`<img src="${esc(a.image_url)}" alt="Student's work" style="max-width:100%;max-height:340px;object-fit:contain;border-radius:10px;margin-top:8px;background:#fff">`:""}
+             <div class="prose" style="font-size:var(--fs-2);margin-top:8px">${esc(a.response||"(blank)")}</div>`}
+      </div>
+      ${m.correct?`<div class="note" style="margin-bottom:10px">Expected: ${esc(m.correct)}</div>`:""}
+      <div class="row" style="gap:12px;align-items:flex-end;flex-wrap:wrap">
+        <div style="width:170px"><label class="f" for="mScore${i}">Marks awarded</label>
+          <input id="mScore${i}" type="number" min="0" max="${q.marks}" step="0.5" value="${m.score!==undefined?m.score:0}"></div>
+        <div style="flex:1;min-width:240px"><label class="f" for="mFb${i}">Feedback to the student</label>
+          <input id="mFb${i}" value="${esc(m.feedback||"")}" placeholder="What earned the marks, and what was missing"></div>
+      </div>
+      ${m.ai_score!==null&&m.ai_score!==undefined?`<div class="note" style="margin-top:8px">Edu AI gave ${m.ai_score} of ${q.marks}.</div>`:""}
+    </div>`; }).join("")}
+
+  ${marked?`<div class="row" style="gap:8px;margin-top:16px;flex-wrap:wrap">
+    <button class="btn" data-act="mark-save" data-id="${s.id}">${busy("markSave","Save my changes")}</button>
+    <button class="btn big" data-act="mark-release" data-id="${s.id}">${busy("markRelease","Release results to this student")}</button>
+  </div>
+  <div class="note" style="margin-top:10px">Releasing saves the result to the student's genome as a test, the heaviest evidence there is.</div>`:""}`;
+};
+
+/* ---------------- student: sitting a test and seeing results ---------------- */
+V.testsStudent = () => {
+  const subs = S.tests.subs||[], list = S.tests.list;
+  const open = list.filter(t=>!subs.some(s=>s.test_id===t.id));
+  const waiting = subs.filter(s=>s.status!=="released");
+  const done = subs.filter(s=>s.status==="released");
+  const tOf = id => list.find(t=>t.id===id)||{};
+  return `
+  <div class="topbar"><div><h1 class="h1">Tests</h1>
+    <div class="sub">Papers set by your teachers, and your results once they're released.</div></div>
+    <button class="btn ghost sm" data-act="tests-refresh">${busy("testsRefresh","Refresh")}</button></div>
+  ${open.length?`<div class="sec">To sit</div>
+    <div class="grid" style="gap:12px">${open.map(t=>`<div class="card">
+      <div class="between wrap-sm"><div style="min-width:0"><b style="font-size:var(--fs-4)">${esc(t.title)}</b>
+        <div class="note">${esc(t.subject)} · ${esc(t.topic)}</div></div>
+        <a class="btn sm" href="#/sit/${t.id}">Start</a></div></div>`).join("")}</div>`:""}
+  ${waiting.length?`<div class="sec">Waiting on your teacher</div>
+    <div class="card list">${waiting.map(s=>`<div class="item">
+      <div><div style="font-size:var(--fs-2);font-weight:600">${esc(tOf(s.test_id).title||"Test")}</div>
+        <div class="note">Submitted ${ago(s.submitted_at)}</div></div>
+      <span class="chip">Being marked</span></div>`).join("")}</div>`:""}
+  ${done.length?`<div class="sec">Your results</div>
+    <div class="grid" style="gap:12px">${done.map(s=>{
+      const pct = s.total_marks?Math.round(s.total_score/s.total_marks*100):0;
+      return `<div class="card"><div class="between wrap-sm">
+        <div style="min-width:0"><b style="font-size:var(--fs-4)">${esc(tOf(s.test_id).title||"Test")}</b>
+          <div class="note">${esc(tOf(s.test_id).subject||"")} · released ${ago(s.released_at||s.submitted_at)}</div></div>
+        <div class="row" style="gap:12px"><b class="pct ${pct<60?"warn":""}">${Math.round(s.total_score)}/${s.total_marks} · ${pct}%</b>
+          <a class="btn sm" href="#/result/${s.id}">See the marking</a></div></div></div>`; }).join("")}</div>`:""}
+  ${!open.length && !waiting.length && !done.length ? empty("No tests yet","When a teacher publishes a paper it appears here, and your results follow once they're released.") : ""}`;
+};
+async function openTake(testId){
+  const [t, q] = await Promise.all([
+    sb.from("tests").select("*").eq("id",testId).single(),
+    sb.from("test_questions").select("id, position, kind, prompt, options, marks").eq("test_id",testId).order("position")
+  ]);
+  S.tests.take = { test:t.data, questions:q.data||[], answers:{}, images:{} };
+  rerender();
+}
+function captureTake(){
+  const T = S.tests.take; if(!T) return;
+  T.questions.forEach((q,i)=>{ const el = $("#aResp"+i); if(el) T.answers[q.id] = { ...(T.answers[q.id]||{}), response: el.value }; });
+}
+V.sit = () => {
+  const T = S.tests.take;
+  if(T && !T.test) return empty("Test not available","It may have been closed by your teacher.");
+  if(!T){ openTake(S.tests.openId); return `<div class="topbar"><div><h1 class="h1">Opening the paper…</h1></div></div>`; }
+  const t = T.test, total = T.questions.reduce((s,q)=>s+q.marks,0);
+  return `
+  <div class="crumb"><a href="#/tests">Tests</a> · ${esc(t.subject)}</div>
+  <div class="card form-head" style="border-top:4px solid var(--teal)">
+    <h1 class="h1" style="font-size:var(--fs-6);margin:0 0 6px">${esc(t.title)}</h1>
+    <div class="note">${esc(t.subject)} · ${esc(t.topic)} · ${T.questions.length} questions · ${total} marks</div>
+    ${t.instructions?`<p class="prose" style="font-size:var(--fs-2);margin:12px 0 0">${esc(t.instructions)}</p>`:""}
+  </div>
+  ${T.questions.length ? "" : `<div class="card" style="margin-top:14px;border-color:var(--warn-line);background:var(--warn-soft)">
+      <b class="warn-text">This paper has no questions yet</b>
+      <p class="note" style="margin:7px 0 0">Your teacher is still building it. Check back shortly.</p></div>`}
+  ${T.questions.map((q,i)=>{
+    const a = T.answers[q.id]||{}, opts = Array.isArray(q.options)?q.options:[];
+    return `<div class="card q-card" style="margin-top:14px">
+      <div class="between" style="margin-bottom:10px">
+        <span class="q-num">Question ${i+1}</span><span class="chip">${q.marks} mark${q.marks===1?"":"s"}</span></div>
+      <p style="font-size:var(--fs-3);font-weight:600;margin:0 0 14px">${esc(q.prompt)}</p>
+      ${q.kind==="mcq" ? opts.map((o,j)=>`
+          <button class="opt-pick ${a.chosen_index===j?"on":""}" data-act="a-pick" data-q="${q.id}" data-j="${j}">
+            <span class="opt-radio ${a.chosen_index===j?"on":""}"></span><span>${esc(o)}</span></button>`).join("")
+        : q.kind==="drawing" ? `
+          <label class="drop" for="aImg${i}">
+            <input type="file" accept="image/*" capture="environment" id="aImg${i}" data-q="${q.id}">
+            <span class="drop-main">${a.image_url?"Photo attached — tap to replace":"Take or choose a photo of your work"}</span>
+            <span class="note">Drawings, graphs or handwritten working</span>
+            ${a.image_url?`<img src="${esc(a.image_url)}" alt="Your work" style="max-height:200px;border-radius:10px;margin-top:10px">`:""}
+          </label>
+          <label class="f" for="aResp${i}">Anything you want to add (optional)</label>
+          <textarea id="aResp${i}" style="min-height:70px">${esc(a.response||"")}</textarea>`
+        : `<div class="paper"><textarea id="aResp${i}" spellcheck="false" placeholder="Write your answer">${esc(a.response||"")}</textarea></div>`}
+    </div>`; }).join("")}
+  <div class="card" style="margin-top:16px">
+    <div class="note" style="margin-bottom:12px">Once you submit, your teacher marks it with Edu AI's help and releases the result.</div>
+    <button class="btn big" data-act="test-submit">${busy("testSubmit","Submit my answers")}</button>
+  </div>`;
+};
+async function openResult(subId){
+  const sub = (await sb.from("test_submissions").select("*").eq("id",subId).single()).data;
+  if(!sub){ S.tests.result = { missing:true }; rerender(); return; }
+  const [t, q, a, m] = await Promise.all([
+    sb.from("tests").select("*").eq("id",sub.test_id).single(),
+    sb.from("test_questions").select("*").eq("test_id",sub.test_id).order("position"),
+    sb.from("test_answers").select("*").eq("submission_id",subId),
+    sb.from("test_marks").select("*").eq("submission_id",subId)
+  ]);
+  S.tests.result = { sub, test:t.data, questions:q.data||[], answers:a.data||[], marks:m.data||[] };
+  rerender();
+}
+V.result = () => {
+  const R = S.tests.result;
+  if(R && R.missing) return empty("Result not available","It may not have been released yet.");
+  if(!R){ openResult(S.tests.openId); return `<div class="topbar"><div><h1 class="h1">Loading your result…</h1></div></div>`; }
+  const pct = R.sub.total_marks?Math.round(R.sub.total_score/R.sub.total_marks*100):0;
+  const markOf = id => R.marks.find(m=>m.question_id===id)||{};
+  const ansOf = id => R.answers.find(a=>a.question_id===id)||{};
+  return `
+  <div class="crumb"><a href="#/tests">Tests</a> · ${esc(R.test.subject)}</div>
+  <div class="topbar"><div><h1 class="h1" style="font-size:var(--fs-6)">${esc(R.test.title)}</h1>
+    <div class="sub">${esc(R.test.topic)} · marked by ${esc(R.test.subject)} teacher</div></div></div>
+  <div class="card report ${pct<60?"weak":""}">
+    <div class="report-top">${ring(pct)}
+      <div><div class="report-verdict">${Math.round(R.sub.total_score)} out of ${R.sub.total_marks}</div>
+        <p class="note" style="margin:8px 0 0">Every mark below was checked by your teacher before release.</p></div></div>
+  </div>
+  ${R.questions.map((q,i)=>{
+    const m = markOf(q.id), a = ansOf(q.id), opts = Array.isArray(q.options)?q.options:[];
+    const full = Number(m.score)>=q.marks, none = Number(m.score)===0;
+    return `<div class="card q-card" style="margin-top:14px;${none?"border-color:var(--warn-line)":""}">
+      <div class="between" style="margin-bottom:10px">
+        <span class="q-num">Question ${i+1}</span>
+        <b class="pct ${none?"warn":""}">${m.score||0}/${q.marks}</b></div>
+      <p style="font-size:var(--fs-3);font-weight:600;margin:0 0 12px">${esc(q.prompt)}</p>
+      <div class="cmp">
+        <div class="box ${full?"right":"yours"}"><div class="lbl">Your answer</div>
+          <div class="mono-ans">${q.kind==="mcq"?esc(opts[a.chosen_index]||"(nothing chosen)"):esc(a.response||"(blank)")}</div>
+          ${a.image_url?`<img src="${esc(a.image_url)}" alt="Your work" style="max-width:100%;border-radius:8px;margin-top:8px">`:""}</div>
+        ${m.correct?`<div class="box right"><div class="lbl">Expected</div><div class="mono-ans">${esc(m.correct)}</div></div>`:""}
+      </div>
+      ${m.feedback?`<p class="prose note" style="margin:12px 0 0">${esc(m.feedback)}</p>`:""}
+    </div>`; }).join("")}`;
+};
+
+/* Writes the paper the teacher is editing. Called by Save, by Publish, and
+   when they navigate away, so questions can never be left only in the browser. */
+async function savePaper(){
+
+    const B = S.tests.builder, t = B.test;
+    if(B.questions.some(q=>!q.prompt.trim())) throw new Error("Every question needs its text");
+    if(B.questions.some(q=>q.kind==="mcq" && (q.options||[]).some(o=>!o.trim()))) throw new Error("Every option needs text");
+    const up = await sb.from("tests").update({ title:t.title, subject:t.subject, topic:t.topic, instructions:t.instructions }).eq("id",t.id);
+    if(up.error) throw up.error;
+    const existing = (await sb.from("test_questions").select("id").eq("test_id",t.id)).data||[];
+    const keep = new Set(B.questions.map(q=>q.id));
+    const gone = existing.filter(e=>!keep.has(e.id)).map(e=>e.id);
+    if(gone.length) await sb.from("test_questions").delete().in("id",gone);
+    const rows = B.questions.map((q,i)=>({ id:q.id, test_id:t.id, position:i+1, kind:q.kind, prompt:q.prompt.trim(),
+      options: q.kind==="mcq" ? q.options : null, marks:q.marks }));
+    if(rows.length){
+      const qe = await sb.from("test_questions").upsert(rows).select("id"); if(qe.error) throw qe.error;
+      const keys = B.questions.map(q=>({ question_id:q.id, test_id:t.id,
+        answer_index: q.kind==="mcq" ? (q.answer_index??0) : null, expected: q.kind==="mcq" ? null : (q.expected||"") }));
+      const ke = await sb.from("question_key").upsert(keys); if(ke.error) throw ke.error;
+    }
+      S.tests.builder.dirty = false;
+  toast("Paper saved");
+}
+async function saveMarks(subId){
+  const M = S.tests.marking;
+  const rows = M.questions.map((q,i)=>{
+    const prev = (M.open.marks.find(m=>m.question_id===q.id)||{});
+    const score = Math.max(0, Math.min(q.marks, Number(($("#mScore"+i)||{}).value ?? prev.score ?? 0)));
+    const feedback = ($("#mFb"+i)||{}).value ?? prev.feedback ?? "";
+    const changed = prev.ai_score!==undefined && prev.ai_score!==null && Number(prev.ai_score)!==score;
+    return { submission_id:subId, question_id:q.id, score, max_marks:q.marks, feedback,
+             correct:prev.correct??null, ai_score:prev.ai_score??null, confidence:prev.confidence??null,
+             marked_by: changed ? "teacher" : (prev.marked_by||"ai") };
+  });
+  const { error } = await sb.from("test_marks").upsert(rows, { onConflict:"submission_id,question_id" });
+  if(error) throw error;
+  M.open.marks = rows;
+  const total = rows.reduce((t,r)=>t+r.score,0), outOf = M.questions.reduce((t,q)=>t+q.marks,0);
+  await sb.from("test_submissions").update({ total_score: total, total_marks: outOf }).eq("id", subId);
+  return { total, outOf };
+}
+/* a photo of drawn or handwritten work, uploaded as the student answers */
+document.addEventListener("change", async e=>{
+  if(!e.target.id || !e.target.id.startsWith("aImg") || !e.target.files[0]) return;
+  const qid = e.target.dataset.q, T = S.tests.take;
+  captureTake(); toast("Uploading your photo…");
+  try{
+    const dataUrl = await fileToCompressedDataURL(e.target.files[0], 1600, 0.82);
+    const blob = await (await fetch(dataUrl)).blob();
+    const path = `${S.me.id}/${T.test.id}-${qid}-${Date.now()}.jpg`;
+    const up = await sb.storage.from("test-uploads").upload(path, blob, { contentType:"image/jpeg", upsert:true });
+    if(up.error) throw up.error;
+    const { data } = sb.storage.from("test-uploads").getPublicUrl(path);
+    T.answers[qid] = { ...(T.answers[qid]||{}), image_url: data.publicUrl };
+    toast("Photo attached"); rerender();
+  }catch(err){ toast(/bucket|not found/i.test(err.message) ? "Photo storage isn't set up — run tests.sql" : err.message); }
+});
+
 /* ================= settings ================= */
+const APP_VERSION = "1.0";
 const PREFS_KEY = "edunexus-prefs";
-const PREF_DEFAULTS = { theme:"dark", accent:"teal", size:"normal", motion:"full" };
+const PREF_DEFAULTS = { theme:"dark", accent:"teal", size:"normal", motion:"full",
+  contrast:"normal", font:"default", density:"comfortable",
+  celebrate:"on", tips:"on", confirm:"on" };
 function getPrefs(){
   try{ return { ...PREF_DEFAULTS, ...JSON.parse(localStorage.getItem(PREFS_KEY) || "{}") }; }
   catch(e){ return { ...PREF_DEFAULTS }; }
@@ -2410,52 +3083,305 @@ function applyPrefs(p){
   let t = p.theme;
   if(t === "system") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
   r.dataset.theme = t; r.dataset.accent = p.accent; r.dataset.size = p.size; r.dataset.motion = p.motion;
+  r.dataset.contrast = p.contrast; r.dataset.font = p.font; r.dataset.density = p.density;
+}
+/* Preferences follow the account, so a student's theme is the same on the
+   school computer as on their phone. Saved locally first so nothing flickers. */
+let prefSyncTimer = null;
+function syncPrefs(p){
+  if(!sb || !S.me) return;
+  clearTimeout(prefSyncTimer);
+  prefSyncTimer = setTimeout(()=>{
+    sb.from("profiles").update({ settings: { ...(S.me.settings||{}), prefs:p } }).eq("id",S.me.id)
+      .then(({error})=>{ if(!error) S.me.settings = { ...(S.me.settings||{}), prefs:p }; });
+  }, 700);
 }
 function setPref(key, value){
   const p = { ...getPrefs(), [key]: value };
   try{ localStorage.setItem(PREFS_KEY, JSON.stringify(p)); }catch(e){}
-  applyPrefs(p); rerender();
+  applyPrefs(p); syncPrefs(p); rerender();
 }
-/* Follow the device when the theme is set to System. */
+const pref = k => getPrefs()[k];
+const prefOn = k => getPrefs()[k] !== "off";
 matchMedia("(prefers-color-scheme: light)").addEventListener("change", ()=>{ if(getPrefs().theme==="system") applyPrefs(getPrefs()); });
 
+
+/* ================= timetable and calendar ================= */
+const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const KINDS = { event:"Event", exam:"Test or exam", deadline:"Deadline", study:"Study", holiday:"Holiday", reminder:"Reminder" };
+S.cal = { view:"week", anchor:null, slots:null, events:[], tests:[], plan:null, editSlot:null };
+const startOfWeek = d => { const x = new Date(d); const n = (x.getDay()+6)%7; x.setHours(0,0,0,0); x.setDate(x.getDate()-n); return x; };
+const sameDay = (a,b) => a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+const hhmm = t => String(t||"").slice(0,5);
+const toLocalInput = d => { const x=new Date(d); x.setMinutes(x.getMinutes()-x.getTimezoneOffset()); return x.toISOString().slice(0,16); };
+const fmtTime = d => new Date(d).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+const calAnchor = () => S.cal.anchor ? new Date(S.cal.anchor) : new Date();
+
+async function loadCalendar(){
+  const from = new Date(); from.setMonth(from.getMonth()-1);
+  const to = new Date(); to.setMonth(to.getMonth()+3);
+  const [slots, ev, tests] = await Promise.all([
+    sb.from("timetable_slots").select("*").eq("user_id",S.me.id).order("day").order("starts"),
+    sb.from("events").select("*").gte("starts_at",from.toISOString()).lte("starts_at",to.toISOString()).order("starts_at"),
+    sb.from("tests").select("id, title, subject, due_at, status, teacher_id").not("due_at","is",null)
+  ]);
+  if(slots.error && /does not exist|schema cache/i.test(slots.error.message)) S.cal.missing = true;
+  S.cal.slots = slots.data||[]; S.cal.events = ev.data||[]; S.cal.tests = tests.data||[];
+  rerender();
+}
+/* everything that lands on a given day: events, test deadlines, study sessions */
+function itemsOn(day){
+  const out = S.cal.events.filter(e=>sameDay(new Date(e.starts_at), day)).map(e=>({ ...e, source:"event" }));
+  S.cal.tests.filter(t=>t.due_at && sameDay(new Date(t.due_at), day))
+    .forEach(t=>out.push({ id:"t-"+t.id, kind:"deadline", title:t.title+" due", starts_at:t.due_at,
+      all_day:false, source:"test", notes:t.subject }));
+  return out.sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at));
+}
+function slotsOn(day){ return (S.cal.slots||[]).filter(s=>s.day === ((day.getDay()+6)%7)+1); }
+
+V.calendar = () => {
+  if(S.cal.slots===null){ loadCalendar(); return `<div class="topbar"><div><h1 class="h1">Calendar</h1><div class="sub">Loading…</div></div></div>`; }
+  if(S.cal.missing) return empty("The calendar isn't set up yet","Run calendar.sql in the Supabase SQL Editor, then reload.");
+  const v = S.cal.view;
+  const tab = (id,label)=>`<button class="${v===id?"on":""}" data-act="cal-view" data-v="${id}">${label}</button>`;
+  return `
+  <div class="topbar"><div><h1 class="h1">Calendar</h1>
+    <div class="sub">Your week, your deadlines, and study time planned around both.</div></div>
+    <div class="row" style="gap:8px">
+      <button class="btn ghost sm" data-act="cal-nav" data-d="-1">←</button>
+      <button class="btn ghost sm" data-act="cal-today">Today</button>
+      <button class="btn ghost sm" data-act="cal-nav" data-d="1">→</button>
+    </div></div>
+  <div class="tabs">${tab("week","Week")}${tab("month","Month")}${tab("agenda","Agenda")}${tab("timetable","My timetable")}</div>
+  ${(V["cal_"+v]||(()=>""))()}`;
+};
+
+/* ---- add anything, in plain English ---- */
+const quickAdd = () => `
+  <div class="card lens-card" style="margin-bottom:14px">
+    <div class="lens-head"><span class="lens-badge">+</span>
+      <div><b>Add to the calendar</b><div class="note">Type it the way you would say it</div></div></div>
+    <div class="composer" style="margin-top:12px">
+      <input id="calAdd" placeholder="Physics test next Tuesday 9am in Lab 2" autocomplete="off">
+      <button class="btn" data-act="cal-parse">${busy("calParse","Add")}</button>
+    </div>
+    <div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="btn ghost sm" data-act="cal-manual">Add it manually instead</button>
+      ${S.me.role==="student"?`<button class="btn ghost sm" data-act="cal-plan">${busy("calPlan","Plan my study week")}</button>`:""}
+    </div>
+    ${S.cal.draft ? `
+      <div class="card flat" style="margin-top:12px">
+        <div class="grid g2">
+          <div><label class="f" for="evTitle">Title</label><input id="evTitle" value="${esc(S.cal.draft.title||"")}"></div>
+          <div><label class="f" for="evKind">Type</label>
+            <select id="evKind">${Object.entries(KINDS).map(([k,n])=>`<option value="${k}" ${S.cal.draft.kind===k?"selected":""}>${n}</option>`).join("")}</select></div>
+        </div>
+        <div class="grid g2">
+          <div><label class="f" for="evStart">Starts</label><input id="evStart" type="datetime-local" value="${esc(S.cal.draft.starts_at||toLocalInput(new Date()))}"></div>
+          <div><label class="f" for="evLoc">Where (optional)</label><input id="evLoc" value="${esc(S.cal.draft.location||"")}"></div>
+        </div>
+        ${S.me.role!=="student"?`<label class="f" for="evAud">Who sees it</label>
+          <select id="evAud"><option value="me">Only me</option><option value="school">Everyone at the school</option></select>`:""}
+        <div class="row" style="gap:8px;margin-top:14px">
+          <button class="btn" data-act="cal-save">${busy("calSave","Add to calendar")}</button>
+          <button class="btn ghost" data-act="cal-cancel">Cancel</button></div>
+      </div>` : ""}
+    ${S.cal.plan ? `
+      <div class="card" style="margin-top:12px;border-color:rgba(var(--accent-rgb),.4)">
+        <div class="who" style="color:var(--teal);font-weight:700;margin-bottom:8px">${I.ai} Suggested study week</div>
+        <p class="note" style="margin:0 0 12px">${esc(S.cal.plan.summary||"")}</p>
+        ${(S.cal.plan.sessions||[]).map((x,i)=>`<div class="set-row">
+          <div style="min-width:0"><div class="set-title">${esc(x.title)}</div>
+            <div class="note">${new Date(x.starts_at).toLocaleString([], {weekday:"short", hour:"2-digit", minute:"2-digit"})} · ${x.minutes} min · ${esc(x.why||"")}</div></div>
+          <button class="mem-x" data-act="plan-drop" data-i="${i}">✕</button></div>`).join("")}
+        <div class="row" style="gap:8px;margin-top:12px">
+          <button class="btn sm" data-act="plan-accept">${busy("planAccept","Add these to my calendar")}</button>
+          <button class="btn ghost sm" data-act="plan-cancel">Discard</button></div>
+      </div>`:""}
+  </div>`;
+
+V.cal_week = () => {
+  const start = startOfWeek(calAnchor());
+  const days = Array.from({length:7},(_,i)=>{ const d=new Date(start); d.setDate(d.getDate()+i); return d; });
+  const today = new Date();
+  return quickAdd() + `
+  <div class="note" style="margin-bottom:10px">${start.toLocaleDateString([], {day:"numeric", month:"long"})} – ${days[6].toLocaleDateString([], {day:"numeric", month:"long", year:"numeric"})}</div>
+  <div class="cal-week">
+    ${days.map(d=>{
+      const items = itemsOn(d), slots = slotsOn(d), isToday = sameDay(d, today);
+      return `<div class="cal-day ${isToday?"today":""}">
+        <div class="cal-dayhead"><b>${DAYS[(d.getDay()+6)%7].slice(0,3)}</b><span>${d.getDate()}</span></div>
+        ${slots.map(s=>`<div class="cal-slot"><b>${hhmm(s.starts)}</b> ${esc(s.title)}${s.location?`<span class="note"> · ${esc(s.location)}</span>`:""}</div>`).join("")}
+        ${items.map(e=>`<button class="cal-ev k-${esc(e.kind)}" data-act="cal-open" data-id="${esc(e.id)}">
+            <b>${e.all_day?"All day":fmtTime(e.starts_at)}</b> ${esc(e.title)}</button>`).join("")}
+        ${!slots.length && !items.length ? `<div class="note" style="padding:6px 0">—</div>`:""}
+      </div>`;
+    }).join("")}
+  </div>`;
+};
+
+V.cal_month = () => {
+  const a = calAnchor(), first = new Date(a.getFullYear(), a.getMonth(), 1);
+  const start = startOfWeek(first), today = new Date();
+  const cells = Array.from({length:42},(_,i)=>{ const d=new Date(start); d.setDate(d.getDate()+i); return d; });
+  return quickAdd() + `
+  <div class="note" style="margin-bottom:10px">${a.toLocaleDateString([], {month:"long", year:"numeric"})}</div>
+  <div class="cal-month">
+    ${DAYS.map(d=>`<div class="cal-dow">${d.slice(0,3)}</div>`).join("")}
+    ${cells.map(d=>{
+      const items = itemsOn(d), out = d.getMonth()!==a.getMonth();
+      return `<div class="cal-cell ${out?"out":""} ${sameDay(d,today)?"today":""}">
+        <div class="cal-date">${d.getDate()}</div>
+        ${items.slice(0,3).map(e=>`<button class="cal-dot k-${esc(e.kind)}" data-act="cal-open" data-id="${esc(e.id)}">${esc(e.title)}</button>`).join("")}
+        ${items.length>3?`<div class="note">+${items.length-3} more</div>`:""}
+      </div>`;
+    }).join("")}
+  </div>`;
+};
+
+V.cal_agenda = () => {
+  const now = new Date(); now.setHours(0,0,0,0);
+  const upcoming = [];
+  for(let i=0;i<60;i++){ const d=new Date(now); d.setDate(d.getDate()+i);
+    const items = itemsOn(d); if(items.length) upcoming.push([d, items]); }
+  return quickAdd() + (upcoming.length ? upcoming.map(([d,items])=>`
+    <div class="sec">${sameDay(d,new Date())?"Today":d.toLocaleDateString([], {weekday:"long", day:"numeric", month:"long"})}</div>
+    <div class="card list">${items.map(e=>`<div class="item wrap-sm">
+      <div style="min-width:0"><div style="font-size:var(--fs-3);font-weight:600">${esc(e.title)}</div>
+        <div class="note">${e.all_day?"All day":fmtTime(e.starts_at)}${e.location?` · ${esc(e.location)}`:""}${e.notes?` · ${esc(e.notes)}`:""}</div></div>
+      <div class="row" style="gap:8px"><span class="chip k-${esc(e.kind)}">${esc(KINDS[e.kind]||e.kind)}</span>
+        ${e.source==="event" && e.owner_id===S.me.id?`<button class="mem-x" data-act="cal-del" data-id="${esc(e.id)}">✕</button>`:""}</div></div>`).join("")}</div>`).join("")
+   : empty("Nothing coming up","Add a deadline above, or let Edu AI plan your study week."));
+};
+
+V.cal_timetable = () => {
+  const slots = S.cal.slots||[];
+  return `
+  <div class="card lens-card" style="margin-bottom:14px">
+    <div class="lens-head"><span class="lens-badge">${I.cal||"7"}</span>
+      <div><b>Your repeating week</b><div class="note">Lessons and clubs that happen every week. Edu AI plans study around them.</div></div></div>
+    <div class="grid g3" style="margin-top:12px">
+      <div><label class="f" for="ttDay">Day</label>
+        <select id="ttDay">${DAYS.map((d,i)=>`<option value="${i+1}">${d}</option>`).join("")}</select></div>
+      <div><label class="f" for="ttStart">Starts</label><input id="ttStart" type="time" value="08:00"></div>
+      <div><label class="f" for="ttEnd">Ends</label><input id="ttEnd" type="time" value="09:00"></div>
+    </div>
+    <div class="grid g2">
+      <div><label class="f" for="ttTitle">What is it</label><input id="ttTitle" placeholder="Physics"></div>
+      <div><label class="f" for="ttLoc">Where (optional)</label><input id="ttLoc" placeholder="Lab 2"></div>
+    </div>
+    <button class="btn" style="margin-top:14px" data-act="tt-add">${busy("ttAdd","Add to my week")}</button>
+  </div>
+  ${slots.length ? `<div class="cal-week">
+      ${DAYS.map((name,i)=>{
+        const mine = slots.filter(s=>s.day===i+1);
+        return `<div class="cal-day">
+          <div class="cal-dayhead"><b>${name.slice(0,3)}</b></div>
+          ${mine.length?mine.map(s=>`<div class="cal-slot">
+              <b>${hhmm(s.starts)}–${hhmm(s.ends)}</b> ${esc(s.title)}
+              ${s.location?`<div class="note">${esc(s.location)}</div>`:""}
+              <button class="mem-x" data-act="tt-del" data-id="${s.id}" style="float:right">✕</button></div>`).join("")
+            :`<div class="note" style="padding:6px 0">Free</div>`}
+        </div>`;
+      }).join("")}</div>`
+   : empty("Your week is empty","Add your lessons above. Once they're in, study sessions get planned around them instead of on top of them.")}`;
+};
+
+/* ---------------- settings ---------------- */
+const SET_TABS = [
+  { id:"account",    name:"Account" },
+  { id:"appearance", name:"Appearance" },
+  { id:"behaviour",  name:"Notifications" },
+  { id:"privacy",    name:"Privacy and data" },
+  { id:"security",   name:"Security" },
+  { id:"about",      name:"About" }
+];
+const swatch = (key, value, label, dot) => {
+  const on = getPrefs()[key]===value;
+  return `<button class="swatch ${on?"on":""}" data-act="pref" data-k="${key}" data-v="${value}">
+    ${dot?`<i style="background:${dot}"></i>`:""}${esc(label)}</button>`;
+};
+const toggle = (key, title, text) => {
+  const on = prefOn(key);
+  return `<div class="set-row">
+    <div style="min-width:0"><div class="set-title">${esc(title)}</div><div class="note">${esc(text)}</div></div>
+    <button class="sw ${on?"on":""}" role="switch" aria-checked="${on}" aria-label="${esc(title)}"
+      data-act="pref" data-k="${key}" data-v="${on?"off":"on"}"><span></span></button></div>`;
+};
 V.settings = () => {
-  const p = getPrefs();
-  const opt = (key, value, label, dot) => `<button class="swatch ${p[key]===value?"on":""}" data-act="pref" data-k="${key}" data-v="${value}">
-      ${dot?`<i style="background:${dot}"></i>`:""}${label}</button>`;
+  const tab = S.setTab || "account";
   return `
   <div class="topbar"><div><h1 class="h1">Settings</h1>
-    <div class="sub">Saved on this device. Changes apply straight away.</div></div></div>
+    <div class="sub">Your account, how EduNexus looks, and what happens to your data.</div></div></div>
+  <div class="set-wrap">
+    <nav class="set-nav">
+      ${SET_TABS.map(t=>`<button class="${tab===t.id?"on":""}" data-act="set-tab" data-t="${t.id}">${esc(t.name)}</button>`).join("")}
+    </nav>
+    <div class="set-body">${(V["set_"+tab]||(()=>""))()}</div>
+  </div>`;
+};
 
-  <div class="sec" style="margin-top:0">Theme</div>
-  <div class="card">
-    <div class="swatches">
-      ${opt("theme","dark","Midnight","#0a1614")}
-      ${opt("theme","light","Light","#f4f8f7")}
-      ${opt("theme","system","Match my device","linear-gradient(90deg,#0a1614 50%,#f4f8f7 50%)")}
-    </div>
+V.set_account = () => {
+  const me = S.me;
+  return `
+  <div class="card lens-card">
+    <div class="lens-head"><span class="lens-badge">${esc(initials(me.full_name))}</span>
+      <div><b>Your account</b><div class="note" style="text-transform:capitalize">${esc(me.role)} at ${esc((CFG.SCHOOL_NAME)||"this school")}</div></div></div>
+    <label class="f" for="acName">Full name</label>
+    <input id="acName" value="${esc(me.full_name)}">
+    ${me.role==="student"
+      ? `<label class="f" for="acGrade">Class</label><input id="acGrade" value="${esc(me.grade||"")}" placeholder="Grade 13-C">`
+      : `<label class="f" for="acSubject">Subject you teach</label><input id="acSubject" value="${esc(me.subject||"")}" placeholder="Physics">`}
+    <button class="btn" style="margin-top:16px" data-act="set-save-account">${busy("setAccount","Save changes")}</button>
   </div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="set-row"><div><div class="set-title">Email address</div>
+      <div class="note">${esc(S.authEmail||"Signed in")}</div></div>
+      <button class="btn ghost sm" data-act="set-email">Change</button></div>
+    <div class="set-row"><div><div class="set-title">Profile photo, banner and name style</div>
+      <div class="note">Set on your profile page</div></div>
+      <a class="btn ghost sm" href="#/profile">Open profile</a></div>
+    <div class="set-row"><div><div class="set-title">Member since</div>
+      <div class="note">${new Date(me.created_at).toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"})}</div></div></div>
+  </div>`;
+};
+
+V.set_appearance = () => `
+  <div class="sec" style="margin-top:0">Theme</div>
+  <div class="card"><div class="swatches">
+    ${swatch("theme","dark","Midnight","#0a1614")}
+    ${swatch("theme","light","Light","#f4f8f7")}
+    ${swatch("theme","system","Match my device","linear-gradient(90deg,#0a1614 50%,#f4f8f7 50%)")}
+  </div></div>
 
   <div class="sec">Accent colour</div>
   <div class="card">
     <div class="swatches">
-      ${opt("accent","teal","Teal","#2fe3c0")}
-      ${opt("accent","sky","Sky","#5cbeff")}
-      ${opt("accent","violet","Violet","#b08cff")}
-      ${opt("accent","lime","Lime","#b0e65a")}
+      ${swatch("accent","teal","Teal","#2fe3c0")}${swatch("accent","sky","Sky","#5cbeff")}
+      ${swatch("accent","violet","Violet","#b08cff")}${swatch("accent","lime","Lime","#b0e65a")}
     </div>
     <div class="note" style="margin-top:10px">Orange stays reserved for weak areas in every theme, so a problem always looks like a problem.</div>
   </div>
 
-  <div class="sec">Text size</div>
-  <div class="card"><div class="swatches">
-    ${opt("size","compact","Compact")}${opt("size","normal","Normal")}${opt("size","large","Large")}
-  </div></div>
+  <div class="sec">Text and layout</div>
+  <div class="card">
+    <div class="note" style="margin-bottom:7px">Text size</div>
+    <div class="swatches">${swatch("size","compact","Compact")}${swatch("size","normal","Normal")}${swatch("size","large","Large")}</div>
+    <div class="note" style="margin:16px 0 7px">Spacing</div>
+    <div class="swatches">${swatch("density","comfortable","Comfortable")}${swatch("density","compact","Dense")}</div>
+    <div class="note" style="margin:16px 0 7px">Reading font</div>
+    <div class="swatches">${swatch("font","default","Default")}${swatch("font","reading","Easier to read")}</div>
+    <div class="note" style="margin-top:10px">The reading font is wider and more evenly spaced, which many people with dyslexia find easier.</div>
+  </div>
 
-  <div class="sec">Motion</div>
-  <div class="card"><div class="swatches">
-    ${opt("motion","full","Animations on")}${opt("motion","reduced","Reduce motion")}
-  </div></div>
+  <div class="sec">Accessibility</div>
+  <div class="card">
+    <div class="note" style="margin-bottom:7px">Contrast</div>
+    <div class="swatches">${swatch("contrast","normal","Normal")}${swatch("contrast","high","High contrast")}</div>
+    <div class="note" style="margin:16px 0 7px">Motion</div>
+    <div class="swatches">${swatch("motion","full","Animations on")}${swatch("motion","reduced","Reduce motion")}</div>
+  </div>
 
   <div class="sec">Preview</div>
   <div class="preview">
@@ -2468,9 +3394,116 @@ V.settings = () => {
     <div class="ai" style="margin-top:12px"><div class="who">${I.ai} Edu AI</div>
       <p>This is how guidance looks in the theme you've picked.</p><span class="btn sm">A button</span></div>
   </div>
+  <div class="row" style="gap:8px;margin-top:16px;flex-wrap:wrap">
+    <button class="btn ghost" data-act="reset-prefs">Reset appearance</button>
+    <span class="note" style="align-self:center">Saved to your account, so it follows you to any device.</span>
+  </div>`;
 
-  <button class="btn ghost" style="margin-top:16px" data-act="reset-prefs">Reset to default</button>`;
+V.set_behaviour = () => `
+  <div class="sec" style="margin-top:0">In the app</div>
+  <div class="card">
+    ${toggle("celebrate","Badge and unlock messages","A short message when you earn a badge or unlock a banner.")}
+    ${toggle("tips","Edu AI suggestions","The side panel that points out your weakest topic and offers to help.")}
+    ${toggle("confirm","Ask before big actions","Confirm before submitting a test, releasing results or deleting anything.")}
+  </div>
+  <div class="card flat" style="margin-top:14px">
+    <div class="set-title" style="margin-bottom:6px">Email notifications</div>
+    <div class="note">EduNexus does not send email yet, so there is nothing here to switch off. When results emails and weekly summaries arrive, the controls will live on this tab.</div>
+  </div>`;
+
+V.set_privacy = () => {
+  const student = S.me.role==="student";
+  return `
+  <div class="sec" style="margin-top:0">Who can see what</div>
+  <div class="card">
+    <div class="set-row"><div><div class="set-title">Your learning record</div>
+      <div class="note">You, and the teachers at your school. Never other students.</div></div><span class="chip">Fixed</span></div>
+    <div class="set-row"><div><div class="set-title">Edu AI conversations</div>
+      <div class="note">Private to you. Teachers cannot read them.</div></div><span class="chip">Private</span></div>
+    ${student?`<div class="set-row"><div><div class="set-title">Portfolio items</div>
+      <div class="note">You choose which items are visible, item by item.</div></div>
+      <a class="btn ghost sm" href="#/portfolio">Manage</a></div>`:""}
+    <div class="note" style="margin-top:12px">These rules are enforced by the database, not by hiding buttons, so they hold even if someone inspects the page.</div>
+  </div>
+
+  <div class="sec">What Edu AI remembers</div>
+  <div class="card">
+    <div class="set-row"><div><div class="set-title">${student?"Your Edu AI memory":"Your teaching assistant's memory"}</div>
+      <div class="note">${student?"Notes Edu AI keeps about how you learn.":"Notes about your preferences, plans and class context."}</div></div>
+      <div class="row" style="gap:8px">
+        <a class="btn ghost sm" href="${student?"#/counsellor":"#/assistant"}">View</a>
+        <button class="btn ghost sm" data-act="set-clear-memory">${busy("clearMem","Clear")}</button></div></div>
+    <div class="set-row"><div><div class="set-title">Conversation history</div>
+      <div class="note">Every message you have exchanged with Edu AI.</div></div>
+      <button class="btn ghost sm" data-act="set-clear-chats">${busy("clearChats","Delete")}</button></div>
+  </div>
+
+  <div class="sec">Your data</div>
+  <div class="card">
+    <div class="set-row"><div><div class="set-title">Download everything</div>
+      <div class="note">One JSON file with your profile, results, portfolio and memory.</div></div>
+      <button class="btn ghost sm" data-act="set-export">${busy("export","Download")}</button></div>
+  </div>
+
+  <div class="card danger" style="margin-top:14px">
+    <div class="set-title warn-text">Delete my data</div>
+    <p class="note" style="margin:8px 0 12px">Removes your ${student?"results, test submissions, portfolio and Edu AI memory":"assistant memory and conversations"} for good. ${student?"Your genome is rebuilt from your results, so it empties too.":"Your courses and lessons stay, so your students keep learning."} This cannot be undone, and your sign-in account is closed separately by your school.</p>
+    <button class="btn ghost" data-act="set-delete">${busy("wipe","Delete my data")}</button>
+  </div>`;
 };
+
+V.set_security = () => `
+  <div class="sec" style="margin-top:0">Password</div>
+  <div class="card">
+    <label class="f" for="pw1">New password</label>
+    <input id="pw1" type="password" autocomplete="new-password" placeholder="At least 8 characters">
+    <label class="f" for="pw2">Confirm new password</label>
+    <input id="pw2" type="password" autocomplete="new-password">
+    <button class="btn" style="margin-top:16px" data-act="set-password">${busy("pw","Change password")}</button>
+    <div class="note" style="margin-top:10px">Passwords are handled by Supabase and never stored by EduNexus.</div>
+  </div>
+
+  <div class="sec">Sessions</div>
+  <div class="card">
+    <div class="set-row"><div><div class="set-title">This device</div>
+      <div class="note">Signed in as ${esc(S.authEmail||S.me.full_name)}</div></div>
+      <button class="btn ghost sm" data-act="set-signout">Sign out</button></div>
+    <div class="set-row"><div><div class="set-title">All other devices</div>
+      <div class="note">Use this if you signed in on a school computer and forgot to sign out.</div></div>
+      <button class="btn ghost sm" data-act="set-signout-all">${busy("outAll","Sign out everywhere")}</button></div>
+  </div>`;
+
+V.set_about = () => {
+  const links = [];
+  if(CFG.PRIVACY_URL) links.push(`<a class="btn ghost sm" href="${esc(CFG.PRIVACY_URL)}" target="_blank" rel="noopener">Privacy notice</a>`);
+  if(CFG.TERMS_URL) links.push(`<a class="btn ghost sm" href="${esc(CFG.TERMS_URL)}" target="_blank" rel="noopener">Terms</a>`);
+  return `
+  <div class="card lens-card">
+    <div class="lens-head"><span class="lens-badge">EN</span>
+      <div><b>EduNexus ${esc(APP_VERSION)}</b><div class="note">${esc(CFG.SCHOOL_NAME||"")}</div></div></div>
+    <p class="note" style="margin:6px 0 0">A school platform that works out why a student is struggling, and what to do next. Built by R.M. Methdinu D. Rajaguru and Thewindu S. A. Wijesiri.</p>
+  </div>
+  <div class="sec">Help</div>
+  <div class="card">
+    <div class="set-row"><div><div class="set-title">Something looks wrong</div>
+      <div class="note">Tell us what you were doing when it happened.</div></div>
+      <a class="btn ghost sm" href="mailto:${esc(CFG.SUPPORT_EMAIL||"")}?subject=EduNexus%20problem%20report">Report a problem</a></div>
+    <div class="set-row"><div><div class="set-title">Contact</div>
+      <div class="note">${esc(CFG.SUPPORT_EMAIL||"No support address set")}</div></div></div>
+    ${links.length?`<div class="row" style="gap:8px;margin-top:12px">${links.join("")}</div>`:""}
+  </div>
+  <div class="sec">System</div>
+  <div class="card">
+    <div class="set-row"><div><div class="set-title">AI service</div>
+      <div class="note">Marking, Edu AI and paper reading</div></div>
+      <button class="btn ghost sm" data-act="set-check-ai">${busy("checkAI","Check")}</button></div>
+    <div class="set-row"><div><div class="set-title">Your records</div>
+      <div class="note">${S.me.role==="student"
+        ? `${S.attempts.length} results · ${S.portfolio.length} portfolio items`
+        : `${S.courses.filter(c=>c.teacher_id===S.me.id).length} courses · ${(S.students||[]).length} students`}</div></div></div>
+  </div>`;
+};
+
 
 /* ================= teacher views ================= */
 V.courses = () => {
@@ -2640,12 +3673,16 @@ function routesFor(role){
     {h:"#/examlens",t:"ExamLens",i:"lens",g:"quick"},
     {h:"#/mirage",t:"Mirage",i:"mirage",g:"quick"},
     {h:"#/doctor",t:"Study doctor",i:"doctor",g:"quick"},
+    {h:"#/calendar",t:"Calendar",i:"cal",g:"quick"},
+    {h:"#/tests",t:"Tests",i:"lens",g:"quick"},
     {h:"#/portfolio",t:"Portfolio",i:"folder",g:"quick"},
     {h:"#/profile",t:"Profile",i:"user",g:"quick"}
   ] : [
     {h:"#/class",t:"My class",i:"school",g:"main"},
     {h:"#/courses",t:"Courses",i:"learn",g:"main"},
     {h:"#/assistant",t:"Edu AI",i:"ai",g:"main"},
+    {h:"#/tests",t:"Tests",i:"doctor",g:"main"},
+    {h:"#/calendar",t:"Calendar",i:"cal",g:"quick"},
     {h:"#/profile",t:"Profile",i:"user",g:"quick"}
   ];
 }
@@ -2667,6 +3704,7 @@ function buildNav(){
   S.moreRoutes = rest;
 }
 function aside(view){
+  if(S.me.role==="student" && !prefOn("tips") && view!=="settings") return "";
   const g = G();
   if(S.me.role!=="student" && view==="assistant") return memoryCard() + `<div class="card" style="margin-top:14px"><b style="font-size:var(--fs-2)">What Edu AI can see</b>
     <p class="note" style="margin:7px 0 10px">Every reply is built from your own data:</p>
@@ -2697,11 +3735,16 @@ function route(){
   let view = parts[0] || (S.me.role==="student" ? "home" : "class");
   S.course = null; S.lesson = null;
   if(view==="course" || view==="edit") S.course = parts[1];
+  if(["build","marking","sit","result"].includes(view)){
+    const id = parts[1];
+    if(S.tests.openId !== id){ S.tests.openId = id; S.tests.builder = S.tests.marking = S.tests.take = S.tests.result = null; }
+  }
   S.gSubject = view==="genome" && parts[1] ? decodeURIComponent(parts[1]) : null;
   S.gTopic   = view==="genome" && parts[2] ? decodeURIComponent(parts[2]) : null;
   if(view==="lesson") S.lesson = parts[1];
   if(!V[view]) view = S.me.role==="student" ? "home" : "class";
-  if(S.me.role!=="student" && ["home","learn","genome","examlens","mirage","doctor","portfolio","course","lesson"].includes(view))
+  if(S.me.role==="student" && ["class","courses","edit","student","assistant","build","marking"].includes(view)) view = "home";
+  if(S.me.role!=="student" && ["home","learn","genome","examlens","mirage","doctor","portfolio","course","lesson","sit","result"].includes(view))
     view = "class";
   $("#main").innerHTML = `<div class="mobiletop">
       <img class="wordmark" src="branding/EduNexus-wordmark-transparent.png" alt="EduNexus" style="height:24px">
@@ -2753,7 +3796,7 @@ const ACT = {
   async join(el){
     const { error } = await sb.from("enrollments").insert({student_id:S.me.id, course_id:el.dataset.id});
     if(error) return toast(error.message);
-    S.enrolled.push(el.dataset.id); toast("Joined"); rerender();
+    S.enrolled.push(el.dataset.id); toast("Joined"); rerender(); checkUnlocks();
   },
   async "answer-cp"(el){
     const l = S.lessons.find(x=>x.id===S.lesson), cp = l.checkpoint;
@@ -2877,8 +3920,9 @@ const ACT = {
       description:$("#poDesc").value.trim(), link:$("#poLink").value.trim()||null };
     const { data, error } = await sb.from("portfolio_items").insert(row).select().single();
     if(error) return toast(error.message);
-    S.portfolio.unshift(data); toast("Added"); rerender();
+    S.portfolio.unshift(data); toast("Added"); rerender(); checkUnlocks();
   },
+  "export-portfolio"(){ exportPortfolioPDF(); },
   async "toggle-portfolio"(el){
     const p = S.portfolio.find(x=>x.id===el.dataset.id);
     const { error } = await sb.from("portfolio_items").update({visible:!p.visible}).eq("id",p.id);
@@ -2973,6 +4017,181 @@ const ACT = {
   },
   drill(el){ location.hash = el.dataset.to; },
   pref(el){ setPref(el.dataset.k, el.dataset.v); },
+  "cal-view"(el){ S.cal.view = el.dataset.v; rerender(); },
+  "cal-nav"(el){ const d = calAnchor(), n = Number(el.dataset.d);
+    if(S.cal.view==="month") d.setMonth(d.getMonth()+n); else d.setDate(d.getDate()+7*n);
+    S.cal.anchor = d.toISOString(); rerender(); },
+  "cal-today"(){ S.cal.anchor = null; rerender(); },
+  "cal-manual"(){ S.cal.draft = { title:"", kind:"event", starts_at:toLocalInput(new Date()) }; rerender(); },
+  "cal-cancel"(){ S.cal.draft = null; rerender(); },
+  "cal-parse"(){ withBusy("calParse", async ()=>{
+    const text = ($("#calAdd").value||"").trim();
+    if(!text) throw new Error("Type what you want to add");
+    const r = await ai("parse_event", { text });
+    if(!r.understood || !r.starts_at) throw new Error("I couldn't work out a date from that. Try adding one, or add it manually.");
+    S.cal.draft = { title:r.title||text, kind:KINDS[r.kind]?r.kind:"event", starts_at:toLocalInput(r.starts_at),
+      location:r.location||"", notes:r.notes||"", all_day:!!r.all_day };
+    $("#calAdd").value = "";
+    toast("Check the details, then add it");
+  }); },
+  "cal-save"(){ withBusy("calSave", async ()=>{
+    const d = S.cal.draft, title = ($("#evTitle").value||"").trim();
+    if(!title) throw new Error("Give it a title");
+    const row = { owner_id:S.me.id, title, kind:$("#evKind").value,
+      starts_at:new Date($("#evStart").value).toISOString(), location:($("#evLoc").value||"").trim()||null,
+      notes:d.notes||null, all_day:!!d.all_day, audience: $("#evAud") ? $("#evAud").value : "me" };
+    const { data, error } = await sb.from("events").insert(row).select().single();
+    if(error) throw error;
+    S.cal.events.push(data); S.cal.draft = null; toast("Added to your calendar");
+  }); },
+  async "cal-del"(el){
+    if(!ask("Remove this from your calendar?")) return;
+    const { error } = await sb.from("events").delete().eq("id", el.dataset.id);
+    if(error) return toast(error.message);
+    S.cal.events = S.cal.events.filter(e=>e.id!==el.dataset.id); toast("Removed"); rerender();
+  },
+  "cal-open"(el){
+    const id = el.dataset.id;
+    const e = S.cal.events.find(x=>x.id===id) || itemsOn(new Date(S.cal.events.find(x=>x.id===id)?.starts_at || Date.now())).find(x=>x.id===id);
+    if(!e) return;
+    toast(`${e.title} · ${e.all_day?"all day":fmtTime(e.starts_at)}${e.location?" · "+e.location:""}`);
+  },
+  "cal-plan"(){ withBusy("calPlan", async ()=>{
+    S.cal.plan = await ai("plan_week", {});
+    if(!(S.cal.plan.sessions||[]).length) throw new Error("There wasn't enough in your record to plan from yet");
+    toast("Check the plan, then add what you want");
+  }); },
+  "plan-drop"(el){ S.cal.plan.sessions.splice(Number(el.dataset.i),1); rerender(); },
+  "plan-cancel"(){ S.cal.plan = null; rerender(); },
+  "plan-accept"(){ withBusy("planAccept", async ()=>{
+    const rows = (S.cal.plan.sessions||[]).map(x=>({ owner_id:S.me.id, kind:"study", title:x.title, notes:x.why||null,
+      starts_at:new Date(x.starts_at).toISOString(),
+      ends_at:new Date(new Date(x.starts_at).getTime() + (Number(x.minutes)||30)*60000).toISOString() }));
+    if(!rows.length) return;
+    const { data, error } = await sb.from("events").insert(rows).select();
+    if(error) throw error;
+    S.cal.events.push(...(data||[])); S.cal.plan = null;
+    toast(`${rows.length} study sessions added`);
+  }); },
+  "tt-add"(){ withBusy("ttAdd", async ()=>{
+    const title = ($("#ttTitle").value||"").trim();
+    if(!title) throw new Error("What is the lesson called?");
+    const row = { user_id:S.me.id, day:Number($("#ttDay").value), starts:$("#ttStart").value, ends:$("#ttEnd").value,
+      title, location:($("#ttLoc").value||"").trim()||null };
+    if(row.ends <= row.starts) throw new Error("It has to end after it starts");
+    const { data, error } = await sb.from("timetable_slots").insert(row).select().single();
+    if(error) throw error;
+    S.cal.slots.push(data); $("#ttTitle").value = ""; toast("Added to your week");
+  }); },
+  async "tt-del"(el){
+    const { error } = await sb.from("timetable_slots").delete().eq("id", el.dataset.id);
+    if(error) return toast(error.message);
+    S.cal.slots = S.cal.slots.filter(s=>s.id!==el.dataset.id); rerender();
+  },
+  "set-tab"(el){ S.setTab = el.dataset.t; rerender(); window.scrollTo(0,0); },
+  "set-save-account"(){ withBusy("setAccount", async ()=>{
+    const patch = { full_name: ($("#acName").value||"").trim() };
+    if(!patch.full_name) throw new Error("Your name cannot be empty");
+    if($("#acGrade")) patch.grade = $("#acGrade").value.trim();
+    if($("#acSubject")) patch.subject = $("#acSubject").value.trim();
+    const { error } = await sb.from("profiles").update(patch).eq("id",S.me.id);
+    if(error) throw error;
+    Object.assign(S.me, patch); toast("Saved");
+  }); },
+  async "set-email"(){
+    const email = prompt("New email address for signing in:", S.authEmail||"");
+    if(!email) return;
+    const { error } = await sb.auth.updateUser({ email: email.trim() });
+    toast(error ? error.message : "Check that inbox for a confirmation link. Your old address works until you confirm.");
+  },
+  "set-password"(){ withBusy("pw", async ()=>{
+    const a = $("#pw1").value, b = $("#pw2").value;
+    if(a.length < 8) throw new Error("Use at least 8 characters");
+    if(a !== b) throw new Error("The two passwords do not match");
+    const { error } = await sb.auth.updateUser({ password: a });
+    if(error) throw error;
+    $("#pw1").value = $("#pw2").value = "";
+    toast("Password changed");
+  }); },
+  "set-signout"(){ signOut(); },
+  "set-signout-all"(){ withBusy("outAll", async ()=>{
+    await sb.auth.signOut({ scope:"global" });
+    location.replace("login.html");
+  }); },
+  "set-clear-memory"(){ withBusy("clearMem", async ()=>{
+    if(!ask("Clear what Edu AI remembers about you? Your results are not affected.")) return;
+    const student = S.me.role==="student";
+    const { error } = await sb.from(student?"student_memory":"assistant_memory")
+      .delete().eq(student?"student_id":"teacher_id", S.me.id);
+    if(error) throw error;
+    if(student) S.studentMemory = []; else if(S.ta) S.ta.memory = [];
+    toast("Memory cleared");
+  }); },
+  "set-clear-chats"(){ withBusy("clearChats", async ()=>{
+    if(!ask("Delete every Edu AI conversation? This cannot be undone.")) return;
+    if(S.me.role==="student"){
+      const threads = (await sb.from("chat_threads").select("id").eq("student_id",S.me.id)).data||[];
+      if(threads.length) await sb.from("chat_messages").delete().in("thread_id", threads.map(t=>t.id));
+      await sb.from("chat_threads").delete().eq("student_id",S.me.id);
+      S.chatThreads = []; S.activeThreadId = null; S.chat = [];
+    } else {
+      await sb.from("assistant_messages").delete().eq("teacher_id",S.me.id);
+      if(S.ta) S.ta.msgs = [];
+    }
+    toast("Conversations deleted");
+  }); },
+  "set-export"(){ withBusy("export", async ()=>{
+    const me = S.me, out = { exported_at:new Date().toISOString(), app:"EduNexus "+APP_VERSION,
+      profile:{ ...me, settings:undefined }, email:S.authEmail };
+    const grab = async (table, col) => ((await sb.from(table).select("*").eq(col, me.id)).data)||[];
+    if(me.role==="student"){
+      out.results = await grab("attempts","student_id");
+      out.portfolio = await grab("portfolio_items","student_id");
+      out.sign_in_days = await grab("login_days","user_id");
+      out.test_submissions = await grab("test_submissions","student_id");
+      out.edu_ai_memory = await grab("student_memory","student_id");
+      out.genome = genomeFrom(S.attempts);
+    } else {
+      out.courses = await grab("courses","teacher_id");
+      out.tests = await grab("tests","teacher_id");
+      out.assistant_memory = await grab("assistant_memory","teacher_id");
+      out.assistant_messages = await grab("assistant_messages","teacher_id");
+    }
+    const blob = new Blob([JSON.stringify(out,null,2)], { type:"application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `edunexus-${me.full_name.toLowerCase().replace(/\s+/g,"-")}-${new Date().toISOString().slice(0,10)}.json`;
+    a.click(); URL.revokeObjectURL(a.href);
+    toast("Downloaded");
+  }); },
+  "set-delete"(){ withBusy("wipe", async ()=>{
+    if(prompt("This deletes your learning data for good. Type DELETE to confirm.") !== "DELETE") return toast("Nothing was deleted");
+    const me = S.me;
+    if(me.role==="student"){
+      const subs = (await sb.from("test_submissions").select("id").eq("student_id",me.id)).data||[];
+      if(subs.length) await sb.from("test_answers").delete().in("submission_id", subs.map(x=>x.id));
+      await sb.from("test_submissions").delete().eq("student_id",me.id);
+      await sb.from("attempts").delete().eq("student_id",me.id);
+      await sb.from("portfolio_items").delete().eq("student_id",me.id);
+      await sb.from("enrollments").delete().eq("student_id",me.id);
+      await sb.from("student_memory").delete().eq("student_id",me.id);
+      const threads = (await sb.from("chat_threads").select("id").eq("student_id",me.id)).data||[];
+      if(threads.length) await sb.from("chat_messages").delete().in("thread_id", threads.map(t=>t.id));
+      await sb.from("chat_threads").delete().eq("student_id",me.id);
+      await sb.from("profiles").update({ goal:null, interests:null, avatar_url:null, badges_shown:[] }).eq("id",me.id);
+    } else {
+      await sb.from("assistant_messages").delete().eq("teacher_id",me.id);
+      await sb.from("assistant_memory").delete().eq("teacher_id",me.id);
+      await sb.from("profiles").update({ avatar_url:null }).eq("id",me.id);
+    }
+    toast("Your data has been deleted. Signing you out.");
+    setTimeout(signOut, 1500);
+  }); },
+  "set-check-ai"(){ withBusy("checkAI", async ()=>{
+    try{ await ai(S.me.role==="student"?"chat":"teacher_chat", { message:"Reply with the single word: ready" });
+      toast("AI service is responding normally"); }
+    catch(e){ toast("AI service problem: "+e.message); }
+  }); },
   "po-kind"(el){
     $("#poKind").value = el.dataset.k;
     $$(".seg [data-act=po-kind]").forEach(b=>{ const on = b===el; b.classList.toggle("on",on); b.setAttribute("aria-checked",on); });
@@ -2982,6 +4201,89 @@ const ACT = {
   "sheet-signout"(){ closeSheet(); signOut(); },
   "cust-tab"(el){ S.custTab = el.dataset.t; rerender(); },
   async banner(el){ if(await saveProfile({ banner: el.dataset.id })){ toast("Banner equipped"); rerender(); } },
+  /* ---------------- tests ---------------- */
+  async "test-create"(){
+    const title=$("#ntTitle").value.trim(), subject=$("#ntSubject").value.trim(), topic=$("#ntTopic").value.trim();
+    if(!title||!subject||!topic) return toast("Title, subject and topic are needed");
+    const { data, error } = await sb.from("tests").insert({ teacher_id:S.me.id, title, subject, topic,
+      instructions:$("#ntInstructions").value.trim()||null }).select().single();
+    if(error) return toast(/does not exist|schema cache/i.test(error.message) ? "Run tests.sql in Supabase first" : error.message);
+    S.tests.list.unshift(data); toast("Test created — now add the questions"); location.hash = "#/build/"+data.id;
+  },
+  async "test-status"(el){
+    const B = S.tests.builder;
+    if(el.dataset.s === "published" && B && B.test.id === el.dataset.id){
+      captureBuilder();
+      if(!B.questions.length) return toast("Add at least one question before publishing");
+      try{ await savePaper(); }catch(e){ return toast("Could not save the paper: "+e.message); }
+    }
+    if(el.dataset.s === "published"){
+      const { count } = await sb.from("test_questions").select("id",{count:"exact",head:true}).eq("test_id", el.dataset.id);
+      if(!count) return toast("This paper has no saved questions yet. Open it, add questions and press Save paper.");
+    }
+    const { error } = await sb.from("tests").update({ status: el.dataset.s }).eq("id", el.dataset.id);
+    if(error) return toast(error.message);
+    const t = (S.tests.list||[]).find(x=>x.id===el.dataset.id); if(t) t.status = el.dataset.s;
+    if(S.tests.builder && S.tests.builder.test.id===el.dataset.id) S.tests.builder.test.status = el.dataset.s;
+    toast(el.dataset.s==="published" ? "Published — students can sit it now" : "Closed to students"); rerender();
+  },
+  "q-add"(el){ captureBuilder(); S.tests.builder.dirty = true; S.tests.builder.questions.push(blankQ(el.dataset.k)); rerender(); },
+  "q-del"(el){ captureBuilder(); S.tests.builder.dirty = true; S.tests.builder.questions.splice(Number(el.dataset.i),1); rerender(); },
+  "q-move"(el){ captureBuilder(); S.tests.builder.dirty = true; const B=S.tests.builder, i=Number(el.dataset.i), j=i+Number(el.dataset.d);
+    if(j<0||j>=B.questions.length) return; const q=B.questions[i]; B.questions[i]=B.questions[j]; B.questions[j]=q; rerender(); },
+  "q-kind"(el){ captureBuilder(); S.tests.builder.dirty = true; const q = S.tests.builder.questions[Number(el.dataset.i)], k = el.dataset.k;
+    if(q.kind===k) return; q.kind=k;
+    if(k==="mcq"){ q.options = q.options||["",""]; q.answer_index = q.answer_index??0; q.marks = q.marks||1; }
+    else { q.options=null; q.answer_index=null; }
+    rerender(); },
+  "q-answer"(el){ captureBuilder(); S.tests.builder.dirty = true; S.tests.builder.questions[Number(el.dataset.i)].answer_index = Number(el.dataset.j); rerender(); },
+  "q-opt-add"(el){ captureBuilder(); S.tests.builder.dirty = true; const q=S.tests.builder.questions[Number(el.dataset.i)]; (q.options=q.options||[]).push(""); rerender(); },
+  "q-opt-del"(el){ captureBuilder(); S.tests.builder.dirty = true; const q=S.tests.builder.questions[Number(el.dataset.i)], j=Number(el.dataset.j);
+    q.options.splice(j,1); if(q.answer_index>=q.options.length) q.answer_index=0; rerender(); },
+  "test-save"(){ captureBuilder(); withBusy("testSave", async ()=>{ await savePaper(); }); },
+
+  "mark-open"(el){ openSubmission(el.dataset.id); },
+  "mark-back"(){ S.tests.marking.open = null; rerender(); },
+  "mark-ai"(el){ withBusy("markAI", async ()=>{
+    const out = await ai("mark_test", { submission_id: el.dataset.id });
+    await openSubmission(el.dataset.id);
+    const M = S.tests.marking; const s = M.subs.find(x=>x.id===el.dataset.id);
+    if(s){ s.status = "marked"; s.total_score = out.total; s.total_marks = out.outOf; }
+    toast(out.lowConfidence ? `Marked — ${out.lowConfidence} answer${out.lowConfidence===1?"":"s"} flagged for you to check` : "Marked — please check before releasing");
+  }); },
+  "mark-save"(el){ withBusy("markSave", async ()=>{ await saveMarks(el.dataset.id); toast("Your changes are saved"); }); },
+  "mark-release"(el){ withBusy("markRelease", async ()=>{
+    const M = S.tests.marking, subId = el.dataset.id;
+    const { total, outOf } = await saveMarks(subId);
+    const s = M.subs.find(x=>x.id===subId);
+    const up = await sb.from("test_submissions").update({ status:"released", released_at:new Date().toISOString(),
+      total_score: total, total_marks: outOf }).eq("id", subId);
+    if(up.error) throw up.error;
+    const pct = outOf ? Math.round(total/outOf*100) : 0;
+    const att = await sb.from("attempts").insert({ student_id: s.student_id, kind:"test", subject:M.test.subject,
+      topic:M.test.topic, score:pct, meta:{ test:M.test.title, submission:subId, marks:`${total}/${outOf}` } });
+    if(att.error) toast("Released, but the genome update failed: "+att.error.message);
+    s.status = "released"; s.total_score = total; s.total_marks = outOf;
+    M.open = null; toast(`Released — ${pct}% is now in their genome`);
+  }); },
+  "tests-refresh"(){ withBusy("testsRefresh", async ()=>{ await loadTests(); }); },
+  "a-pick"(el){ captureTake(); const T = S.tests.take, q = el.dataset.q;
+    T.answers[q] = { ...(T.answers[q]||{}), chosen_index: Number(el.dataset.j) }; rerender(); },
+  "test-submit"(){ captureTake(); withBusy("testSubmit", async ()=>{
+    const T = S.tests.take;
+    const unanswered = T.questions.filter(q=>{ const a=T.answers[q.id]||{};
+      return q.kind==="mcq" ? a.chosen_index===undefined : !(a.response||"").trim() && !a.image_url; });
+    if(unanswered.length && !confirm(`${unanswered.length} question${unanswered.length===1?" is":"s are"} unanswered. Submit anyway?`)) return;
+    const { data:sub, error } = await sb.from("test_submissions").insert({ test_id:T.test.id, student_id:S.me.id }).select().single();
+    if(error) throw new Error(/duplicate|unique/i.test(error.message) ? "You have already submitted this test" : error.message);
+    const rows = T.questions.map(q=>{ const a = T.answers[q.id]||{};
+      return { submission_id:sub.id, question_id:q.id, response:a.response||null,
+               chosen_index: a.chosen_index===undefined?null:a.chosen_index, image_url:a.image_url||null }; });
+    const ae = await sb.from("test_answers").insert(rows); if(ae.error) throw ae.error;
+    S.tests.list = null; S.tests.take = null;
+    toast("Submitted. Your teacher will release the result once it's marked.");
+    location.hash = "#/tests";
+  }); },
   "ta-send"(){ const i=$("#taAsk"); const v=i.value; i.value=""; taSend(v); },
   "ta-ask"(el){ taSend(el.dataset.q); },
   async "ta-forget"(el){
@@ -2996,7 +4298,7 @@ const ACT = {
     S.ta.memory.push(data); toast("Saved to memory"); rerender();
   },
   async "ta-clear"(){
-    if(!confirm("Start a new conversation? Edu AI keeps its memory notes.")) return;
+    if(!ask("Start a new conversation? Edu AI keeps its memory notes.")) return;
     const { error } = await sb.from("assistant_messages").delete().eq("teacher_id", S.me.id);
     if(error) return toast(error.message);
     S.ta.msgs = []; rerender();
@@ -3131,6 +4433,12 @@ function openChatList(){
 }
 document.addEventListener("click", e=>{ if(e.target.id==="sheetBack") closeSheet(); });
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSheet(); });
+window.addEventListener("hashchange", ()=>{
+  const B = S.tests && S.tests.builder;
+  if(B && B.dirty && !location.hash.startsWith("#/build/")){
+    savePaper().catch(e=>toast("Your last change could not be saved: "+e.message));
+  }
+});
 window.addEventListener("hashchange", closeSheet);
 window.addEventListener("hashchange", route);
 
@@ -3200,6 +4508,18 @@ async function boot(){
     return;
   }
   S.me = profile;
+  S.authEmail = session.user.email;
+  /* Appearance follows the account. Local wins on first paint, then the
+     account's saved preferences fill in anything this device hasn't set. */
+  try{
+    const saved = (profile.settings||{}).prefs;
+    if(saved){
+      const local = JSON.parse(localStorage.getItem(PREFS_KEY) || "null");
+      const merged = local ? { ...saved, ...local } : saved;
+      localStorage.setItem(PREFS_KEY, JSON.stringify(merged));
+      applyPrefs({ ...PREF_DEFAULTS, ...merged });
+    }
+  }catch(e){}
 
   // Is the v2 schema actually there?
   const probe = await sb.from("courses").select("id").limit(1);
@@ -3227,10 +4547,12 @@ async function boot(){
   catch(e){ toast("Could not load your data: "+e.message); }
   $("#whoami").innerHTML = `${esc(S.me.full_name)}<br><span style="color:var(--teal)">${esc(S.me.role)}</span>`;
   $("#signout").onclick = signOut;
-  $("#gate").remove();
+  const gate = $("#gate");
+  gate.classList.add("hide"); setTimeout(()=>gate.remove(), 700);   // fade the loading screen out over the app
   $("#shell").style.visibility = "visible";
   if(!location.hash) location.hash = S.me.role==="student" ? "#/home" : "#/class";
   route();
+  setTimeout(checkUnlocks, 900);   // after the loading screen has faded
 }
 async function signOut(){
   await sb.auth.signOut();

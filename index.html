@@ -6,12 +6,16 @@
 </head>
 <body>
 <script>
-  /* Supabase's email-confirm / magic-link redirects land here whenever the
-     project's Site URL is set to the bare origin. The auth tokens live in
-     the URL hash, which browsers never send to the server, so we carry it
-     over manually rather than relying on Supabase's redirect config being
-     exactly right. */
-  location.replace("app.html" + location.hash);
+  /* Two jobs.
+     1. Supabase's email-confirm / magic-link redirects land here whenever the
+        project's Site URL is set to the bare origin. The auth tokens live in the
+        URL hash (or a ?code= on the PKCE flow), which we carry over to app.html
+        untouched, exactly as before.
+     2. Everyone else is just visiting the site: send them through the sign-in
+        page, which plays the welcome splash and then forwards anyone who is
+        already signed in on to the dashboard. */
+  var callback = location.hash.length > 1 || /[?&](code|error|error_description)=/.test(location.search);
+  location.replace((callback ? "app.html" : "login.html") + location.search + location.hash);
 </script>
 </body>
 </html>
