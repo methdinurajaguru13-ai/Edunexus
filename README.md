@@ -56,4 +56,6 @@ Worth knowing before you ask — see the full list in [SETUP.md](SETUP.md#honest
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+[PolyForm Noncommercial 1.0.0](LICENSE) — the source is public so anyone can read it, learn from it and run it for personal, educational or research purposes. **Commercial use is not permitted** without written permission from the authors. This applies from this version onwards; earlier releases published under the MIT license (such as v1.0.0) remain available under those original terms.
+
+For commercial licensing enquiries, contact the maintainers via the [Edunexus-Sri-Lanka](https://github.com/Edunexus-Sri-Lanka) organization.
